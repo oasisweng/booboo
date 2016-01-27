@@ -1,0 +1,1 @@
+[2016-01-27 15:11:49] php.DEBUG: fsockopen(): unable to connect to 127.0.0.1:8000 (Connection refused) {"type":2,"file":"/Users/oasisweng/Sites/Booboo/vendor/symfony/symfony/src/Symfony/Bundle/FrameworkBundle/Command/ServerCommand.php","line":59,"level":28928} []
