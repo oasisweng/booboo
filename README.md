@@ -12,3 +12,13 @@ Install [Bower](http://bower.io/)
 ```sh
 php app/console server:start
 ```
+### Route
+               
+PURPOSE | NAME | PATH
+:------------- | :------------- | :-------------
+Registration | user_registration  | /register
+Show user profile| user_show  | /user/{userId}     
+Edit user profile | user_edit  | /user/{userId}/edit
+Create an auction| auction_new   | /user/{userId}/auction/new
+Show an auction| auction_show  | /auction/{auctionId}  
+Edit an auction| auction_edit  | /auction/{auctionId}/edit      
