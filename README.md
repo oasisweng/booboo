@@ -25,3 +25,11 @@ Show an auction| auction_show  | /auction/{auctionId} | `{{ path('auction_show',
 Edit an auction| auction_edit  | /auction/{auctionId}/edit | `{{ path('auction_edit', {'auctionId': 1}) }}`
 Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}   `  
 
+### Assets(Images,JS,CSS)
+
+TYPE | HREF
+------------ | ------------- 
+Image | `{{ asset('assets/images/')}}`
+JS | `{{ asset('assets/js/')}}`
+CSS | `{{ asset('assets/css/')}}`
+
