@@ -1,5 +1,87 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Item show.html.twig</h1>
+    <h1>Item Detail Page</h1>
+    <div class="row">
+    	<div class="col-md-4"> 
+    		<h4> Item Name</h4>
+    		<img src ="{{ asset('assets/images/item.jpg')}}" width = "50%" height="50%" class="img-responsive center-block">
+    	</div>
+    	<div class="col-md-8"> 
+    		<div class="row">
+    			<label>Category :</label>
+    		</div>
+    		<div class="row">
+				<label>Description :</label>
+			</div>
+			<div class="row">
+				<label>Time Left :</label>
+			</div>
+			<div class="row">
+				<label>£ Current Price</label>
+			</div>
+				    <div class="container">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalTable">
+            Launch modal table
+        </button>
+        <div class="modal fade" id="modalTable" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="table"
+                               data-toggle="table"
+                               data-height="299"
+                               data-url="../json/data1.json">
+                            <thead>
+                            <tr>
+                                <th data-field="id">ID</th>
+                                <th data-field="name">Item Name</th>
+                                <th data-field="price">Item Price</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </div>
+				<a href="#" title="Header" data-toggle="popover" data-placement="right" data-content="Content">bid history</a>
+			<div class="row">
+				<div class="col-xs-2"> 
+				<input class="form-control" type="text" name='bid'/>
+				</div>
+				<button class="btn btn-primary" type="submit">Place Bid</button>
+			</div>
+			<div class="row">
+				<label>View :</label>
+			</div>
+			<div class="row">
+				<label>Seller :</label>
+				 <a href="{{ path('user_show', {'userId': 1}) }}">seller profile</a>
+			</div>
+    	</div>
+    </div>
+
+<script>
+    var $table = $('#table');
+    $(function () {
+        $('#modalTable').on('shown.bs.modal', function () {
+            $table.bootstrapTable('resetView');
+        });
+    });
+</script>
+
+<style>
+	.row{
+		margin-top: 2em;
+	}
+</style>
 {% endblock %}

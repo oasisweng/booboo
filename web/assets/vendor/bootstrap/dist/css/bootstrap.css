@@ -65,7 +65,7 @@ h1 {
   text-align: center;
 }
 
-h3 {
+h3, h4 {
     margin: 0.5em;
     text-align: center;
 }
@@ -91,6 +91,7 @@ sub {
   bottom: -.25em;
 }
 img {
+  margin-top: 1em;
   border: 0;
   margin-bottom: 1.5em;
 }
