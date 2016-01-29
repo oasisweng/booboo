@@ -62,7 +62,14 @@ dfn {
 h1 {
   margin: .67em 0;
   font-size: 2em;
+  text-align: center;
 }
+
+h3 {
+    margin: 0.5em;
+    text-align: center;
+}
+
 mark {
   color: #000;
   background: #ff0;
@@ -85,6 +92,7 @@ sub {
 }
 img {
   border: 0;
+  margin-bottom: 1.5em;
 }
 svg:not(:root) {
   overflow: hidden;
