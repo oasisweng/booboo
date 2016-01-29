@@ -18,7 +18,7 @@ class ItemController extends Controller {
      */
     public function showAction($itemId) {
 
-        return $this->render( 'item/show.html.twig');
+        return $this->render('item/show.html.twig');
     }
 
 
