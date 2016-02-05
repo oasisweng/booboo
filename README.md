@@ -1,4 +1,5 @@
-Booboo, the fanciest online auction system
+#Booboo 
+##the fanciest online auction system
 ======
 
 ### Before start
@@ -8,10 +9,8 @@ Install [Composer](https://getcomposer.org/download/) for Windows
 
 Install [Bower](http://bower.io/)
 
-**Start the server:**
-```sh
-php app/console server:start
-```
+**Start the server:** `php app/console server:start`
+
 ### Route
 **(Look for relevant controller for more info)**
                
@@ -29,7 +28,8 @@ Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'
 
 TYPE | HREF
 ------------ | ------------- 
-Image | `{{ asset('assets/images/')}}`
-JS | `{{ asset('assets/js/')}}`
-CSS | `{{ asset('assets/css/')}}`
+Static images | `{{ asset('assets/images/')}}`
+Item Photos | `{{asset('uploads/photos/') ~ item.imageURL}}`
+
+
 
