@@ -3,7 +3,11 @@
     <head>
         <meta charset="UTF-8" />
         <title>{% block title %}COMP3013 Group 3{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
+        {% block stylesheets %}
+            {% stylesheets 'assets/css/*' filter='cssrewrite' %}
+                <link rel="stylesheet" href="{{ asset_url }}" />
+            {% endstylesheets %}
+        {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
         <link rel="stylesheet"
             href="{{asset('assets/vendor/bootstrap/dist/css/bootstrap.css') }}">
@@ -17,6 +21,10 @@
 
     <body>
         {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
+        {% block javascripts %}
+            {% javascripts 'assets/js/*' %}
+                <script src="{{ asset_url }}"></script>
+            {% endjavascripts %}
+        {% endblock %}
     </body>
 </html>

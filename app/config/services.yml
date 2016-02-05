@@ -4,6 +4,11 @@ parameters:
 #    parameter_name: value
 
 services:
-#    service_name:
-#        class: AppBundle\Directory\ClassName
-#        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+  db:
+      class: AppBundle\Database\DatabaseConnection
+  app.form.type.category:
+      class: AppBundle\Form\Type\CategoryType
+      tags:
+          - { name: form.type }
+  traits.referer:
+      class: AppBundle\Traits\Referer

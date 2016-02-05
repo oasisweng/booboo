@@ -9,34 +9,41 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 
-//test form
-use AppBundle\Entity\Task;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use AppBundle\Entity\Auction;
+use AppBundle\Form\AuctionType;
 
 
 class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}/auction/new", requirements={"userId": "\d+"})
+     * @Route("/user/{userId}/auction/new", name="auction_new", requirements={"userId": "\d+"})
      */
-    public function newAction($userId,Request $request ) {
-        $task = new Task();
+    public function newAction( $userId, Request $request ) {
+        $auction = new Auction();
+        $auction->sellerID = $userId;
+        $form = $this->createForm( AuctionType::class, $auction );
 
-        $form = $this->createFormBuilder( $task )
-        ->add( 'task', TextType::class )
-        ->add( 'dueDate', DateType::class )
-        ->add( 'save', SubmitType::class, array( 'label' => 'Create Task' ) )
-        ->getForm();
 
         $form->handleRequest( $request );
 
         if ( $form->isSubmitted() && $form->isValid() ) {
             // ... perform some action, such as saving the task to the database
 
-            return $this->redirectToRoute( 'task_success' );
+            if ( $auctionId = $this->get( 'db' )->addAuction( $connection, $auction ) ) {
+                $this->addFlash(
+                    'notice',
+                    'New Auction created!'
+                );
+
+                return $this->redirectToRoute('auction_show', array("auctionId"=>$auctionId), 302);
+            } else {
+                $this->addFlash(
+                    'error',
+                    'Creating auction went wrong! AuctionController.php'
+                );
+            }
+            
         }
 
         return $this->render( 'auction/new.html.twig', array(
@@ -47,36 +54,43 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/auction/{auctionId}", requirements={"auctionId": "\d+"})
+     * @Route("/auction/{auctionId}", name="auction_show", requirements={"auctionId": "\d+"})
      */
-    public function showAction($auctionId) {
-
-        return $this->render( 'auction/show.html.twig');
+    public function showAction( $auctionId ) {
+        $con = $this->get( "db" )->connect();
+        $auction = $this->get( "db" )->selectOne( $con, 'auction', $auctionId );
+        var_dump($auction);
+        return $this->render( 'auction/show.html.twig', array("auction"=>$auction) );
     }
 
     /**
      *
      *
-     * @Route("/auction/{auctionId}/edit", requirements={"auctionId": "\d+"})
+     * @Route("/auction/{auctionId}/edit", name="auction_edit", requirements={"auctionId": "\d+"})
      */
-    public function editAction($auctionId,Request $request) {
-        $task = new Task();
-
-        $form = $this->createFormBuilder( $task )
-        ->add( 'task', TextType::class )
-        ->add( 'dueDate', DateType::class )
-        ->add( 'save', SubmitType::class, array( 'label' => 'Create Task' ) )
-        ->getForm();
+    public function editAction( $auctionId, Request $request ) {
+        $con = $this->get( "db" )->connect();
+        $auctionEntry = $this->get( "db" )->selectOne( $con, 'auctionId', $auctionId );
+        $auction = new Auction($auctionEntry);
+        $form = $this->createForm( AuctionType::class, $auction );;
 
         $form->handleRequest( $request );
 
         if ( $form->isSubmitted() && $form->isValid() ) {
-            // ... perform some action, such as saving the task to the database
+            if ( $this->get( 'db' )->updateAuction( $connection, $auction ) ) {
+                $this->addFlash(
+                    'notice',
+                    'Auction {$auctionId} updated!'
+                );
 
-            return $this->redirectToRoute( 'task_success' );
-        } else {
-            // ... fill with exisiting data
-        }
+                return $this->redirectToRoute('auction_show', array("auctionId"=>$auctionId), 302);
+            } else {
+                $this->addFlash(
+                    'error',
+                    'Updating Auction {$auctionId} went wrong! AuctionController.php'
+                );
+            }
+        } 
 
         return $this->render( 'auction/edit.html.twig', array(
                 'form' => $form->createView(),

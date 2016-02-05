@@ -23,16 +23,30 @@ class UserController extends Controller {
     public function registerAction( Request $request ) {
         // 1) build the form
         $user = new User();
-        $form = $this->createForm( UserType::class, $user );
+        $form = $this->createForm( UserType::class);
 
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest( $request );
+
         if ( $form->isSubmitted() && $form->isValid() ) {
             // ... do any other work - like send them an email, etc
             // maybe set a "flash" success message for the user
 
-            return $this->redirectToRoute( 'replace_with_some_route' );
+            if ( $userId = $this->get( 'db' )->addAuction( $connection, $user ) ) {
+                $this->addFlash(
+                    'notice',
+                    'New User created!'
+                );
+
+                return $this->redirectToRoute('homepage', 302);
+            } else {
+                $this->addFlash(
+                    'error',
+                    'Creating user went wrong! UserController.php'
+                );
+            }
         }
+
 
         return $this->render(
             'user/new.html.twig',
@@ -46,8 +60,10 @@ class UserController extends Controller {
      * @Route("/user/{userId}", name="user_show", requirements={"userId": "\d+"})
      */
     public function showAction($userId) {
-
-        return $this->render( 'user/show.html.twig');
+        $con = $this->get( "db" )->connect();
+        $user = $this->get( "db" )->selectOne( $con, 'user', $userId );
+        var_dump($user);
+        return $this->render( 'user/show.html.twig', array("user"=>$user) );
     }
 
     /**

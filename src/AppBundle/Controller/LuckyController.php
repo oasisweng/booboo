@@ -14,12 +14,12 @@ class LuckyController extends Controller {
      *
      * @Route("/lucky/number/{count}")
      */
-    public function numberAction($count) {
+    public function numberAction( $count ) {
         $numbers = array();
-        for ($i = 0; $i < $count; $i++) {
-            $numbers[] = rand(0, 100);
+        for ( $i = 0; $i < $count; $i++ ) {
+            $numbers[] = rand( 0, 100 );
         }
-        $numbersList = implode(', ', $numbers);
+        $numbersList = implode( ', ', $numbers );
 
         // $html = $this->container->get('templating')->render(
         //     'lucky/number.html.twig',
@@ -27,10 +27,25 @@ class LuckyController extends Controller {
         // );
 
         // return new Response($html);
-        
+
+        $con = $this->get( "db" )->connect();
+        $item = $this->get( "db" )->selectOne( $con, 'item', 1 );
+
+        $itemName = "Victo'ri\$q;@";
+        $description = 'Victoria\' secret';
+        $categoryID = 2;
+
+        if ( $id =  $this->get( "db" )->addItem( $con ,  $itemName, $description, NULL, NULL, $categoryID ) ) {
+            echo "ADD SUCCESS. id => " . $id;
+            if ( $this->get( "db" )->deleteOne( $con, 'item', $id ) ) {
+                echo "<br/>DELETE SUCCESS. ";
+            }
+        }
+        mysqli_close( $con );
+
         return $this->render(
-        'lucky/number.html.twig',
-        array('luckyNumberList' => $numbersList)
+            'lucky/number.html.twig',
+            array( 'luckyNumberList' => $numbersList, 'item' => $item )
         );
     }
 
@@ -44,8 +59,6 @@ class LuckyController extends Controller {
             'lucky_number' => rand( 0, 100 ),
         );
 
-        return new JsonResponse($data);
+        return new JsonResponse( $data );
     }
 }
-
-

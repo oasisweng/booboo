@@ -74,4 +74,6 @@
   73 => 'Sensio\\Bundle\\FrameworkExtraBundle\\EventListener\\HttpCacheListener',
   74 => 'Sensio\\Bundle\\FrameworkExtraBundle\\EventListener\\SecurityListener',
   75 => 'Sensio\\Bundle\\FrameworkExtraBundle\\Configuration\\ConfigurationAnnotation',
+  76 => 'Symfony\\Bundle\\AsseticBundle\\DefaultValueSupplier',
+  77 => 'Symfony\\Bundle\\AsseticBundle\\Factory\\AssetFactory',
 );
