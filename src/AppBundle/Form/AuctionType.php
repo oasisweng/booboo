@@ -11,7 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use AppBundle\Form\ItemType;
 
-class ItemType extends AbstractType
+class AuctionType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
         $builder->add( 'sellerID', HiddenType::class )

@@ -23,7 +23,8 @@ class DatabaseConnection {
   }
 
   public function selectOne( $connection, $column, $id ) {
-    $query = "SELECT * FROM {$column} WHERE id = ".(int)$id." LIMIT 1";
+    $safe_id = mysqli_real_escape_string($connection, $id);
+    $query = "SELECT * FROM {$column} WHERE id = {$safe_id} LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       return mysqli_fetch_assoc( $result );
@@ -33,7 +34,8 @@ class DatabaseConnection {
   }
 
   public function deleteOne( $connection, $column, $id ) {
-    $query = "DELETE FROM item WHERE id = ".(int)$id." LIMIT 1";
+    $safe_id = mysqli_real_escape_string($connection, $id);
+    $query = "DELETE FROM item WHERE id ={$safe_id} LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( !$result ) {
       die( "Database query failed. " . mysqli_error( $connection ) . "<br/>" );
@@ -43,7 +45,8 @@ class DatabaseConnection {
     }
   }
 
-  public function addItem( $connection, $item ) {
+  public function addItem($item) {
+    $connection = $this->connect();
     $itemName = $item->itemName;
     $description = $item->description;
     $image = $item->image;
@@ -72,7 +75,7 @@ class DatabaseConnection {
     }
   }
 
-  public function updateItem( $connection, $item ) {
+  public function updateItem($connection, $item ) {
     $id = $item->id;
     $itemName = $item->itemName;
     $description = $item->description;
@@ -113,7 +116,8 @@ class DatabaseConnection {
     }
   }
 
-  public function addAuction( $connection, $auction ) {
+  public function addAuction( $auction ) {
+    $connection = $this->connect();
     $sellerID = $auction->sellerID;
     $startAt = $auction->startAt;
     $endAt = $auction->endAt;
@@ -140,7 +144,7 @@ class DatabaseConnection {
     }
   }
 
-  public function updateAuction( $connection, $auction ) {
+  public function updateAuction($connection, $auction ) {
     $id = $auction->id;
     $startAt = $auction->startAt;
     $endAt = $auction->endAt;
@@ -169,6 +173,44 @@ class DatabaseConnection {
     }
   }
 
+  public function addUser($user){
+    $connection = $this->connect();
+    $name = $user->name;
+    $email = $user->email;
+    $password = $user->password;
+
+    //encrptyion
+    $encrptyed_password = encrpt($pasword);
+
+    $query = "INSERT INTO user ".
+    "(name,email,password) ".
+    "VALUES({$name},{$email},{$encrptyed_password})"
+
+    $result = mysqli_query( $connection, $query );
+    if ( $result ) {
+      $id =  mysqli_insert_id( $connection );
+      return $id;
+    } else {
+      die( "Database query failed (User). " . mysqli_error( $connection ) );
+      return FALSE;
+    }
+
+  }
+
+  public function login($user){
+    $connection = $this->connect();
+    $email = mysqli_real_escape_string($user->email);
+    $query = "SELECT * FROM user WHERE email={$email} LIMIT 1";
+    $result = mysqli_query( $connection, $query );
+    if ( $result ) {
+      $id =  mysqli_insert_id( $connection );
+      return $id;
+    } else {
+      die( "Database query failed (User login). " . mysqli_error( $connection ) );
+      return false;
+    }
+  }
+
   public function fetchCategories() {
     $con = $this->connect();
     $query = "SELECT * FROM category LIMIT 25";
@@ -185,6 +227,31 @@ class DatabaseConnection {
     return mysqli_real_escape_string( $connection, $string );
   }
 
+
+  private function encrpt( $string){
+    $hash_format = "$2$11$";
+    $salt = buy_salt(22);
+    $formatted_salt = $hash_format . $salt;
+    return crypt($password,$formatted_salt);
+  }
+
+  private function check_password( $password, $hashed_password){
+    $hash = crypt($password,$hashed_password);
+    if ($hash==$hashed_password) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private function buy_salt($length){
+    $unique_random_string = md5(uniqid(mt_rand(),true))
+    $base64_string = base64_encode($unique_random_string);
+    $modified_base64_string = str_replace('+', '.', $base64_string);
+    $salt = substr($modified_base64_string, 0, $length);
+    return $salt;
+
+  }
 }
 
 ?>
