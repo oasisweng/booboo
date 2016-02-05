@@ -10,13 +10,19 @@
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
         <link rel="stylesheet"
-            href="{{asset('assets/vendor/bootstrap/dist/css/bootstrap.css') }}">
+            href="{{asset('assets/vendor/bootstrap/dist/css/main.css') }}">
 
         <link rel="stylesheet"
             href="{{ asset('assets/vendor/bootstrap/dist/css/bootstrap.min.css') }}">
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-        <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.js') }}"></script>
+        <!-- Scripts -->
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.dropotron.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/skel.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/skel-viewport.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/util.js')}}"></script>
+        <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/main.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/bootstrap.js')}}"></script>
     </head>
 
     <body>
