@@ -25,11 +25,11 @@ Edit an auction| auction_edit  | /auction/{auctionId}/edit | `{{ path('auction_e
 Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}   `  
 
 ### Assets(Images,JS,CSS)
+>Javascript and CSS files are combined in a unified file. Please refer to base.html.twig to see the update(within javascript and css block respectively).
 
 TYPE | HREF
 ------------ | ------------- 
 Static images | `{{ asset('assets/images/')}}`
 Item Photos | `{{asset('uploads/photos/') ~ item.imageURL}}`
-
 
 
