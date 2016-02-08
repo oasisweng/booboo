@@ -13,21 +13,7 @@ use AppBundle\Entity\Auction;
 use AppBundle\Entity\Item;
 use AppBundle\Form\Type\AuctionType;
 
-trait Referer {
-    private function getRefererParams() {
-        $request = $this->getRequest();
-        $referer = $request->headers->get( 'referer' );
-        if ( is_null( $referer ) ) {
-            return null;
-        }
-        $baseUrl = $this->get( 'request' )->getSchemeAndHttpHost();
-        $lastPath = substr( $referer, strpos( $referer, $baseUrl ) + strlen( $baseUrl ) );
-        return $this->get( 'router' )->getMatcher()->match( $lastPath );
-    }
-}
-
 class AuctionController extends Controller {
-    use Referer;
 
     /**
      *
@@ -51,7 +37,7 @@ class AuctionController extends Controller {
                     'New Auction created!'
                 );
 
-                return $this->redirectToRoute( 'auction_show', array( "auctionId"=>$auctionId ), 201 );
+                return $this->redirectToRoute( 'auction_show', array( "auctionId"=>$auctionId ), 301 );
             } else {
                 $this->addFlash(
                     'error',
@@ -112,7 +98,7 @@ class AuctionController extends Controller {
                         'Auction {$auctionId} updated!'
                     );
 
-                    return $this->redirectToRoute( 'auction_show', array( "auctionId"=>$auctionId ), 200 );
+                    return $this->redirectToRoute( 'auction_show', array( "auctionId"=>$auctionId ), 301 );
                 } else {
                     $this->addFlash(
                         'error',
@@ -130,13 +116,7 @@ class AuctionController extends Controller {
                 'The auction selected does not exist!'
             );
 
-            $params = $this->getRefererParams();
-            if ( is_null( $params ) ) {
-                return $this->redirectToRoute( 'homepage' );
-            } else {
-                return $this->redirect( $this->generateUrl(
-                        $params['_route'] ) );
-            }
+            return $this->redirectToRoute( 'homepage' );
         }
     }
 

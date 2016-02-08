@@ -11,10 +11,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 //test form
 use AppBundle\Form\Type\UserType;
+use AppBundle\Form\Type\UpdateProfileType;
+use AppBundle\Form\Type\ForgottenPasswordType;
 use AppBundle\Entity\User;
 
 
 class UserController extends Controller {
+
     /**
      *
      *
@@ -38,7 +41,7 @@ class UserController extends Controller {
                     'New User created!'
                 );
 
-                return $this->redirectToRoute( 'homepage', 201 );
+                return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
                 $this->addFlash(
                     'error',
@@ -85,7 +88,7 @@ class UserController extends Controller {
 
                 $userAttributeBag->set( 'userId', '{$id}' );
 
-                return $this->redirectToRoute( 'homepage', 200 );
+                return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
                 $this->addFlash(
                     'error',
@@ -119,6 +122,7 @@ class UserController extends Controller {
      * @Route("/user/{userId}/edit", name="user_edit",  requirements={"userId": "\d+"})
      */
     public function editAction( $userId, Request $request ) {
+        //edit user name
         return $this->render(
             'user/edit.html.twig'
         );
@@ -128,14 +132,68 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}/editt", name="user_editt",  requirements={"userId": "\d+"})
+     * @Route("/user/{userId}/update_profile", name="user_update_profile",  requirements={"userId": "\d+"})
      */
-    public function editTestAction( $userId, Request $request ) {
+    public function updateProfileAction( $userId, Request $request ) {
         // 1) build the form
         $connection = $this->get( "db" )->connect();
-        if ( $userEntry = $this->get( "db" )->selectOne( $connection, "user" ) ) {
+        $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userId );
+        if ( isset($userEntry) ) {
             $user = new User( $userEntry );
-            $form = $this->createForm( UserType::class, $user );
+            $form = $this->createForm( UpdateProfileType::class, $user );
+
+            // 2) handle the submit (will only happen on POST)
+            $form->handleRequest( $request );
+            if ( $form->isSubmitted() && $form->isValid() ) {
+                // ... do any other work - like send them an email, etc
+                // maybe set a "flash" success message for the user
+                if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
+                    $this->addFlash(
+                        'notice',
+                        'User {$userId} profile updated!'
+                    );
+
+                    return $this->redirectToRoute( 'user_show', array( "userId"=>$userId ), 301 );
+                } else {
+                    $this->addFlash(
+                        'error',
+                        'Updating user went wrong! UserController.php'
+                    );
+
+                }
+
+                return $this->render(
+                    'user/update_profile.html.twig',
+                    array( 'form' => $form->createView() )
+                );
+            } else {
+                return $this->render(
+                    'user/update_profile.html.twig',
+                    array( 'form' => $form->createView() )
+                );
+            }
+        } else {
+                $this->addFlash(
+                    'error',
+                    'The user selected does not exist!'
+                );
+
+                return $this->redirectToRoute( 'homepage' );
+            }
+
+    }
+
+    /**
+     *
+     *
+     * @Route("/user/{userId}/forgotten_password", name="user_forgotten_password",  requirements={"userId": "\d+"})
+     */
+    public function forgottenPasswordAction( $userId, Request $request ) {
+        // 1) build the form
+        $connection = $this->get( "db" )->connect();
+        if ( $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userId ) ) {
+            $user = new User( $userEntry );
+            $form = $this->createForm( ForgottenPasswordType::class, $user );
 
             // 2) handle the submit (will only happen on POST)
             $form->handleRequest( $request );
@@ -146,39 +204,36 @@ class UserController extends Controller {
                 if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
                     $this->addFlash(
                         'notice',
-                        'User {$userId} created!'
+                        'User {$userId} password reset!'
                     );
 
-                    return $this->redirectToRoute( 'user_show', array( "userId"=>$userId ), 200 );
+                    return $this->redirectToRoute( 'user_show', array( "userId"=>$userId ), 301 );
                 } else {
                     $this->addFlash(
                         'error',
-                        'Creating user went wrong! UserController.php'
+                        'Resetting user went wrong! UserController.php'
                     );
 
                 }
 
                 return $this->render(
-                    'user/edit.html.twig',
+                    'user/forgotten_password.html.twig',
                     array( 'form' => $form->createView() )
                 );
             } else {
+                return $this->render(
+                    'user/forgotten_password.html.twig',
+                    array( 'form' => $form->createView() )
+                );
+            }
+        } else {
                 $this->addFlash(
                     'error',
-                    'The auction selected does not exist!'
+                    'The user selected does not exist!'
                 );
 
-                $params = $this->getRefererParams();
-                if ( is_null( $params ) ) {
-                    return $this->redirectToRoute( 'homepage' );
-                } else {
-                    $this->get( "dump" )->d( $params );
-                    return $this->redirect( $this->generateUrl(
-                            $params['_route'] ) );
-                }
+                return $this->redirectToRoute( 'homepage' );
             }
-        }
-
 
     }
 }

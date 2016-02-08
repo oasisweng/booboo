@@ -18,7 +18,7 @@ class User
     /**
      *
      *
-     * @Assert\NotBlank()
+     * 
      * @Assert\Email()
      */
     public $email;
@@ -26,15 +26,15 @@ class User
     /**
      *
      *
-     * @Assert\NotBlank()
+     * 
      */
     public $name;
 
     /**
      *
      *
-     * @Assert\NotBlank()
-     * @Assert\Length(max = 12)
+     * 
+     * 
      */
     public $password;
 
@@ -49,11 +49,16 @@ class User
         $this->name=$name;
     }
 
+    public function getId(){
+        return $this->id;
+    }
+
     public function __construct( $u = NULL ) {
         if ( isset($u) ) {
-            $id = $u->id;
-            $email = $u->email;
-            $name = $u->name;
+            $this->id = $u["id"];
+            $this->email = $u["email"];
+            $this->name = $u["name"];
+            $this->password = $u["password"];
         } 
     }
 }

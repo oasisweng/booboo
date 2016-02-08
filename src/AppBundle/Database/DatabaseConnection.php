@@ -92,7 +92,7 @@ class DatabaseConnection {
     $imageURL = $item->imageURL;
     $escaped_name = $this->e( $connection, $itemName );
     $escaped_description = $this->e( $connection, $description );
-    if ( isset( $image )) {
+    if ( isset( $image ) ) {
       $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/uploads/photos/';
       //remove old one
       $fs = new Filesystem();
@@ -104,9 +104,10 @@ class DatabaseConnection {
       $generator = new SecureRandom();
       $fileName = $generator->nextBytes( 10 );
       $image->move( $dir, $fileName );
+      $item->imageURL = $fileName;
       $imageURL = $fileName;
-      $escaped_imageURL = $this->e( $connection, $imageURL );
     }
+    $escaped_imageURL = $this->e( $connection, $imageURL );
 
     $query = "UPDATE item SET ".
       "itemName='{$escaped_name}',".
@@ -173,7 +174,7 @@ class DatabaseConnection {
     $affected = mysqli_affected_rows( $connection );
     if ( $result && $affected >= 0 ) {
       // save item
-      if ($this->updateItem( $connection, $item )){
+      if ( $this->updateItem( $connection, $item ) ) {
         return true;
       } else {
         return false;
@@ -191,11 +192,11 @@ class DatabaseConnection {
     $password = $user->password;
 
     //encrptyion
-    $encrptyed_password = encrpt( $pasword );
+    $encrptyed_password = $this->encrpt( $password );
 
     $query = "INSERT INTO user ".
       "(name,email,password) ".
-      "VALUES({$name},{$email},{$encrptyed_password})";
+      "VALUES('{$name}','{$email}','{$encrptyed_password}')";
 
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
@@ -208,54 +209,50 @@ class DatabaseConnection {
 
   }
 
-  public function updateUser($connection, $user){
-    $id = $user->id;
+  public function updateUser( $connection, $user ) {
+    $id = $user->getId();
     $name = $user->name;
     $email = $user->email;
     $password = $user->password;
+    $newPassword = $user->newPassword;
     // reset password
-    if (isset($password) && $this->login($email)){
-      $password = encrpt( $password );
-      $query = "UPDATE user SET";
-      $query .= "password='{$password}' ";
-      $query .= "WHERE id = {$id}"
-    } else {
-      $query = "UPDATE user SET";
-      $query .= "name='{$name}',";
-      $query .= "email='{$email}' ";
-      $query .= "WHERE id={$id}";
-    }
+    if ( !is_null( $email ) && $this->login( $user ) ) {
+      if ( !is_null( $newPassword ) ) {
+        $newPassword = $this->encrpt( $newPassword );
+        $query = "UPDATE user SET ";
+        $query .= "password='{$newPassword}' ";
+        $query .= "WHERE id = {$id}";
+      } else {
+        $query = "UPDATE user SET ";
+        $query .= "name='{$name}' ";
+        $query .= "WHERE id={$id}";
+      }
 
-    $result = mysqli_query( $connection, $query );
-    $affected = mysqli_affected_rows( $connection );
-    if ( $result && $affected >= 0 ) {
-      // save item
-      if ($this->updateItem( $connection, $item )){
+      $result = mysqli_query( $connection, $query );
+      $affected = mysqli_affected_rows( $connection );
+      if ( $result && $affected >= 0 ) {
         return true;
       } else {
+        die( "Database query failed (UpdateUser). " . mysqli_error( $connection ) );
         return false;
       }
     } else {
-      die( "Database query failed (UpdateUser). " . mysqli_error( $connection ) );
-      return FALSE;
+      return false;
     }
-    
-
-
 
   }
 
   public function login( $user ) {
     $connection = $this->connect();
-    $email = mysqli_real_escape_string( $user->email );
-    $query = "SELECT * FROM user WHERE email={$email} LIMIT 1";
+    $email = mysqli_real_escape_string($connection, $user->email );
+    $query = "SELECT * FROM user WHERE email='{$email}' LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
-      $row = mysqli_fetch_assoc($result);
-      if (check_password($user->password, $row["password"])){
-        $id =  mysqli_insert_id( $connection );
-        return $id;
+      $fetched_user = mysqli_fetch_assoc( $result );
+      if ( $user->password == $fetched_user["password"] || $this->check_password( $user->password, $fetched_user["password"] ) ) {
+        return $fetched_user["id"];
       } else {
+        die( "Database query failed (User login). " . mysqli_error( $connection ) );
         return false;
       }
     } else {
@@ -281,15 +278,19 @@ class DatabaseConnection {
   }
 
 
-  private function encrpt( $string ) {
-    $hash_format = "$2$11$";
-    $salt = buy_salt( 22 );
+  private function encrpt( $password ) {
+    $hash_format = "$2y$10$";
+    $salt = $this->buy_salt( 22 );
     $formatted_salt = $hash_format . $salt;
     return crypt( $password, $formatted_salt );
   }
 
   private function check_password( $password, $hashed_password ) {
     $hash = crypt( $password, $hashed_password );
+    // echo "{$password}<br/>";
+    // echo "{$hashed_password}<br/>";
+    // echo "{$hash}<br/>";
+
     if ( $hash==$hashed_password ) {
       return true;
     } else {
