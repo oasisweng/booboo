@@ -2,6 +2,7 @@
 namespace AppBundle\Entity;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use \DateTime;
 
 /**
  */
@@ -41,6 +42,8 @@ class Auction {
     /**
      */
     public $item;
+
+    public $itemId;
 
     /**
      *
@@ -83,18 +86,33 @@ class Auction {
      */
     public $reservedPrice;
 
-    public function __construct( $a ) {
-        $this->id = $a->id;
-        $this->sellerID = $a->sellerID;
-        $this->winnerID = $a->winnerID;
-        $this->startAt = $a->startAt;
-        $this->endAt = $a->endAt;
-        $this->item = isset( $a->itemId ) ? ( new Item( $a->itemId ) ) : NULL;
-        $this->startingBid = 1.0;
-        $this->minBidIncrease = 0.5;
-        $this->viewCount = isset( $a->viewCount ) ? $a->viewCount : 0;
-        $this->createdAt = isset( $a->createdAt ) ? $a->createdAt : date( "Y-m-d H:i:s" );
-        $this->updatedAt = isset( $a->updatedAt ) ? $a->updatedAt : date( "Y-m-d H:i:s" );
+
+    public $ended;
+
+    public function __construct( $a = NULL ) {
+        if ( isset($a) ) {
+            $this->id = $a["id"];
+            $this->sellerID = $a["sellerID"];
+            $this->winnerID = $a["winnerID"];
+            $this->startAt = new DateTime($a["startAt"]);
+            $this->endAt = new DateTime($a["endAt"]);
+            $this->itemId = $a["itemID"];
+            $this->viewCount = $a["viewCount"];
+            $this->createdAt = new DateTime($a["createdAt"]);
+            $this->updatedAt = new DateTime($a["updatedAt"]);
+            $this->startingBid = $a["startingBid"];
+            $this->minBidIncrease = $a["minBidIncrease"];
+            $this->reservedPrice = $a["reservedPrice"];
+            $this->ended = $a["ended"];
+        } else {
+
+            $this->startingBid = 1.0;
+            $this->minBidIncrease = 0.5;
+            $this->viewCount =  0;
+            $this->createdAt = date( "Y-m-d H:i:s" );
+            $this->updatedAt = date( "Y-m-d H:i:s" );
+            $this->ended = false;
+        }
     }
 
 }

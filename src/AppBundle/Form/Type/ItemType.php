@@ -13,10 +13,15 @@ class ItemType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
         $builder->add( 'itemName', TextType::class )
-        ->add( 'description', TextareaType::class )
-        ->add( 'image', FileType::class )
+        ->add( 'description', TextareaType::class, array(
+            'required' => false,
+        ) )
+        ->add( 'image', FileType::class, array(
+            'required' => false,
+            ) )
         ->add( 'categoryID', CategoryType::class, array(
                 'placeholder' => 'Choose a category',
+                'label' => 'Category',
             ) );
 
     }

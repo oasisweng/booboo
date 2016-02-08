@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 //test form
-use AppBundle\Form\UserType;
+use AppBundle\Form\Type\UserType;
 use AppBundle\Entity\User;
 
 
@@ -21,37 +21,37 @@ class UserController extends Controller {
      * @Route("/register", name="user_registration")
      */
     public function registerAction( Request $request ) {
-        // // 1) build the form
-        // $user = new User();
-        // $form = $this->createForm( UserType::class, $user);
+        // 1) build the form
+        $user = new User();
+        $form = $this->createForm( UserType::class, $user );
 
-        // // 2) handle the submit (will only happen on POST)
-        // $form->handleRequest( $request );
+        // 2) handle the submit (will only happen on POST)
+        $form->handleRequest( $request );
 
-        // if ( $form->isSubmitted() && $form->isValid() ) {
-        //     // ... do any other work - like send them an email, etc
-        //     // maybe set a "flash" success message for the user
+        if ( $form->isSubmitted() && $form->isValid() ) {
+            // ... do any other work - like send them an email, etc
+            // maybe set a "flash" success message for the user
 
-        //     if ( $userId = $this->get( 'db' )->addUser( $connection, $user ) ) {
-        //         $this->addFlash(
-        //             'notice',
-        //             'New User created!'
-        //         );
+            if ( $userId = $this->get( 'db' )->addUser( $user ) ) {
+                $this->addFlash(
+                    'notice',
+                    'New User created!'
+                );
 
-        //         return $this->redirectToRoute('homepage', 302);
-        //     } else {
-        //         $this->addFlash(
-        //             'error',
-        //             'Creating user went wrong! UserController.php'
-        //         );
-        //     }
-        // }
+                return $this->redirectToRoute( 'homepage', 201 );
+            } else {
+                $this->addFlash(
+                    'error',
+                    'Creating user went wrong! UserController.php'
+                );
+            }
+        }
 
 
         return $this->render(
-            'user/new.html.twig');//,
-        //    array( 'form' => $form->createView() )
-       // );
+            'user/new.html.twig',
+            array( 'form' => $form->createView() )
+        );
     }
 
     /**
@@ -62,7 +62,7 @@ class UserController extends Controller {
     public function loginAction( Request $request ) {
         // 1) build the form
         $user = new User();
-        $form = $this->createForm( UserType::class, $user);
+        $form = $this->createForm( UserType::class, $user );
 
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest( $request );
@@ -71,21 +71,21 @@ class UserController extends Controller {
             // ... do any other work - like send them an email, etc
             // maybe set a "flash" success message for the user
 
-            if ($id = $this->get( 'db' )->login( $user ) ) {
+            if ( $id = $this->get( 'db' )->login( $user ) ) {
                 $this->addFlash(
                     'notice',
                     'Log in!'
                 );
                 $session = new Session();
 
-                $userAttributeBag = new AttributeBag('user');
-                $session->registerBag($userAttributeBag);
+                $userAttributeBag = new AttributeBag( 'user' );
+                $session->registerBag( $userAttributeBag );
 
                 $session->start();
 
-                $userAttributeBag->set('userId','{$id}');
+                $userAttributeBag->set( 'userId', '{$id}' );
 
-                return $this->redirectToRoute('homepage', 302);
+                return $this->redirectToRoute( 'homepage', 200 );
             } else {
                 $this->addFlash(
                     'error',
@@ -96,9 +96,9 @@ class UserController extends Controller {
 
 
         return $this->render(
-            'user/new.html.twig');//,
-         //   array( 'form' => $form->createView() )
-       // );
+            'user/new.html.twig',
+            array( 'form' => $form->createView() )
+        );
     }
 
     /**
@@ -106,11 +106,11 @@ class UserController extends Controller {
      *
      * @Route("/user/{userId}", name="user_show", requirements={"userId": "\d+"})
      */
-    public function showAction($userId) {
-        // $con = $this->get( "db" )->connect();
-        // $user = $this->get( "db" )->selectOne( $con, 'user', $userId );
-        // var_dump($user);
-        return $this->render( 'user/show.html.twig');//, array("user"=>$user) );
+    public function showAction( $userId ) {
+        $con = $this->get( "db" )->connect();
+        $user = $this->get( "db" )->selectOne( $con, 'user', $userId );
+        var_dump( $user );
+        return $this->render( 'user/show.html.twig', array( "user"=>$user ) );
     }
 
     /**
@@ -119,26 +119,66 @@ class UserController extends Controller {
      * @Route("/user/{userId}/edit", name="user_edit",  requirements={"userId": "\d+"})
      */
     public function editAction( $userId, Request $request ) {
-        // // 1) build the form
-        // $user = new User();
-        // $form = $this->createForm( UserType::class, $user );
-
-        // // 2) handle the submit (will only happen on POST)
-        // $form->handleRequest( $request );
-        // if ( $form->isSubmitted() && $form->isValid() ) {
-        //     // ... do any other work - like send them an email, etc
-        //     // maybe set a "flash" success message for the user
-
-        //     return $this->redirectToRoute( 'replace_with_some_route' );
-        // } else {
-        //     // 2.5) fill with exisiting data
-        // }
-
         return $this->render(
-            'user/edit.html.twig');//,
-        //    array( 'form' => $form->createView() )
-        //);
+            'user/edit.html.twig'
+        );
     }
 
 
+    /**
+     *
+     *
+     * @Route("/user/{userId}/editt", name="user_editt",  requirements={"userId": "\d+"})
+     */
+    public function editTestAction( $userId, Request $request ) {
+        // 1) build the form
+        $connection = $this->get( "db" )->connect();
+        if ( $userEntry = $this->get( "db" )->selectOne( $connection, "user" ) ) {
+            $user = new User( $userEntry );
+            $form = $this->createForm( UserType::class, $user );
+
+            // 2) handle the submit (will only happen on POST)
+            $form->handleRequest( $request );
+            if ( $form->isSubmitted() && $form->isValid() ) {
+                // ... do any other work - like send them an email, etc
+                // maybe set a "flash" success message for the user
+
+                if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
+                    $this->addFlash(
+                        'notice',
+                        'User {$userId} created!'
+                    );
+
+                    return $this->redirectToRoute( 'user_show', array( "userId"=>$userId ), 200 );
+                } else {
+                    $this->addFlash(
+                        'error',
+                        'Creating user went wrong! UserController.php'
+                    );
+
+                }
+
+                return $this->render(
+                    'user/edit.html.twig',
+                    array( 'form' => $form->createView() )
+                );
+            } else {
+                $this->addFlash(
+                    'error',
+                    'The auction selected does not exist!'
+                );
+
+                $params = $this->getRefererParams();
+                if ( is_null( $params ) ) {
+                    return $this->redirectToRoute( 'homepage' );
+                } else {
+                    $this->get( "dump" )->d( $params );
+                    return $this->redirect( $this->generateUrl(
+                            $params['_route'] ) );
+                }
+            }
+        }
+
+
+    }
 }

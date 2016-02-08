@@ -9,7 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use AppBundle\Form\ItemType;
+use AppBundle\Form\Type\ItemType;
 
 class AuctionType extends AbstractType
 {
@@ -17,22 +17,22 @@ class AuctionType extends AbstractType
         $builder->add( 'sellerID', HiddenType::class )
         ->add( 'startAt', DateTimeType::class )
         ->add( 'endAt', DateTimeType::class )
-        ->add( 'item', new ItemType())
-        ->add( 'startingBid', MoneyType::Class , array(
-            'grouping' => true) )
-        ->add( 'minBidIncrease', MoneyType::Class , array(
-            'grouping' => true,
-            'required'    => false))
-        ->add( 'reservedPrice', MoneyType::Class, array(
-            'grouping' => true,
-            'required'    => false) )
-        ->add('save',SubmitType::class, array('label' => 'Start Auction'));
+        ->add( 'item', new ItemType() )
+        ->add( 'startingBid', MoneyType::class , array(
+                'grouping' => true ) )
+        ->add( 'minBidIncrease', MoneyType::class , array(
+                'grouping' => true,
+                'required'    => false ) )
+        ->add( 'reservedPrice', MoneyType::class, array(
+                'grouping' => true,
+                'required'    => false ) )
+        ->add( 'save', SubmitType::class);
 
     }
 
     public function configureOptions( OptionsResolver $resolver ) {
         $resolver->setDefaults( array(
-                'data_class' => 'AppBundle\Entity\Item',
+                'data_class' => 'AppBundle\Entity\Auction',
             ) );
     }
 }

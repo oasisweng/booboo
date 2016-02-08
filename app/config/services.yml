@@ -6,9 +6,15 @@ parameters:
 services:
   db:
       class: AppBundle\Database\DatabaseConnection
+      arguments:
+          - @service_container
+  dump:
+      class: AppBundle\Miscellaneous\Dump
+      arguments:
+          - @service_container
   app.form.type.category:
       class: AppBundle\Form\Type\CategoryType
       tags:
           - { name: form.type }
-  traits.referer:
-      class: AppBundle\Traits\Referer
+      arguments:
+          - @db

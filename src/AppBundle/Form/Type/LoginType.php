@@ -1,5 +1,5 @@
 <?php
-namespace AppBundle\Form;
+namespace AppBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -9,17 +9,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class UserType extends AbstractType
+class LoginType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
-        $builder->add( 'name', TextType::class )
-        ->add( 'email', EmailType::class )
-        ->add( 'password', RepeatedType::class, array(
-                'type' => PasswordType::class,
-                'pswd'  => array( 'label' => 'Password' ),
-                'rpswd' => array( 'label' => 'Repeat Password' ),
-            )
-        );
+        $builder->add( 'email', EmailType::class )
+        ->add( 'password', PasswordType::class);
     }
 
     public function configureOptions( OptionsResolver $resolver ) {

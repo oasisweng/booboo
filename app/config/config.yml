@@ -35,6 +35,8 @@ framework:
 twig:
     debug:            "%kernel.debug%"
     strict_variables: "%kernel.debug%"
+    globals:
+        kernelRootDir: "%kernel.root_dir%"
 
 # Swiftmailer Configuration
 swiftmailer:

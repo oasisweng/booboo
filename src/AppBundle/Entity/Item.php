@@ -66,20 +66,15 @@ class Item
      */
     public $createdAt;
 
-    public function __construct( $item ) {
-        $this->id = $item->id;
-        $this->itemName = $item->itemName;
-        $this->description = $item->description;
-        if (isset($item->imageURL)){
-            $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/uploads/photos/';
-            $this->image = new File(($dir . $item->imageURL));
-            $this->imageURL = $this->imageURL;
-        } else {
-            $this->image = NULL; 
-            $this->imageURL = NULL;
-        }
-        $this->ownerID = $item->ownerID;
-        $this->categoryID = $item->categoryID;
+    public function __construct( $item = NULL) {
+        if (isset($item)){
+        $this->id = $item["id"];
+        $this->itemName = $item["itemName"];
+        $this->description = $item["description"];
+        $this->imageURL = isset($item["imageURL"]) ? $item->imageURL : NULL;
+        $this->ownerID = $item["ownerID"];
+        $this->categoryID = $item["categoryID"];
+    }
     }
 }
 ?>
