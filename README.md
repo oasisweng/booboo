@@ -1,6 +1,5 @@
 #Booboo 
 ##the fanciest online auction system
-======
 
 ### Before start
 Install [Composer](http://www.abeautifulsite.net/installing-composer-on-os-x/) for Mac OSX
@@ -24,8 +23,8 @@ Change user password | user_change_password | /user/{userID}/change_password | `
 Create an auction| auction_new   | /user/{userID}/auction/new | `{{ path('auction_new', {'userID': 1}) }}`
 Show an auction| auction_show  | /auction/{auctionID} | `{{ path('auction_show', {'auctionID': 1}) }}`
 Edit an auction| auction_edit  | /auction/{auctionID}/edit | `{{ path('auction_edit', {'auctionID': 1}) }}`
-Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}   `  
-Place a bid | bid_bid | /auction/{auctionID}/bid | `{{ path('bid_bid', {'auctionID': 1}) }}   
+Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}`  
+Place a bid | bid_bid | /auction/{auctionID}/bid | `{{ path('bid_bid', {'auctionID': 1}) }}`
 
 ### Assets(Images,JS,CSS)
 >Javascript and CSS files are combined in a unified file. Please refer to base.html.twig to see the update(within javascript and css block respectively).
