@@ -31,13 +31,13 @@ class AuctionController extends Controller {
         if ( $form->isSubmitted() && $form->isValid() ) {
             // ... perform some action, such as saving the task to the database
             $connection = $this->get( 'db' )->connect();
-            if ( $auctionId = $this->get( 'db' )->addAuction( $connection, $auction ) ) {
+            if ( $auctionID = $this->get( 'db' )->addAuction( $connection, $auction ) ) {
                 $this->addFlash(
                     'notice',
                     'New Auction created!'
                 );
 
-                return $this->redirectToRoute( 'auction_show', array( "auctionId"=>$auctionId ), 301 );
+                return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             } else {
                 $this->addFlash(
                     'error',
@@ -55,21 +55,43 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/auction/{auctionId}", name="auction_show", requirements={"auctionId": "\d+"})
+     * @Route("/auction/{auctionID}", name="auction_show", requirements={"auctionID": "\d+"})
      */
-    public function showAction( $auctionId ) {
-        $con = $this->get( "db" )->connect();
-        $auction = $this->get( "db" )->selectOne( $con, 'auction', $auctionId );
-        var_dump( $auction );
-        return $this->render( 'auction/show.html.twig', array( "auction"=>$auction ) );
+    public function showAction( $auctionID ) {
+        $connection = $this->get( "db" )->connect();
+        $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
+        $auction = new Auction($auctionEntry);
+
+        //if should finish auction through this way
+        if ($this->get('db')->shouldFinishAuction($auction)){
+            $this->get('db')->finishAuction($connection,$auction);
+        }
+
+        //get userID, or null if not logged in 
+        $userID = 1234;
+
+        $ended = $auction->ended;
+        //placed a bid
+        $bidded = isset($userID) && $this->get('db')->bidded($connection,$auctionID,$userID);
+        $winning = $bidded && $auction->winnerID==$userID;
+        $won = $ended && $winning;
+
+        $params = array( "auction"=>$auction,
+            "ended"=>$ended,
+            "bidded"=>$bidded,
+            "won"=>$won,
+            "winning"=>$winning);
+
+        return $this->render( 'auction/show.html.twig', 
+            $params);
     }
 
     /**
      *
      *
-     * @Route("/auction/{auctionId}/edit", name="auction_edit", requirements={"auctionId": "\d+"})
+     * @Route("/auction/{auctionID}/edit", name="auction_edit", requirements={"auctionID": "\d+"})
      */
-    public function editAction( $auctionId, Request $request ) {
+    public function editAction( $auctionID, Request $request ) {
 
         return $this->render( 'auction/edit.html.twig' );
     }
@@ -77,11 +99,11 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/auction/{auctionId}/editt", name="auction_edit_test", requirements={"auctionId": "\d+"})
+     * @Route("/auction/{auctionID}/editt", name="auction_edit_test", requirements={"auctionID": "\d+"})
      */
-    public function editTestAction( $auctionId, Request $request ) {
+    public function editTestAction( $auctionID, Request $request ) {
         $connection = $this->get( "db" )->connect();
-        if ( $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionId ) ) {
+        if ( $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID ) ) {
             $this->get( 'dump' )->d( $auctionEntry );
             $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
             $auction = new Auction( $auctionEntry );
@@ -95,14 +117,14 @@ class AuctionController extends Controller {
                 if ( $this->get( 'db' )->updateAuction( $connection, $auction ) ) {
                     $this->addFlash(
                         'notice',
-                        'Auction {$auctionId} updated!'
+                        'Auction {$auctionID} updated!'
                     );
 
-                    return $this->redirectToRoute( 'auction_show', array( "auctionId"=>$auctionId ), 301 );
+                    return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
                 } else {
                     $this->addFlash(
                         'error',
-                        'Updating Auction {$auctionId} went wrong! AuctionController.php'
+                        'Updating Auction {$auctionID} went wrong! AuctionController.php'
                     );
                 }
             }

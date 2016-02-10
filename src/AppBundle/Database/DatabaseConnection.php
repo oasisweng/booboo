@@ -34,8 +34,8 @@ class DatabaseConnection {
     $safe_id = mysqli_real_escape_string( $connection, $id );
     $query = "SELECT * FROM {$column} WHERE id = {$safe_id} LIMIT 1";
     $result = mysqli_query( $connection, $query );
-    $object = mysqli_fetch_assoc( $result );
-    if ( !is_null( $object ) ) {
+    if ( $result ) {
+      $object = mysqli_fetch_assoc( $result );
       return $object;
     } else {
       return false;
@@ -147,7 +147,7 @@ class DatabaseConnection {
       $id =  mysqli_insert_id( $connection );
       return $id;
     } else {
-      die( "Database query failed (Auction). " . mysqli_error( $connection ) );
+      die( "Database query failed (Auction Add). " . mysqli_error( $connection ) );
       return FALSE;
     }
   }
@@ -160,29 +160,173 @@ class DatabaseConnection {
     $startingBid = $auction->startingBid;
     $minBidIncrease = $auction->minBidIncrease;
     $reservedPrice = $auction->reservedPrice;
+    $winnerID = $auction->winnerID;
+    $ended = $auction->ended ? 1:0;
+    $currentBid = $auction->currentBid;
 
     $query = "UPDATE auction SET ".
       "startAt='{$startAt}',".
       "endAt='{$endAt}',".
       "startingBid={$startingBid},".
       "minBidIncrease={$minBidIncrease}," .
-      "reservedPrice={$reservedPrice} " .
+      "reservedPrice={$reservedPrice}," .
+      "winnerID={$winnerID}," .
+      "ended={$ended}, " .
+      "currentBid={$currentBid} " .
       "WHERE id={$id}";
-
 
     $result = mysqli_query( $connection, $query );
     $affected = mysqli_affected_rows( $connection );
     if ( $result && $affected >= 0 ) {
       // save item
+      if (!isset($item)){
+        //special update which does not effect item
+        return true;
+      }
+
       if ( $this->updateItem( $connection, $item ) ) {
         return true;
       } else {
         return false;
       }
     } else {
-      die( "Database query failed (Auction). " . mysqli_error( $connection ) );
+      die( "Database query failed (Auction Update). " . mysqli_error( $connection ) );
       return FALSE;
     }
+  }
+
+  public function shouldFinishAuction( $auction ) {
+    // usleep(mt_rand(100000,1000000))
+    // check if auction has finished
+    $now = date( "Y-m-d H:i:s" );
+    if ( $auction->endAt<$now ) {
+      //if it should finish, check if it did finish
+      if ( !$auction->ended ) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  public function finishAuction( $connection, $auction ) {
+    $id = mysqli_real_escape_string( $connection, $auction->id );
+    //get two highest bid(sort by value DESC and time ASC)
+    $query = "SELECT * FROM bid WHERE ";
+    $query .= "auctionID={$id} ";
+    $query .= "ORDER BY bidValue DESC, createdAt ASC ";
+    $query .= "LIMIT 1";
+    $result = mysqli_query( $connection, $query );
+    $object = mysqli_fetch_assoc( $result );
+    if ( $object ) {
+      $auction->winnerID = $object["buyerID"];
+    }
+    $auction->ended = true;
+    $this->updateAuction( $connection, $auction );
+  }
+
+  public function addBid( $connection, $bid ) {
+    $bidValue = $bid->bidValue;
+    $buyerID = $bid->buyerID;
+    $auctionID = $bid->auctionID;
+
+    $query = "INSERT INTO bid (bidValue,buyerID,auctionID) ";
+    $query .= "VALUES({$bidValue},{$buyerID},{$auctionID})";
+    $result = mysqli_query( $connection, $query );
+    if ( $result ) {
+      $id =  mysqli_insert_id( $connection );
+      return $id;
+    } else {
+      die( "Database query failed (Bid). " . mysqli_error( $connection ) );
+      return false;
+    }
+  }
+
+  public function bid( $connection, $bid, $auction ) {
+    //check if auction is on,
+    echo "<pre>";
+    var_dump($bid);
+    var_dump($auction);
+    echo "<pre/>";
+    $now = date( "Y-m-d H:i:s" );
+    if ( $auction->endAt>$now ) {
+      //check if currentBid is null
+      if ( is_null( $auction->currentBid ) ) {
+        //save the bid and change current bid to the min value and winnerId to userId and return true and congrats
+        if ( $bid->id = $this->addBid( $connection, $bid ) ) {
+          $auction->currentBid = $auction->startingBid;
+          $auction->winnerID = $bid->buyerID;
+          $this->updateAuction( $connection, $auction );
+          return array( "status"=>true, "message"=>"Congratulations" );
+        } else {
+          return array( "status"=>false, "message"=>"Unable to get records" );
+        }
+      } else {
+        //check if bid is higher than currentBid+minInc
+        if ( $bid->bidValue>( $auction->currentBid+$auction->minBidIncrease ) ) {
+          //save the current bid
+          if ( $bid->id=$this->addBid( $connection, $bid ) ) {
+            //get two highest bid(sort by value DESC and time ASC)
+            $auctionID = $auction->id;
+            $query = "SELECT * FROM bid WHERE ";
+            $query .= "auctionID={$auctionID} ";
+            $query .= "ORDER BY bidValue DESC, createdAt ASC ";
+            $query .= "LIMIT 2";
+            $result = mysqli_query( $connection, $query );
+            $highestBid = mysqli_fetch_assoc( $result );
+            $secondHighestBid = mysqli_fetch_assoc( $result );
+            if ( is_null( $highestBid ) || is_null( $secondHighestBid ) ) {
+              //return server error
+              return array( "status"=>false, "message"=>"Unable to get records" );
+            }
+            //check if the bid is highest bid
+            if ( $bid->id == $highestBid["id"] ) {
+              //change current bid to the bid and winnerId to userId and return true and congrats
+              $auction->currentBid = $bid->bidValue;
+              $auction->winnerID = $bid->buyerID;
+              $this->updateAuction( $connection, $auction );
+              return array( "status"=>true, "message"=>"Congratulations" );
+            } else {
+              // change current bid to the second highest bid and return false and report price outbid.
+              $auction->currentBid = $secondHighestBid["bidValue"];
+              $auction->winnerID = $secondHighestBid["buyerID"];
+              $this->updateAuction( $connection, $auction );
+              return array( "status"=>false, "message"=>"Price outbid" );
+            }
+
+          } else {
+            //return server error
+            return array( "status"=>false, "message"=>"Unable to save records" );
+          }
+        } else {
+          //return false and report price too low
+          return array( "status"=>false, "message"=>"Price too low" );
+        }
+
+      }
+    } else {
+      //return false and report auction is over.
+      return array( "status"=>false, "message"=>"Auction is over" );
+    }
+  }
+
+  public function bidded( $connection, $auctionID, $userID ) {
+    $query = "SELECT COUNT(*) as totalno FROM bid ";
+    $query .= "WHERE auctionID={$auctionID},buyerID={$userID}";
+    $result = mysqli_query( $connection, $query );
+    if ( $result ) {
+      $count = mysqli_fetch_assoc( $result );
+      if ( $count["totalno"]>=0 ) {
+        return true;
+      } else {
+        return false;
+      }
+    }else {
+      return false;
+    }
+
   }
 
   public function addUser( $user ) {
@@ -244,7 +388,7 @@ class DatabaseConnection {
 
   public function login( $user ) {
     $connection = $this->connect();
-    $email = mysqli_real_escape_string($connection, $user->email );
+    $email = mysqli_real_escape_string( $connection, $user->email );
     $query = "SELECT * FROM user WHERE email='{$email}' LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {

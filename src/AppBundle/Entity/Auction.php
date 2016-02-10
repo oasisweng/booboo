@@ -103,7 +103,8 @@ class Auction {
             $this->startingBid = $a["startingBid"];
             $this->minBidIncrease = $a["minBidIncrease"];
             $this->reservedPrice = $a["reservedPrice"];
-            $this->ended = $a["ended"];
+            $this->ended = $a["ended"] ? true : false;
+            $this->currentBid = $a["currentBid"];
         } else {
 
             $this->startingBid = 1.0;
