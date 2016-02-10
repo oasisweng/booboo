@@ -388,8 +388,8 @@ class DatabaseConnection {
 
   public function login( $user ) {
     $connection = $this->connect();
-    $email = mysqli_real_escape_string( $connection, $user->email );
-    $query = "SELECT * FROM user WHERE email='{$email}' LIMIT 1";
+    $name = mysqli_real_escape_string( $connection, $user->name );
+    $query = "SELECT * FROM user WHERE name='{$name}' LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       $fetched_user = mysqli_fetch_assoc( $result );
