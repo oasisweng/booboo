@@ -1351,8 +1351,7 @@
 /* Form */
 
 	form label {
-		font-weight: 600;
-		text-transform: uppercase;
+		font-weight: 200;
 		color: #888;
 		display: block;
 		margin: 0 0 1em 0;

@@ -14,15 +14,22 @@ class AuctionType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
         $builder->add( 'sellerID', HiddenType::class )
-        ->add( 'startAt', DateTimeType::class )
-        ->add( 'endAt', DateTimeType::class )
         ->add( 'item', new ItemType() )
+        ->add( 'startAt', DateTimeType::class)
+        ->add('endAt', DateTimeType::class,array(
+            'widget' => 'single_text',
+            // this is actually the default format for single_text
+            'format' => 'yyyy-MM-dd'))
+        //->add( 'endAt', DateTimeType::class )
         ->add( 'startingBid', MoneyType::class , array(
+                'currency' => 'GBP',
                 'grouping' => true ) )
         ->add( 'minBidIncrease', MoneyType::class , array(
+                'currency' => 'GBP',
                 'grouping' => true,
                 'required'    => false ) )
         ->add( 'reservedPrice', MoneyType::class, array(
+                'currency' => 'GBP',
                 'grouping' => true,
                 'required'    => false ) )
         ->add( 'save', SubmitType::class);
