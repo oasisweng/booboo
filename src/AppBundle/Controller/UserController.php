@@ -37,7 +37,7 @@ class UserController extends Controller {
             // ... do any other work - like send them an email, etc
             // maybe set a "flash" success message for the user
 
-            if ( $userId = $this->get( 'db' )->addUser( $user ) ) {
+            if ( $userID = $this->get( 'db' )->addUser( $user ) ) {
                 $this->addFlash(
                     'notice',
                     'New User created!'
@@ -89,7 +89,7 @@ class UserController extends Controller {
                 $userAttributeBag = new AttributeBag( 'user' );
                 $session->registerBag( $userAttributeBag );
 
-                $userAttributeBag->set( 'userId', '{$id}' );
+                $userAttributeBag->set( 'userID', '{$id}' );
 
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
@@ -110,11 +110,11 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}", name="user_show", requirements={"userId": "\d+"})
+     * @Route("/user/{userID}", name="user_show", requirements={"userID": "\d+"})
      */
-    public function showAction( $userId ) {
+    public function showAction( $userID ) {
         $con = $this->get( "db" )->connect();
-        $user = $this->get( "db" )->selectOne( $con, 'user', $userId );
+        $user = $this->get( "db" )->selectOne( $con, 'user', $userID );
         var_dump( $user );
         return $this->render( 'user/show.html.twig', array( "user"=>$user ) );
     }
@@ -122,9 +122,9 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}/edit", name="user_edit",  requirements={"userId": "\d+"})
+     * @Route("/user/{userID}/edit", name="user_edit",  requirements={"userID": "\d+"})
      */
-    public function editAction( $userId, Request $request ) {
+    public function editAction( $userID, Request $request ) {
         //edit user name
         return $this->render(
             'user/edit.html.twig'
@@ -135,12 +135,12 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}/update_profile", name="user_update_profile",  requirements={"userId": "\d+"})
+     * @Route("/user/{userID}/update_profile", name="user_update_profile",  requirements={"userID": "\d+"})
      */
-    public function updateProfileAction( $userId, Request $request ) {
+    public function updateProfileAction( $userID, Request $request ) {
         // 1) build the form
         $connection = $this->get( "db" )->connect();
-        $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userId );
+        $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userID );
         if ( isset($userEntry) ) {
             $user = new User( $userEntry );
             $form = $this->createForm( UpdateProfileType::class, $user );
@@ -153,10 +153,10 @@ class UserController extends Controller {
                 if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
                     $this->addFlash(
                         'notice',
-                        'User {$userId} profile updated!'
+                        'User {$userID} profile updated!'
                     );
 
-                    return $this->redirectToRoute( 'user_show', array( "userId"=>$userId ), 301 );
+                    return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
                 } else {
                     $this->addFlash(
                         'error',
@@ -189,12 +189,12 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}/change_password", name="user_change_password",  requirements={"userId": "\d+"})
+     * @Route("/user/{userID}/change_password", name="user_change_password",  requirements={"userID": "\d+"})
      */
-    public function changePasswordAction( $userId, Request $request ) {
+    public function changePasswordAction( $userID, Request $request ) {
         // 1) build the form
         $connection = $this->get( "db" )->connect();
-        if ( $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userId ) ) {
+        if ( $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userID ) ) {
             $user = new User( $userEntry );
             $form = $this->createForm( ChangePasswordType::class, $user );
 
@@ -207,10 +207,10 @@ class UserController extends Controller {
                 if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
                     $this->addFlash(
                         'notice',
-                        'User {$userId} password reset!'
+                        'User {$userID} password reset!'
                     );
 
-                    return $this->redirectToRoute( 'user_show', array( "userId"=>$userId ), 301 );
+                    return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
                 } else {
                     $this->addFlash(
                         'error',
