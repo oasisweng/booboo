@@ -16,38 +16,44 @@
 	<div class="row">      		
       	<div class="6u 12u(mobile)">
       		<h3>Create an Account</h3>
-        	<form action="" id="loginForm">
-            {{ form_start(form) }}
-            <div class="form-group input-group">
-              <span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
-            {{ form_row (form.name, {'label': ""}) }}
+          {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <div>
+              {{ form_label(form.name) }}
+              {{ form_errors(form.name) }}
+              <div class="form-group input-group">
+                <span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
+                {{ form_widget(form.name) }}
+              </div>
+            </div>
+            <div>
+              {{ form_label(form.email) }}
+              {{ form_errors(form.email) }}
+              <div class="form-group input-group">
+                <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
+                {{ form_widget(form.email) }}
+              </div>
+            </div>
+            <div>
+              {{ form_label(form.password.first) }}
+              {{ form_errors(form.password.first) }}
+              <div class="form-group input-group">
+                <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+                {{ form_widget(form.password.first) }}
+              </div>
+            </div>
+            <div>
+              {{ form_label(form.password.second) }}
+              {{ form_errors(form.password.second) }}
+              <div class="form-group input-group">
+                <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+                {{ form_widget(form.password.second) }}
+              </div>
+            </div>
+            <div>
+                {{ form_widget(form.register, {'attr': {'class': 'btn btn-def btn-block'}}) }}
             </div>
             {{ form_end(form) }}
-          	<div class="form-group input-group">
-            	<span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
-            	<input class="form-control" type="text" placeholder="Username"/>          
-          	</div>
-          	<div class="form-group input-group">
-            	<span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
-            	<input class="form-control" type="text" placeholder="Email address"/>   
-          	</div>
-          	<div class="form-group input-group">
-            	<span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
-            	<input class="form-control" type="password" placeholder="Password"/>     
-          	</div>
-          	<div class="form-group input-group">
-            	<span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
-            	<input class="form-control" type="password" placeholder="Confirm password"/>    
-          	</div>
-          	<div class="checkbox">
-            	<label>
-              	<input type="checkbox"> I agree to the <a href="#">Terms and Conditions</a>
-            	</label>
-          	</div>
-          	<div class="form-group">
-            	<button type="button" class="btn btn-def btn-block">Register</button>
-          	</div>
-        	</form> 
     	</div>
     	<div class="6u 12u(mobile)">
     		<h3>Sign in</h3>

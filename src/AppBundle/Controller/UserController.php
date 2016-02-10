@@ -7,12 +7,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 
 
 //test form
 use AppBundle\Form\Type\UserType;
 use AppBundle\Form\Type\UpdateProfileType;
-use AppBundle\Form\Type\ForgottenPasswordType;
+use AppBundle\Form\Type\ChangePasswordType;
+use AppBundle\Form\Type\LoginType;
 use AppBundle\Entity\User;
 
 
@@ -30,7 +33,6 @@ class UserController extends Controller {
 
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest( $request );
-
         if ( $form->isSubmitted() && $form->isValid() ) {
             // ... do any other work - like send them an email, etc
             // maybe set a "flash" success message for the user
@@ -47,6 +49,7 @@ class UserController extends Controller {
                     'error',
                     'Creating user went wrong! UserController.php'
                 );
+                die("failed to add user");
             }
         }
 
@@ -65,10 +68,12 @@ class UserController extends Controller {
     public function loginAction( Request $request ) {
         // 1) build the form
         $user = new User();
-        $form = $this->createForm( UserType::class, $user );
+        $form = $this->createForm( LoginType::class, $user );
 
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest( $request );
+
+
 
         if ( $form->isSubmitted() && $form->isValid() ) {
             // ... do any other work - like send them an email, etc
@@ -79,12 +84,10 @@ class UserController extends Controller {
                     'notice',
                     'Log in!'
                 );
-                $session = new Session();
+                $session = $request->getSession();
 
                 $userAttributeBag = new AttributeBag( 'user' );
                 $session->registerBag( $userAttributeBag );
-
-                $session->start();
 
                 $userAttributeBag->set( 'userId', '{$id}' );
 
@@ -99,7 +102,7 @@ class UserController extends Controller {
 
 
         return $this->render(
-            'user/new.html.twig',
+            'user/login.html.twig',
             array( 'form' => $form->createView() )
         );
     }
@@ -186,14 +189,14 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}/forgotten_password", name="user_forgotten_password",  requirements={"userId": "\d+"})
+     * @Route("/user/{userId}/change_password", name="user_change_password",  requirements={"userId": "\d+"})
      */
-    public function forgottenPasswordAction( $userId, Request $request ) {
+    public function changePasswordAction( $userId, Request $request ) {
         // 1) build the form
         $connection = $this->get( "db" )->connect();
         if ( $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userId ) ) {
             $user = new User( $userEntry );
-            $form = $this->createForm( ForgottenPasswordType::class, $user );
+            $form = $this->createForm( ChangePasswordType::class, $user );
 
             // 2) handle the submit (will only happen on POST)
             $form->handleRequest( $request );
