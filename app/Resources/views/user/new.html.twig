@@ -3,19 +3,9 @@
 
 {% block body %}
 
-<div class="container block-center">
-  <!-- Header -->
-    <div id="header-wrapper">
-          <div id="header" class="container">
-              <!-- Logo -->
-                <img src ="{{ asset('assets/images/logo.png')}}" width = "10%" height="10%" class="img-responsive center-block">
-                <h1 id="logo">BOO BOO</a></h1>
-                <p>Group Project</p>
-            </div>
-    </div>
-	<div class="row">      		
-      	<div class="6u 12u(mobile)">
-      		<h3>Create an Account</h3>
+<div class="container">    		
+      	<div class="col-md-6 col-md-offset-3">
+      		<h2>Register</h2>
           {{ form_start(form) }}
             {{ form_errors(form) }}
             <div>
@@ -54,27 +44,6 @@
                 {{ form_widget(form.register, {'attr': {'class': 'btn btn-def btn-block'}}) }}
             </div>
             {{ form_end(form) }}
-    	</div>
-    	<div class="6u 12u(mobile)">
-    		<h3>Sign in</h3>
-    		<form action="" id="loginForm">
-          		<div class="form-group input-group">
-                <span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
-                <input class="form-control" type="text" placeholder="Username"/>          
-              </div>
-
-          		<div class="form-group input-group">
-                <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
-                <input class="form-control" type="password" placeholder="Password"/>     
-              </div>
-          		<div class="form-group text-center">
-            	<a href="#">Forgot Password</a>&nbsp;|&nbsp;<a href="#">Support</a>
-          		</div>
-          		<div class="form-group">
-            		<button type="button" class="btn btn-def btn-block">Sign In</button>
-          		</div>
-          	</form> 
-    	</div>
       </div>    
   </div>
 </div>
