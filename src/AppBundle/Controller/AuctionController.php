@@ -18,11 +18,11 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userId}/auction/new", name="auction_new", requirements={"userId": "\d+"})
+     * @Route("/user/{userID}/auction/new", name="auction_new", requirements={"userID": "\d+"})
      */
-    public function newAction( $userId, Request $request ) {
+    public function newAction( $userID, Request $request ) {
         $auction = new Auction();
-        $auction->sellerID = $userId;
+        $auction->sellerID = $userID;
         $form = $this->createForm( AuctionType::class, $auction );
 
 
@@ -60,19 +60,19 @@ class AuctionController extends Controller {
     public function showAction( $auctionID ) {
         $connection = $this->get( "db" )->connect();
         $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
-        $auction = new Auction($auctionEntry);
+        $auction = new Auction( $auctionEntry );
 
         //if should finish auction through this way
-        if ($this->get('db')->shouldFinishAuction($auction)){
-            $this->get('db')->finishAuction($connection,$auction);
+        if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
+            $this->get( 'db' )->finishAuction( $connection, $auction );
         }
 
-        //get userID, or null if not logged in 
+        //get userID, or null if not logged in
         $userID = 1234;
 
         $ended = $auction->ended;
         //placed a bid
-        $bidded = isset($userID) && $this->get('db')->bidded($connection,$auctionID,$userID);
+        $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 
@@ -80,10 +80,10 @@ class AuctionController extends Controller {
             "ended"=>$ended,
             "bidded"=>$bidded,
             "won"=>$won,
-            "winning"=>$winning);
+            "winning"=>$winning );
 
-        return $this->render( 'auction/show.html.twig', 
-            $params);
+        return $this->render( 'auction/show.html.twig',
+            $params );
     }
 
     /**
@@ -92,16 +92,6 @@ class AuctionController extends Controller {
      * @Route("/auction/{auctionID}/edit", name="auction_edit", requirements={"auctionID": "\d+"})
      */
     public function editAction( $auctionID, Request $request ) {
-
-        return $this->render( 'auction/edit.html.twig' );
-    }
-
-    /**
-     *
-     *
-     * @Route("/auction/{auctionID}/editt", name="auction_edit_test", requirements={"auctionID": "\d+"})
-     */
-    public function editTestAction( $auctionID, Request $request ) {
         $connection = $this->get( "db" )->connect();
         if ( $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID ) ) {
             $this->get( 'dump' )->d( $auctionEntry );
@@ -129,7 +119,7 @@ class AuctionController extends Controller {
                 }
             }
 
-            return $this->render( 'auction/editt.html.twig', array(
+            return $this->render( 'auction/edit.html.twig', array(
                     'form' => $form->createView(),
                 ) );
         } else {
