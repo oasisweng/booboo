@@ -82,7 +82,6 @@ PURPOSE | NAME | PATH | HREF
 Login | user_log | /login | `{{ path('user_login'}}`
 Registration | user_registration  | /register | `{{ path('user_registration'}}`
 Show user profile | user_show  | /user/{userID} | `{{ path('user_show', {'userID': 1}) }}`
-Update user profile | user_update_profile  | /user/{userID}/update_profile | `{{ path('user_update_profile', {'userID': 1}) }}`
 Change user password | user_change_password | /user/{userID}/change_password | `{{ path('user_change_password', {'userID': 1}) }}`
 Create an auction | auction_new   | /user/{userID}/auction/new | `{{ path('auction_new', {'userID': 1}) }}`
 Show an auction | auction_show  | /auction/{auctionID} | `{{ path('auction_show', {'auctionID': 1}) }}`

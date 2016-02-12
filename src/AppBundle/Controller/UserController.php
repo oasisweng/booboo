@@ -86,10 +86,7 @@ class UserController extends Controller {
                 );
                 $session = $request->getSession();
 
-                $userAttributeBag = new AttributeBag( 'user' );
-                $session->registerBag( $userAttributeBag );
-
-                $userAttributeBag->set( 'userID', '{$id}' );
+                $session->set( 'userID', '{$id}' );
 
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
@@ -117,73 +114,6 @@ class UserController extends Controller {
         $user = $this->get( "db" )->selectOne( $con, 'user', $userID );
         var_dump( $user );
         return $this->render( 'user/show.html.twig', array( "user"=>$user ) );
-    }
-
-    /**
-     *
-     *
-     * @Route("/user/{userID}/edit", name="user_edit",  requirements={"userID": "\d+"})
-     */
-    public function editAction( $userID, Request $request ) {
-        //edit user name
-        return $this->render(
-            'user/edit.html.twig'
-        );
-    }
-
-
-    /**
-     *
-     *
-     * @Route("/user/{userID}/update_profile", name="user_update_profile",  requirements={"userID": "\d+"})
-     */
-    public function updateProfileAction( $userID, Request $request ) {
-        // 1) build the form
-        $connection = $this->get( "db" )->connect();
-        $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userID );
-        if ( isset($userEntry) ) {
-            $user = new User( $userEntry );
-            $form = $this->createForm( UpdateProfileType::class, $user );
-
-            // 2) handle the submit (will only happen on POST)
-            $form->handleRequest( $request );
-            if ( $form->isSubmitted() && $form->isValid() ) {
-                // ... do any other work - like send them an email, etc
-                // maybe set a "flash" success message for the user
-                if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
-                    $this->addFlash(
-                        'notice',
-                        'User {$userID} profile updated!'
-                    );
-
-                    return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
-                } else {
-                    $this->addFlash(
-                        'error',
-                        'Updating user went wrong! UserController.php'
-                    );
-
-                }
-
-                return $this->render(
-                    'user/update_profile.html.twig',
-                    array( 'form' => $form->createView() )
-                );
-            } else {
-                return $this->render(
-                    'user/update_profile.html.twig',
-                    array( 'form' => $form->createView() )
-                );
-            }
-        } else {
-                $this->addFlash(
-                    'error',
-                    'The user selected does not exist!'
-                );
-
-                return $this->redirectToRoute( 'homepage' );
-            }
-
     }
 
     /**
