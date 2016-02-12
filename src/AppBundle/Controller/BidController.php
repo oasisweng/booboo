@@ -60,18 +60,14 @@ class BidController extends Controller {
             //attempt to bid
             $response = $this->get( 'db' )->bid( $connection, $bid, $auction );
 
-            var_dump( $response );
-
             if ( $response["status"] ) {
                 $this->addFlash(
                     'notice',
                     $response["message"]
                 );
 
-                return $this->render( 'bid/bid.html.twig', array(
-                        'bid_form' => $form->createView(),
-                    ) );
-                return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
+                return new JsonResponse($response);
+                //return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             } else {
                 $this->addFlash(
                     'error',
