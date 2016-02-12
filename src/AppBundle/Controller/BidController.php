@@ -69,7 +69,7 @@ class BidController extends Controller {
                 );
 
                 return $this->render( 'bid/bid.html.twig', array(
-                        'form' => $form->createView(),
+                        'bid_form' => $form->createView(),
                     ) );
                 return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             } else {
@@ -82,7 +82,7 @@ class BidController extends Controller {
         }
 
         return $this->render( 'bid/bid.html.twig', array(
-                'form' => $form->createView(),
+                'bid_form' => $form->createView(),
             ) );
     }
 
