@@ -24,10 +24,12 @@
 
 	label {
 		margin: 1em;
+
 	}
 
 	h2 {
 		text-align: center;
+		padding-bottom: 1em;
 	}
 
 	div.container3 {
@@ -83,6 +85,7 @@
 	.container {
 		margin-left: auto;
 		margin-right: auto;
+		padding-bottom: 2em;
 	}
 
 	.container.\31 25\25 {
@@ -1351,11 +1354,10 @@
 /* Form */
 
 	form label {
-		font-weight: 600;
-		text-transform: uppercase;
+		font-weight: 200;
 		color: #888;
-		display: block;
-		margin: 0 0 1em 0;
+		display: inline-block;
+		margin: 0 1em 0 0;
 	}
 
 	form input[type="text"],

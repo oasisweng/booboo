@@ -13,19 +13,23 @@ use AppBundle\Form\Type\ItemType;
 class AuctionType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
-        $builder->add( 'sellerID', HiddenType::class )
-        ->add( 'startAt', DateTimeType::class )
-        ->add( 'endAt', DateTimeType::class )
-        ->add( 'item', new ItemType() )
-        ->add( 'startingBid', MoneyType::class , array(
+        $builder->add('sellerID', HiddenType::class )
+        ->add('item', new ItemType() )
+        ->add('startAt', DateTimeType::class)
+        ->add('endAt', DateTimeType::class)
+        //->add( 'endAt', DateTimeType::class )
+        ->add('startingBid', MoneyType::class, array(
+                'currency' => 'GBP',
                 'grouping' => true ) )
-        ->add( 'minBidIncrease', MoneyType::class , array(
+        ->add('minBidIncrease', MoneyType::class, array(
+                'currency' => 'GBP',
                 'grouping' => true,
-                'required'    => false ) )
-        ->add( 'reservedPrice', MoneyType::class, array(
+                'required' => false ) )
+        ->add('reservedPrice', MoneyType::class, array(
+                'currency' => 'GBP',
                 'grouping' => true,
-                'required'    => false ) )
-        ->add( 'save', SubmitType::class);
+                'required' => false ) )
+        ->add('save', SubmitType::class);
 
     }
 

@@ -12,12 +12,12 @@
      
         
                         <a class="navbar-padright">
-                            <li><a class="icon fa-home" href="index.html"><span>Home</span></a></li>
+                            <li><a class="icon fa-home" href="{{ path('auction_new', {'userID': 1}) }}"><span>Home</span></a></li>
                         </a>
         
                             <a class="navbar-padleft">    
                                 <li><a class="" href=""><span>                      </span></a></li>
-                                <li><a class="icon fa-sign-in" href="left-sidebar.html"><span>Sign In/ Register</span></a></li>
+                                <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
                                 <li><a class="icon fa-question" href="right-sidebar.html"><span>Contact Us/ FAQ</span></a></li>
                             </a>
                         </ul>

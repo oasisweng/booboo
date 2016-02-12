@@ -38,7 +38,7 @@ twig:
     globals:
         kernelRootDir: "%kernel.root_dir%"
     form:
-        resources: ['bootstrap_3_layout.html.twig']
+        resources: ['bootstrap_3_horizontal_layout.html.twig']
 
 # Swiftmailer Configuration
 swiftmailer:
