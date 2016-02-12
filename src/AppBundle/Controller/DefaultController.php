@@ -17,8 +17,8 @@ class DefaultController extends Controller
         $connection = $this->get('db')->connect();
         $hot_auctions = $this->get('db')->getHotAuctions($connection,10);
         $expiring_auctions = $this->get('db')->getExpiringAuctions($connection,10);
-        $new_auctions = $this->get('db')->getNewAuctions($connection,10);
-        $recommended_auctions = $this->get('db')->getNewAuctions($connection,10);
+        $new_auctions = $this->get('db')->getNewAuctions($connection,1,10,false);
+        $recommended_auctions = $this->get('db')->getRecommendedAuctions($connection,6);
         return $this->render('default/index.html.twig', array(
             'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
             'hot_auctions' => $hot_auctions,

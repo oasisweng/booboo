@@ -43,7 +43,7 @@ class Auction {
      */
     public $item;
 
-    public $itemId;
+    public $itemID;
 
     /**
      *
@@ -96,7 +96,7 @@ class Auction {
             $this->winnerID = $a["winnerID"];
             $this->startAt = new DateTime($a["startAt"]);
             $this->endAt = new DateTime($a["endAt"]);
-            $this->itemId = $a["itemID"];
+            $this->itemID = $a["itemID"];
             $this->viewCount = $a["viewCount"];
             $this->createdAt = new DateTime($a["createdAt"]);
             $this->updatedAt = new DateTime($a["updatedAt"]);

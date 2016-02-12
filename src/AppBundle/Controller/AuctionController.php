@@ -16,6 +16,67 @@ use AppBundle\Form\Type\AuctionType;
 class AuctionController extends Controller {
 
     /**
+     *  get search result based on keywords and page number
+     *
+     * @Route("/auctions/{page}", name = "auction_search",
+     *                            requirements = {"page": "\d+"},
+     *                            defaults = {"page" : 1})
+     */
+    public function searchAction( $page, Request $request ) {
+        //page cannot be zero
+        if ($page == 0){
+            $this->addFlash(
+                'warning',
+                'Page number cannot be zero!'
+            );
+
+            return $this->redirectToRoute( 'homepage' );
+        }
+        //get data
+        //remove leading and trailing whitespace for keywords
+        $keywords_s = ltrim( rtrim( $request->get( 'keywords','' ) ) );
+        $keywords_a = [];
+        if ( strlen( $keywords_s )>0 ) {
+            $keywords_a = explode( ' ', $keywords_s );
+        }
+
+        $connection = $this->get( 'db' )->connect();
+        $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25 );
+
+        if ( $request->isXmlHttpRequest() ) {
+            //return json
+            return new JsonResponse($searchResults);
+        } else {
+            //return page
+            $totalPages = $searchResults["totalPages"];
+            if ( $page>$totalPages ) {
+                //page number is larger than total pages of data
+                $this->addFlash(
+                    'warning',
+                    'Page number exceeds total number of pages!'
+                );
+
+                return $this->redirectToRoute( 'homepage' );
+            }
+            echo $totalPages;
+            $this->get('dump')->d($searchResults);
+            $auctions = [];
+            $items= [];
+            foreach ( $searchResults["auctions"] as $auctionEntry ) {
+                $auctions[] = new Auction( $auctionEntry );
+                $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
+                $items[] = new Item($itemEntry);
+            }
+
+            return $this->render( 'auction/search.html.twig', array(
+                'totalPages' => $totalPages,
+                'auctions' => $auctions,
+                'items' => $items
+            ) );
+        }
+    }
+
+    /**
      *
      *
      * @Route("/user/{userID}/auction/new", name="auction_new", requirements={"userID": "\d+"})
@@ -61,6 +122,8 @@ class AuctionController extends Controller {
         $connection = $this->get( "db" )->connect();
         $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
         $auction = new Auction( $auctionEntry );
+        $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
+        $item = new Item($itemEntry);
 
         //if should finish auction through this way
         if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {

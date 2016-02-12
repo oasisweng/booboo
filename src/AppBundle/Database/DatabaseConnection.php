@@ -272,24 +272,90 @@ class DatabaseConnection {
   }
 
   /*
+   * search for auctions based on keywords
+   * @return: {"auctions"=>search result array, "totalPages"=>total number of pages}
+   */
+  public function searchAuctions($connection,$keywords,$page,$perPage){
+    if ($page==0){
+      return NULL;
+    } 
+    //init auctions
+    $auctions = [];
+    //get offset
+    $offset = ($page-1)*$perPage;
+    //if there is keywords, do keyword search
+    $where = "";
+    $keywords_c = count($keywords);
+    if ($keywords_c>0){
+      $first_keyword = $keywords[0];
+      $where = "WHERE item.itemName LIKE '%{$first_keyword}%' ";
+      //add second keyword and more
+      for ($i = 1; $i<$keywords_c;$i++){
+        $keyword = $keywords[$i];
+        $where = "OR item.itemName LIKE '%{$keyword}%' ";
+      }
+      //get all auctions
+      $query = "SELECT auction.* FROM auction ";
+      $query .= "INNER JOIN ";
+      $query .= "item ON auction.itemID = item.id ";
+      $query .= $where;
+      $query .= "LIMIT {$offset},{$perPage} ";
+      $result = mysqli_query($connection,$query);
+      if ($result){
+        while ($row = mysqli_fetch_assoc($result)){
+          $auctions[] = $row;
+        }
+      }else {
+        die( "Database query failed (search auction). " . mysqli_error( $connection ) );
+      } 
+    } else {
+      //if there is no keywords, get new auctions
+      $auctions = $this->getNewAuctions($connection,$page,$perPage,true);
+    }
+
+    //get total number of auctions
+    $query2 = "SELECT COUNT(*) AS ct FROM auction ";
+    $query2 .= "INNER JOIN ";
+    $query2 .= "item ON auction.itemID = item.id ";
+    $query2 .= $where;
+
+    $totalPages = 1;
+    $result = mysqli_query($connection,$query2);
+    if ($result){
+      $count = mysqli_fetch_assoc($result);
+      $totalPages = ceil($count["ct"]/$perPage);
+    }else {
+      die( "Database query failed (search auction). " . mysqli_error( $connection ) );
+    } 
+
+    return ["auctions"=>$auctions,"totalPages"=>$totalPages];
+  }
+
+  /*
    * get new auction for homepage, defined by the date of creation
    */
-  public function getNewAuctions($connection,$limit){
+  public function getNewAuctions($connection,$page,$perPage,$isSearch){
     $auctions = [];
+    //get offset
+    $offset = ($page-1)*$perPage;
 
     //get expiring auctions, ordered by how close they are to the end;
     $query ="SELECT ";
-    $query .="auction.id, ";
-    $query .="item.imageURL ";
-    $query .="FROM ";
-    $query .="auction ";
+    if ($isSearch){
+      $query .= "* FROM auction ";
+    } else {
+      $query .="auction.id, ";
+      $query .="item.imageURL ";
+      $query .="FROM ";
+      $query .="auction ";
+    }
     $query .="INNER JOIN ";
     $query .="item ON item.id = auction.itemID ";
     $query .="WHERE ";
     $query .="auction.endAt>NOW() ";
     $query .="ORDER BY ";
     $query .="auction.createdAt DESC ";
-    $query .="LIMIT 10 ";
+    $query .="LIMIT {$offset},{$perPage} ";
 
     $result = mysqli_query($connection,$query);
     if ($result){
@@ -297,7 +363,7 @@ class DatabaseConnection {
         $auctions[] = $row;
       }
     }else {
-      die( "Database query failed (expiring auction). " . mysqli_error( $connection ) );
+      die( "Database query failed (new auction). " . mysqli_error( $connection ) );
     }
 
     return $auctions;
@@ -366,6 +432,7 @@ class DatabaseConnection {
         while ($row = mysqli_fetch_assoc($result)){
           $auctions[] = $row;
         }
+        
       }else {
         die( "Database query failed (random auction). " . mysqli_error( $connection ) );
       }
@@ -383,7 +450,7 @@ class DatabaseConnection {
     define("MAX_TOTAL_RECOMMENDATIONS",10);
     $query = "SELECT ";
     $query .= "auction.id,";
-    $query .= "item.imageURL";
+    $query .= "item.imageURL ";
     $query .= "FROM ";
     $query .= "auction ";
     $query .= "INNER JOIN ";
@@ -425,7 +492,7 @@ class DatabaseConnection {
 
     $result = mysqli_query( $connection, $query );
 
-    $auctions = [];
+    $auctions = array();
     //get reco auctions
     if ( $result ) {
       while ($row = mysqli_fetch_assoc($result)){
@@ -440,7 +507,12 @@ class DatabaseConnection {
     if ($reco_count<=constant("MAX_TOTAL_RECOMMENDATIONS")){
         $more = constant("MAX_TOTAL_RECOMMENDATIONS")-$reco_count;
         $random = $this->getRandomAuctions($connection,$more);
-        array_push($auctions,$random);
+        if (count($auctions)== 0){
+          $auctions = $random;
+        } else {
+          array_push($auctions,$random);
+        }
+        
       }
 
     return $auctions;

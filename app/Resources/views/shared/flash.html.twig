@@ -1,0 +1,48 @@
+{% if app.session.flashBag.has('success') %}
+    <div class="flash flash-success">
+        {% for msg in app.session.flashBag.get('success') %}
+          <div class="alert alert-danger alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            {{ msg }}
+        {% endfor %}
+    </div>
+{% endif %}
+{% if app.session.flashBag.has('info') %}
+    <div class="flash flash-info">
+        {% for msg in app.session.flashBag.get('info') %}
+          <div class="alert alert-info alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            {{ msg }}
+        {% endfor %}
+    </div>
+{% endif %}
+{% if app.session.flashBag.has('warning') %}
+    <div class="flash flash-warning">
+        {% for msg in app.session.flashBag.get('warning') %}
+          <div class="alert alert-warning alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            {{ msg }}
+        {% endfor %}
+    </div>
+{% endif %}
+{% if app.session.flashBag.has('danger') %}
+    <div class="flash flash-danger">
+        {% for msg in app.session.flashBag.get('danger') %}
+          <div class="alert alert-danger alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            {{ msg }}
+        {% endfor %}
+    </div>
+{% endif %}
