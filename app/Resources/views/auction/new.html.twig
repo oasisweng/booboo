@@ -41,31 +41,30 @@
             <div>
               {{ form_label(form.startAt) }}
               {{ form_errors(form.startAt) }}
-              <div class="form-group input-group">
-                <span class="input-group-addon"></span>
-                {{ form_widget(form.startAt) }}
+              <div class="input-group-custom form-group">
+              {{ form_widget(form.startAt) }}
               </div>
             </div>
-            <div class="form-group">
+            <div>
                  {{ form_label(form.endAt ) }}
                  {{ form_errors(form.endAt) }}
-                    <div class='input-group date'>
-                        {{ form_widget(form.endAt) }}
-                         <span class="input-group-addon">
-                             <span class="glyphicon glyphicon-calendar"></span>
-                         </span>
-                    </div>
+                <div class="input-group-custom form-group">
+                 {{ form_widget(form.endAt) }}
+             	</div>
              </div>
-             <div class="form-group">
+             <div>
               {{ form_label(form.reservedPrice) }}
               {{ form_errors(form.reservedPrice) }}
+               <div class="form-group">
                 {{ form_widget(form.reservedPrice) }}
-            
+            	</div>
              </div>
-             <div class="form-group">
+             <div>
               {{ form_label(form.startingBid) }}
               {{ form_errors(form.startingBid) }}
-                {{ form_widget(form.startingBid) }}
+              	<div class="form-group">
+                	{{ form_widget(form.startingBid) }}
+            	</div>
               </div>
 
               <div class="form-group">
