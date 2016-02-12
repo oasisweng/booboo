@@ -33,7 +33,7 @@ class BidController extends Controller {
         $auction = new Auction( $auctionEntity );
         $bid->auctionID = $auctionID;
         //get userID
-        $userID = 6;//will use session
+        $userID = 9;//will use session
         if ( !isset( $userID ) ) {
             //return to login page
             $this->addFlash(

@@ -2,11 +2,75 @@
 ##the fanciest online auction system
 
 ### Before start
+#####Composer
 Install [Composer](http://www.abeautifulsite.net/installing-composer-on-os-x/) for Mac OSX
 
 Install [Composer](https://getcomposer.org/download/) for Windows
 
+#####Bower
 Install [Bower](http://bower.io/)
+
+#####MySQL
+
+1. mysqladmin -u root -p password
+2. SET GLOBAL event_scheduler = ON;
+3. Enter the following code:
+
+```
+DELIMITER $$
+
+CREATE 
+  EVENT `end_auctions` 
+  ON SCHEDULE EVERY 5 MINUTE
+  DO BEGIN
+  
+    -- calculate winner and end auction
+    UPDATE
+      auction,
+      (
+      SELECT
+        bid.buyerID AS BuyerID,
+        bid.bidValue AS BidValue,
+        auction.id AS AuctionID
+      FROM
+        auction
+      INNER JOIN
+        bid ON bid.auctionID = auction.id
+      WHERE
+        auction.ended = 0 AND auction.endAt < NOW() AND bid.bidValue =(
+        SELECT
+          MAX(bid.bidValue)
+        FROM
+          bid
+        WHERE
+          bid.createdAt =(
+          SELECT
+            MIN(bid.createdAt)
+          FROM
+            bid
+          WHERE
+            bid.auctionID = auction.id
+        )
+      )
+      ORDER BY
+        bid.createdAt ASC
+      ) src
+      SET
+        auction.ended = 1,
+        auction.winnerID = src.BuyerID
+      WHERE
+        auction.id = src.AuctionID
+      
+  END */$$
+
+DELIMITER ;
+```
+
+4. to drop the event, run
+
+```
+DROP EVENT `end_auctions`
+```
 
 **Start the server:** `php app/console server:start`
 

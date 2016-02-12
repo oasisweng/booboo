@@ -13,9 +13,30 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        // replace this example code with whatever you need
+        
+        $connection = $this->get('db')->connect();
+        $hot_auctions = $this->get('db')->getHotAuctions($connection,10);
+        $expiring_auctions = $this->get('db')->getExpiringAuctions($connection,10);
+        $new_auctions = $this->get('db')->getNewAuctions($connection,10);
+        $recommended_auctions = $this->get('db')->getNewAuctions($connection,10);
+        echo "hot:";
+        var_dump($hot_auctions);
+        echo "<br/>";
+        echo "expiring87:";
+        var_dump($expiring_auctions);
+        echo "<br/>";
+         echo "new87:";
+        var_dump($new_auctions);
+        echo "<br/>";
+         echo "reco:";
+        var_dump($recommended_auctions);
+        echo "<br/>";
         return $this->render('default/index.html.twig', array(
             'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
+            'hot_auctions' => $hot_auctions,
+            'expiring_auctions' => $expiring_auctions,
+            'new_auctions' => $new_auctions,
+            'recommended_auctions' => $recommended_auctions
         ));
     }
 }

@@ -214,7 +214,7 @@ class DatabaseConnection {
   public function finishAuction( $connection, $auction ) {
     $id = mysqli_real_escape_string( $connection, $auction->id );
     //get two highest bid(sort by value DESC and time ASC)
-    $query = "SELECT * FROM bid WHERE ";
+    $query = "SELECT buyerID FROM bid WHERE ";
     $query .= "auctionID={$id} ";
     $query .= "ORDER BY bidValue DESC, createdAt ASC ";
     $query .= "LIMIT 1";
@@ -225,6 +225,225 @@ class DatabaseConnection {
     }
     $auction->ended = true;
     $this->updateAuction( $connection, $auction );
+  }
+
+  /*
+   * get hot auction, which are bidden the most, for homepage
+   * hot auction should not be expired
+   */
+  public function getHotAuctions($connection,$limit){
+    $auctions = [];
+
+    $query = "SELECT ";
+    $query .= "auction.id, ";
+    $query .= "item.imageURL ";
+    $query .= "FROM ";
+    $query .= "auction ";
+    $query .= "INNER JOIN ";
+    $query .= "(SELECT ";
+    $query .= "auctionID, ";
+    $query .= "COUNT(*) AS ct ";
+    $query .= "FROM ";
+    $query .= "bid ";
+    $query .= "GROUP BY ";
+    $query .= "bid.auctionID ";
+    $query .= "ORDER BY ";
+    $query .= "ct DESC ";
+    $query .= "LIMIT 10 ";
+    $query .= ") AS hot_bid ON hot_bid.auctionID = auction.id ";
+    $query .= "INNER JOIN ";
+    $query .= "item ON item.id = auction.itemID ";
+    $query .= "WHERE  ";
+    $query .= "auction.endAt>NOW() ";
+    $query .= "ORDER BY ";
+    $query .= "hot_bid.ct DESC ";
+    $query .= "LIMIT 10 ";
+
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    }else {
+      die( "Database query failed (expiring auction). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+  }
+
+  /*
+   * get new auction for homepage, defined by the date of creation
+   */
+  public function getNewAuctions($connection,$limit){
+    $auctions = [];
+
+    //get expiring auctions, ordered by how close they are to the end;
+    $query ="SELECT ";
+    $query .="auction.id, ";
+    $query .="item.imageURL ";
+    $query .="FROM ";
+    $query .="auction ";
+    $query .="INNER JOIN ";
+    $query .="item ON item.id = auction.itemID ";
+    $query .="WHERE ";
+    $query .="auction.endAt>NOW() ";
+    $query .="ORDER BY ";
+    $query .="auction.createdAt DESC ";
+    $query .="LIMIT 10 ";
+
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    }else {
+      die( "Database query failed (expiring auction). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+
+  }
+
+  /*
+   * get expiring auction for homepage
+   */
+  public function getExpiringAuctions($connection,$limit){
+    $auctions = [];
+
+    //get expiring auctions, ordered by how close they are to the end;
+    $query ="SELECT ";
+    $query .="auction.id, ";
+    $query .="item.imageURL ";
+    $query .="FROM ";
+    $query .="auction ";
+    $query .="INNER JOIN ";
+    $query .="item ON item.id = auction.itemID ";
+    $query .="WHERE ";
+    $query .="auction.endAt>NOW() ";
+    $query .="ORDER BY ";
+    $query .="auction.endAt ASC ";
+    $query .="LIMIT 10 ";
+
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    }else {
+      die( "Database query failed (expiring auction). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+  }
+
+  public function getRandomAuctions($connection,$limit){
+    $auctions = [];
+    $query = "SELECT COUNT(*) as ct FROM auction";
+    $result = mysqli_query($connection, $query);
+    if ($result){
+      //get count
+      $countEntry = mysqli_fetch_assoc($result);
+      $count = $countEntry["ct"];
+      //get random auctions
+      $rand_a = [];
+      for ($i=0;$i<$limit;$i++){
+        $rand_a[] = mt_rand(1,$count);
+      }
+      $rand_s = implode(",",$rand_a);
+
+      $query = "SELECT ";
+      $query .= "auction.id, ";
+      $query .= "item.imageURL ";
+      $query .= "FROM ";
+      $query .= "auction ";
+      $query .= "INNER JOIN ";
+      $query .= "item ON item.id = auction.itemID ";
+      $query .= "WHERE ";
+      $query .= "auction.id IN({$rand_s}); ";
+
+      $result = mysqli_query($connection,$query);
+      if ($result){
+        while ($row = mysqli_fetch_assoc($result)){
+          $auctions[] = $row;
+        }
+      }else {
+        die( "Database query failed (random auction). " . mysqli_error( $connection ) );
+      }
+    } else {
+      die( "Database query failed (random auction). " . mysqli_error( $connection ) );
+    }
+ 
+    return $auctions;
+  }
+
+  public function getRecommendedAuctions($connection,$userID){
+    //select all distinct categories user has bidded，ordered by number of categories
+    //if results are not adequate, it will further select hottest auctions
+    //in an attempt to attract user to bid them
+    define("MAX_TOTAL_RECOMMENDATIONS",10);
+    $query = "SELECT ";
+    $query .= "auction.id,";
+    $query .= "item.imageURL";
+    $query .= "FROM ";
+    $query .= "auction ";
+    $query .= "INNER JOIN ";
+    $query .= "item ON item.id = auction.itemID ";
+    $query .= "INNER JOIN ";
+    $query .= "( ";
+    $query .= "SELECT ";
+    $query .= "item.categoryID AS CategoryID, ";
+    $query .= "COUNT(item.id) AS Occurrence ";
+    $query .= "FROM ";
+    $query .= "item, ";
+    $query .= "( ";
+    $query .= "SELECT ";
+    $query .= "auction.itemID AS ItemID ";
+    $query .= "FROM ";
+    $query .= "auction, ";
+    $query .= "( ";
+    $query .= "SELECT DISTINCT ";
+    $query .= "bid.auctionID AS AuctionID ";
+    $query .= "FROM ";
+    $query .= "bid ";
+    $query .= "WHERE ";
+    $query .= "bid.buyerID = {$userID} ";
+    $query .= ") AS ab ";
+    $query .= "WHERE ";
+    $query .= "auction.id = ab.AuctionID ";
+    $query .= ") AS ai ";
+    $query .= "WHERE ";
+    $query .= "item.id = ai.ItemID ";
+    $query .= "GROUP BY ";
+    $query .= "item.categoryID ";
+    $query .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
+    $query .= "WHERE ";
+    $query .= "item.imageURL IS NOT NULL ";
+    $query .= "ORDER BY ";
+    $query .= "item_category.Occurrence DESC, ";
+    $query .= "auction.id DESC ";
+    $query .= "LIMIT 10; ";
+
+    $result = mysqli_query( $connection, $query );
+
+    $auctions = [];
+    //get reco auctions
+    if ( $result ) {
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (get recommended auction). " . mysqli_error( $connection ) );
+    }
+
+    //if reco auctions are not adequate, get random auctions
+    $reco_count = count($auctions);
+    if ($reco_count<=constant("MAX_TOTAL_RECOMMENDATIONS")){
+        $more = constant("MAX_TOTAL_RECOMMENDATIONS")-$reco_count;
+        $random = $this->getRandomAuctions($connection,$more);
+        array_push($auctions,$random);
+      }
+
+    return $auctions;
   }
 
   public function addBid( $connection, $bid ) {
@@ -284,14 +503,18 @@ class DatabaseConnection {
             //check if the bid is highest bid
             if ( $bid->id == $highestBid["id"] ) {
               //change current bid to the bid and winnerId to userId and return true and congrats
-              $auction->currentBid = $bid->bidValue;
+              if ($highestBid["bidValue"]>$secondHighestBid["bidValue"]+$auction->minBidIncrease){
+                $auction->currentBid = $secondHighestBid["bidValue"]+$auction->minBidIncrease;
+              } else {
+                $auction->currentBid = $highestBid["bidValue"];
+              }
               $auction->winnerID = $bid->buyerID;
               $this->updateAuction( $connection, $auction );
               return array( "status"=>true, "message"=>"Congratulations" );
             } else {
               // change current bid to the second highest bid and return false and report price outbid.
               $auction->currentBid = $secondHighestBid["bidValue"];
-              $auction->winnerID = $secondHighestBid["buyerID"];
+              $auction->winnerID = $highestBid["buyerID"];
               $this->updateAuction( $connection, $auction );
               return array( "status"=>false, "message"=>"Price outbid" );
             }
