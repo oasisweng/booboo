@@ -180,7 +180,7 @@ class AuctionController extends Controller {
                 'error',
                 'You can\'t bid on your auction.' );
         }
-        
+
         $bid->buyerID = $userID;
 
         $bidForm = $this->createForm( BidType::class, $bid );
@@ -198,8 +198,7 @@ class AuctionController extends Controller {
                     $response["message"]
                 );
 
-                return new JsonResponse($response);
-                //return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
+                return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             } else {
                 $this->addFlash(
                     'error',
