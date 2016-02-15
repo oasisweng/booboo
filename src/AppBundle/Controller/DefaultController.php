@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class DefaultController extends Controller
 {
@@ -13,7 +14,7 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        
+        $session = $request->getSession();        
         $connection = $this->get('db')->connect();
         $hot_auctions = $this->get('db')->getHotAuctions($connection,10);
         $expiring_auctions = $this->get('db')->getExpiringAuctions($connection,10);
@@ -24,7 +25,8 @@ class DefaultController extends Controller
             'hot_auctions' => $hot_auctions,
             'expiring_auctions' => $expiring_auctions,
             'new_auctions' => $new_auctions,
-            'recommended_auctions' => $recommended_auctions
+            'recommended_auctions' => $recommended_auctions,
+            'is_logged_in' => $session->get('userID')
         ));
     }
 }

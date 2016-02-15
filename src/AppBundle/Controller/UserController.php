@@ -43,6 +43,9 @@ class UserController extends Controller {
                     'New User created!'
                 );
 
+                $session = $request->getSession();
+                $session->set( 'userID', '{$userID}' );
+
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
                 $this->addFlash(
@@ -53,11 +56,19 @@ class UserController extends Controller {
             }
         }
 
-
         return $this->render(
             'user/new.html.twig',
             array( 'form' => $form->createView() )
         );
+    }
+
+     /**
+     * @Route("/logout", name="user_logout")
+     */
+    public function logoutAction( Request $request ) {
+        $session = $request->getSession();
+        $session->set( 'userID', null );
+        return $this->redirectToRoute( 'homepage' );
     }
 
     /**
@@ -66,6 +77,11 @@ class UserController extends Controller {
      * @Route("/login", name="user_login")
      */
     public function loginAction( Request $request ) {
+        $session = $request->getSession();
+        if ($session->get('userID')) {
+            return $this->redirectToRoute( 'homepage', array(), 301 );
+        }
+
         // 1) build the form
         $user = new User();
         $form = $this->createForm( LoginType::class, $user );
@@ -99,6 +115,7 @@ class UserController extends Controller {
             }
         }
 
+        $session = $request->getSession();
 
         return $this->render(
             'user/login.html.twig',
