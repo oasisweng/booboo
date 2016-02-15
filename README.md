@@ -90,6 +90,46 @@ Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'
 Place a bid | bid_bid | /auction/{auctionID}/bid | `{{ path('bid_bid', {'auctionID': 1}) }}`
 Search for auction | auction_search | /auctions/{page} | *Use Form* |
 
+###How to embed views in other views
+1. Embed bid form in auction's page
+
+Views: `bid/bid.html.twig` `auction/show.html.twig`
+
+Copy 
+
+```
+
+{{ include('bid/bid.html.twig', { 'bid_form': bid_form }) }}
+
+
+```
+ from `bid/bid.html.twig`and paste it somewhere in `auction/show.html.twig`
+ 
+ 
+ 
+ <mark>Please delete the example code wrapped in `div.delete-us`</mark>
+
+
+2. Embed auction list in user's profile
+Views: `auction/auction_row.html.twig` `user/show.html.twig`
+
+Follow the instruction in `auction/auction_row.html.twig`
+
+Copy i.e.
+
+```Symfony
+
+{% for auction in buyingArray %}
+{{ include('auction/auction.html.twig', { 'auction': auction }) }}
+{% endfor %}
+
+
+```
+
+from `auction/auction_row.html.twig` to `user/show.html.twig`
+
+ <mark>Please delete everything and write HTML code for rendering the row for each auction in `auction_row.html.twig`</mark>
+
 ### Assets(Images,JS,CSS)
 >Javascript and CSS files are combined in a unified file. Please refer to base.html.twig to see the update(within javascript and css block respectively).
 

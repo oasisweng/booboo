@@ -1,6 +1,7 @@
 
 <h1>Auction auction_row.html.twig</h1>
-<h2>Embed the following snippet in User/show.html.twig </h2>
+<h1>This view is called a <big>partial</big> </h1>
+<h2>Embed the following snippet in User/show.html.twig. </h2>
 {% for auction in buyingArray %}
 {{ include('auction/auction.html.twig', { 'auction': auction }) }}
 {% endfor %}
@@ -16,4 +17,4 @@
 
 
 
-<h3> Then, please write auction's view </h3>
+<h3> Then, please write HTML for this specific auction's row here </h3>
