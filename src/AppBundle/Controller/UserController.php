@@ -73,8 +73,6 @@ class UserController extends Controller {
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest( $request );
 
-
-
         if ( $form->isSubmitted() && $form->isValid() ) {
             // ... do any other work - like send them an email, etc
             // maybe set a "flash" success message for the user
@@ -88,6 +86,10 @@ class UserController extends Controller {
 
                 $session->set( 'userID', '{$id}' );
 
+                $redirectRoute = $request->get('redirectRoute'); 
+                if (isset($redirectRoute)){
+                    return $this->redirectToRoute( $redirectRoute, array(), 301 );    
+                }
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
                 $this->addFlash(

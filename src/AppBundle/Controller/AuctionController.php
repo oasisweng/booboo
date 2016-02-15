@@ -45,7 +45,7 @@ class AuctionController extends Controller {
 
         if ( $request->isXmlHttpRequest() ) {
             //return json
-            return new JsonResponse($searchResults);
+            return new JsonResponse(['result'=>$searchResults,'page'=>$page]);
         } else {
             //return page
             $totalPages = $searchResults["totalPages"];
@@ -71,9 +71,29 @@ class AuctionController extends Controller {
             return $this->render( 'auction/search.html.twig', array(
                 'totalPages' => $totalPages,
                 'auctions' => $auctions,
-                'items' => $items
+                'items' => $items,
+                'page' => $page
             ) );
         }
+    }
+
+    /**
+     *
+     *
+     * @Route("/user/{userID}/auctions", name="auction_list", requirements={"userID": "\d+"})
+     */
+    public function listAction($userID, Request $request){
+        //get buying
+        $buying = [];
+        //get selling
+        $selling = [];
+        //get bought
+        $bought = [];
+
+        return $this->render("auction/list.html.twig",array('buyingArray'=>$buying,
+                                                            'sellingArray'=>$selling,
+                                                            'boughtArray'=>$bought,
+                                                            'userID'=>$userID));
     }
 
     /**
@@ -139,11 +159,62 @@ class AuctionController extends Controller {
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 
+
+
+        //bid form
+        $bid = new Bid();
+        $bid->auctionID = $auctionID;
+        //get userID
+        $userID = 9;//will use session
+        if ( !isset( $userID ) ) {
+            //return to login page
+            $this->addFlash(
+                'error',
+                'You need to login first!'
+            );
+
+            return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get('_route') ), 301 );
+        } else if ( $userID == $auction->sellerID ) {
+            //return to auction page
+            $this->addFlash(
+                'error',
+                'You can\'t bid on your auction.' );
+        }
+        
+        $bid->buyerID = $userID;
+
+        $bidForm = $this->createForm( BidType::class, $bid );
+
+        $bidForm->handleRequest( $request );
+
+        if ( $form->isSubmitted() && $form->isValid() ) {
+
+            //attempt to bid
+            $response = $this->get( 'db' )->bid( $connection, $bid, $auction );
+
+            if ( $response["status"] ) {
+                $this->addFlash(
+                    'notice',
+                    $response["message"]
+                );
+
+                return new JsonResponse($response);
+                //return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
+            } else {
+                $this->addFlash(
+                    'error',
+                    $response["message"]
+                );
+            }
+
+        }
+
         $params = array( "auction"=>$auction,
             "ended"=>$ended,
             "bidded"=>$bidded,
             "won"=>$won,
-            "winning"=>$winning );
+            "winning"=>$winning,
+            'bid_form' => $bidForm->createView(), );
 
         return $this->render( 'auction/show.html.twig',
             $params );
