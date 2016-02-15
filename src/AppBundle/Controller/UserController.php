@@ -44,7 +44,7 @@ class UserController extends Controller {
                 );
 
                 $session = $request->getSession();
-                $session->set( 'userID', '{$userID}' );
+                $session->set( 'userID', "{$userID}" );
 
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
@@ -100,7 +100,7 @@ class UserController extends Controller {
                 );
                 $session = $request->getSession();
 
-                $session->set( 'userID', '{$id}' );
+                $session->set( 'userID', "{$id}" );
 
                 $redirectRoute = $request->get('redirectRoute'); 
                 if (isset($redirectRoute)){
@@ -119,7 +119,7 @@ class UserController extends Controller {
 
         return $this->render(
             'user/login.html.twig',
-            array( 'form' => $form->createView() )
+            array( 'form' => $form->createView(),  'is_logged_in' => $session->get('userID') )
         );
     }
 
@@ -128,10 +128,16 @@ class UserController extends Controller {
      *
      * @Route("/user/{userID}", name="user_show", requirements={"userID": "\d+"})
      */
-    public function showAction( $userID ) {
+    public function showAction( Request $request ) {
+        //passing through entire session as parameter instead of just userID
+        //entire session required to check whether user is 'LOGGED IN' or 'NOT LOGGED IN'
+        $userID = $request->attributes->get('userID');
         $con = $this->get( "db" )->connect();
         $user = $this->get( "db" )->selectOne( $con, 'user', $userID );
-        var_dump( $user );
+
+        if (!$user) {
+            return $this->redirectToRoute('homepage');
+        }
 
         //get buying auctions
         $buying = [];
@@ -140,10 +146,14 @@ class UserController extends Controller {
         //get bought
         $bought = [];
 
+        $session = $request->getSession();
+
+
         return $this->render("user/show.html.twig",array('buyingArray'=>$buying,
                                                             'sellingArray'=>$selling,
                                                             'boughtArray'=>$bought,
-                                                            "user"=>$user ));
+                                                            "user"=>$user,
+                                                            'owner' => ($userID == $session->get('userID'))));
 
     }
 

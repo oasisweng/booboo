@@ -253,8 +253,8 @@ class DatabaseConnection {
     $query .= ") AS hot_bid ON hot_bid.auctionID = auction.id ";
     $query .= "INNER JOIN ";
     $query .= "item ON item.id = auction.itemID ";
-    $query .= "WHERE  ";
-    $query .= "auction.endAt>NOW() ";
+//    $query .= "WHERE  ";
+//    $query .= "auction.endAt>NOW() ";
     $query .= "ORDER BY ";
     $query .= "hot_bid.ct DESC ";
     $query .= "LIMIT 10 ";

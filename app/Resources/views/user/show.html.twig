@@ -1,5 +1,10 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>User show.html.twig</h1>
+	{% if owner %}
+    <h1>User show.html.twig user is owner</h1>
+    {% else %}
+    <h1> user is not owner of profile page </h1>
+    {% endif %}
+
 {% endblock %}
