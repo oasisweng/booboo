@@ -550,9 +550,9 @@ class DatabaseConnection {
           $auction->currentBid = $auction->startingBid;
           $auction->winnerID = $bid->buyerID;
           $this->updateAuction( $connection, $auction );
-          return array( "status"=>true, "message"=>"Congratulations" );
+          return array( "status"=>"ok", "message"=>"Congratulations" );
         } else {
-          return array( "status"=>false, "message"=>"Unable to get records" );
+          return array( "status"=>"fail", "message"=>"Unable to get records" );
         }
       } else {
         //check if bid is higher than currentBid+minInc
@@ -570,7 +570,7 @@ class DatabaseConnection {
             $secondHighestBid = mysqli_fetch_assoc( $result );
             if ( is_null( $highestBid ) || is_null( $secondHighestBid ) ) {
               //return server error
-              return array( "status"=>false, "message"=>"Unable to get records" );
+              return array( "status"=>"fail", "message"=>"Unable to get records" );
             }
             //check if the bid is highest bid
             if ( $bid->id == $highestBid["id"] ) {
@@ -582,28 +582,34 @@ class DatabaseConnection {
               }
               $auction->winnerID = $bid->buyerID;
               $this->updateAuction( $connection, $auction );
-              return array( "status"=>true, "message"=>"Congratulations" );
+              //send second person an email notification for being outbid if second person is not also the buyer
+              if ($bid->buyerID != $secondHighestBid["buyerID"]){
+                return array( "status"=>"ok", "message"=>"Congratulations","second_buyerID"=>$secondHighestBid["buyerID"]);
+              } else {
+                return array( "status"=>"ok", "message"=>"Congratulations" );
+              }
+              
             } else {
               // change current bid to the second highest bid and return false and report price outbid.
               $auction->currentBid = $secondHighestBid["bidValue"];
               $auction->winnerID = $highestBid["buyerID"];
               $this->updateAuction( $connection, $auction );
-              return array( "status"=>false, "message"=>"Price outbid" );
+              return array( "status"=>"fail", "message"=>"Price outbid" );
             }
 
           } else {
             //return server error
-            return array( "status"=>false, "message"=>"Unable to save records" );
+            return array( "status"=>"fail", "message"=>"Unable to save records" );
           }
         } else {
           //return false and report price too low
-          return array( "status"=>false, "message"=>"Price too low" );
+          return array( "status"=>"fail", "message"=>"Price too low" );
         }
 
       }
     } else {
       //return false and report auction is over.
-      return array( "status"=>false, "message"=>"Auction is over" );
+      return array( "status"=>"fail", "message"=>"Auction is over" );
     }
   }
 

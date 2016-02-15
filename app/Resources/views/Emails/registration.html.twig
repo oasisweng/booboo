@@ -1,0 +1,8 @@
+<h3>{{ name }}, you did it! You are registered!</h3>
+
+To login, go to our <a href="{{ url('user_login') }}">login page</a>.
+
+Thanks!
+
+{# Makes an absolute URL to the /images/logo.png file #}
+<img src="{{ absolute_url(asset('images/logo.png')) }}">

@@ -39,17 +39,35 @@ class UserController extends Controller {
 
             if ( $userID = $this->get( 'db' )->addUser( $user ) ) {
                 $this->addFlash(
-                    'notice',
-                    'New User created!'
+                    'success',
+                    'We sent you an welcome email!'
                 );
+
+
+                //send notification email on successful registration
+                $name = $user->name;
+                $email = $user->email;
+                //send email
+                $message = \Swift_Message::newInstance()
+                ->setSubject( 'Welcome to Booboo Auction!' )
+                ->setFrom( 'boobooauction@gmail.com' )
+                ->setTo( $email )
+                ->setBody(
+                    $this->renderView(
+                        'Emails/registration.html.twig',
+                        array( 'name' => $name )
+                    ),
+                    'text/html'
+                );
+                $this->get( 'mailer' )->send( $message );
 
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
                 $this->addFlash(
-                    'error',
+                    'danger',
                     'Creating user went wrong! UserController.php'
                 );
-                die("failed to add user");
+                die( "failed to add user" );
             }
         }
 
@@ -79,22 +97,22 @@ class UserController extends Controller {
 
             if ( $id = $this->get( 'db' )->login( $user ) ) {
                 $this->addFlash(
-                    'notice',
+                    'success',
                     'Log in!'
                 );
                 $session = $request->getSession();
 
-                $session->set( 'userID', '{$id}' );
+                $session->set( 'userID', $id );
 
-                $redirectRoute = $request->get('redirectRoute'); 
-                if (isset($redirectRoute)){
-                    return $this->redirectToRoute( $redirectRoute, array(), 301 );    
+                $redirectRoute = $request->get( 'redirectRoute' );
+                if ( isset( $redirectRoute ) ) {
+                    return $this->redirectToRoute( $redirectRoute, array(), 301 );
                 }
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
                 $this->addFlash(
-                    'error',
-                    'Login failed! UserController.php'
+                    'warning',
+                    'You have entered wrong username/password!'
                 );
             }
         }
@@ -123,10 +141,10 @@ class UserController extends Controller {
         //get bought
         $bought = [];
 
-        return $this->render("user/show.html.twig",array('buyingArray'=>$buying,
-                                                            'sellingArray'=>$selling,
-                                                            'boughtArray'=>$bought,
-                                                            "user"=>$user ));
+        return $this->render( "user/show.html.twig", array( 'buyingArray'=>$buying,
+                'sellingArray'=>$selling,
+                'boughtArray'=>$bought,
+                "user"=>$user ) );
 
     }
 
@@ -150,15 +168,15 @@ class UserController extends Controller {
 
                 if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
                     $this->addFlash(
-                        'notice',
+                        'success',
                         'User {$userID} password reset!'
                     );
 
                     return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
                 } else {
                     $this->addFlash(
-                        'error',
-                        'Resetting user went wrong! UserController.php'
+                        'warning',
+                        'Failed to reset password!'
                     );
 
                 }
@@ -174,13 +192,13 @@ class UserController extends Controller {
                 );
             }
         } else {
-                $this->addFlash(
-                    'error',
-                    'The user selected does not exist!'
-                );
+            $this->addFlash(
+                'danger',
+                'The user selected does not exist!'
+            );
 
-                return $this->redirectToRoute( 'homepage' );
-            }
+            return $this->redirectToRoute( 'homepage' );
+        }
 
     }
 }

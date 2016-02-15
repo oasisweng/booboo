@@ -24,7 +24,7 @@ class AuctionController extends Controller {
      */
     public function searchAction( $page, Request $request ) {
         //page cannot be zero
-        if ($page == 0){
+        if ( $page == 0 ) {
             $this->addFlash(
                 'warning',
                 'Page number cannot be zero!'
@@ -34,7 +34,7 @@ class AuctionController extends Controller {
         }
         //get data
         //remove leading and trailing whitespace for keywords
-        $keywords_s = ltrim( rtrim( $request->get( 'keywords','' ) ) );
+        $keywords_s = ltrim( rtrim( $request->get( 'keywords', '' ) ) );
         $keywords_a = [];
         if ( strlen( $keywords_s )>0 ) {
             $keywords_a = explode( ' ', $keywords_s );
@@ -45,7 +45,7 @@ class AuctionController extends Controller {
 
         if ( $request->isXmlHttpRequest() ) {
             //return json
-            return new JsonResponse(['result'=>$searchResults,'page'=>$page]);
+            return new JsonResponse( ['result'=>$searchResults, 'page'=>$page] );
         } else {
             //return page
             $totalPages = $searchResults["totalPages"];
@@ -59,21 +59,21 @@ class AuctionController extends Controller {
                 return $this->redirectToRoute( 'homepage' );
             }
             echo $totalPages;
-            $this->get('dump')->d($searchResults);
+            $this->get( 'dump' )->d( $searchResults );
             $auctions = [];
             $items= [];
             foreach ( $searchResults["auctions"] as $auctionEntry ) {
                 $auctions[] = new Auction( $auctionEntry );
                 $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
-                $items[] = new Item($itemEntry);
+                $items[] = new Item( $itemEntry );
             }
 
             return $this->render( 'auction/search.html.twig', array(
-                'totalPages' => $totalPages,
-                'auctions' => $auctions,
-                'items' => $items,
-                'page' => $page
-            ) );
+                    'totalPages' => $totalPages,
+                    'auctions' => $auctions,
+                    'items' => $items,
+                    'page' => $page
+                ) );
         }
     }
 
@@ -119,12 +119,12 @@ class AuctionController extends Controller {
      *
      * @Route("/auction/{auctionID}", name="auction_show", requirements={"auctionID": "\d+"})
      */
-    public function showAction( $auctionID ) {
+    public function showAction( $auctionID, Request $request ) {
         $connection = $this->get( "db" )->connect();
         $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
         $auction = new Auction( $auctionEntry );
         $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
-        $item = new Item($itemEntry);
+        $item = new Item( $itemEntry );
 
         //if should finish auction through this way
         if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
@@ -140,8 +140,6 @@ class AuctionController extends Controller {
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 
-
-
         //bid form
         $bid = new Bid();
         $bid->auctionID = $auctionID;
@@ -154,13 +152,13 @@ class AuctionController extends Controller {
                 'You need to login first!'
             );
 
-            return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get('_route') ), 301 );
+            return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
         } else if ( $userID == $auction->sellerID ) {
-            //return to auction page
-            $this->addFlash(
-                'error',
-                'You can\'t bid on your auction.' );
-        }
+                //return to auction page
+                $this->addFlash(
+                    'error',
+                    'You can\'t bid on your auction.' );
+            }
 
         $bid->buyerID = $userID;
 
@@ -178,6 +176,29 @@ class AuctionController extends Controller {
                     'notice',
                     $response["message"]
                 );
+                //get the user who has been outbid, send an email
+                if (!is_null($response["second_buyerID"])){
+                    //if someone has been outbid and its not current buyer, get user name
+                    $userEntry = $this->get('db')->selectOne($connection,"user",$response["second_buyerID"]);
+                    $name = $userEntry["name"];
+                    $email = $userEntry["email"];
+                     //send email
+                $message = \Swift_Message::newInstance()
+                ->setSubject( 'You are outbid!' )
+                ->setFrom( 'boobooauction@gmail.com' )
+                ->setTo( $email )
+                ->setBody(
+                    $this->renderView(
+                        'Emails/outbid.html.twig',
+                        array( 'name' => $name,
+                        'auctionID'=>$auctionID)
+                    ),
+                    'text/html'
+                );
+                $this->get( 'mailer' )->send( $message );
+                }
+
+               
 
                 return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             } else {
