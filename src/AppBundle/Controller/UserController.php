@@ -115,7 +115,19 @@ class UserController extends Controller {
         $con = $this->get( "db" )->connect();
         $user = $this->get( "db" )->selectOne( $con, 'user', $userID );
         var_dump( $user );
-        return $this->render( 'user/show.html.twig', array( "user"=>$user ) );
+
+        //get buying auctions
+        $buying = [];
+        //get selling
+        $selling = [];
+        //get bought
+        $bought = [];
+
+        return $this->render("auction/list.html.twig",array('buyingArray'=>$buying,
+                                                            'sellingArray'=>$selling,
+                                                            'boughtArray'=>$bought,
+                                                            "user"=>$user ));
+
     }
 
     /**
