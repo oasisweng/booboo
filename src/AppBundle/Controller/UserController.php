@@ -43,7 +43,6 @@ class UserController extends Controller {
                     'We sent you an welcome email!'
                 );
 
-
                 //send notification email on successful registration
                 $name = $user->name;
                 $email = $user->email;
@@ -61,6 +60,9 @@ class UserController extends Controller {
                 );
                 $this->get( 'mailer' )->send( $message );
 
+                $session = $request->getSession();
+                $session->set( 'userID', $userID );
+
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
                 $this->addFlash(
@@ -71,11 +73,19 @@ class UserController extends Controller {
             }
         }
 
-
         return $this->render(
             'user/new.html.twig',
             array( 'form' => $form->createView() )
         );
+    }
+
+     /**
+     * @Route("/logout", name="user_logout")
+     */
+    public function logoutAction( Request $request ) {
+        $session = $request->getSession();
+        $session->set( 'userID', null );
+        return $this->redirectToRoute( 'homepage' );
     }
 
     /**
@@ -84,6 +94,11 @@ class UserController extends Controller {
      * @Route("/login", name="user_login")
      */
     public function loginAction( Request $request ) {
+        $session = $request->getSession();
+        if ($session->get('userID')) {
+            return $this->redirectToRoute( 'homepage', array(), 301 );
+        }
+
         // 1) build the form
         $user = new User();
         $form = $this->createForm( LoginType::class, $user );
@@ -117,6 +132,7 @@ class UserController extends Controller {
             }
         }
 
+        $session = $request->getSession();
 
         return $this->render(
             'user/login.html.twig',

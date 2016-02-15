@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}COMP3013 Group 3{% endblock %}</title>
+        {% block stylesheets %}
+            {% stylesheets 'assets/css/*' filter='cssrewrite' %}
+                <link rel="stylesheet" href="{{ asset_url }}" />
+            {% endstylesheets %}
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet"
+            href="{{asset('assets/vendor/bootstrap/dist/css/main.css') }}">
+
+        <link rel="stylesheet"
+            href="{{ asset('assets/vendor/bootstrap/dist/css/bootstrap.min.css') }}">
+        <!-- Scripts -->
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.dropotron.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/skel.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/skel-viewport.min.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/util.js')}}"></script>
+        <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/main.js')}}"></script>
+        <script src="{{asset('assets/vendor/bootstrap/dist/js/bootstrap.js')}}"></script>
+    </head>
+
+    <body>
+        {% block body %}{% endblock %}
+        {% block javascripts %}
+            {% javascripts 'assets/js/*' %}
+                <script src="{{ asset_url }}"></script>
+            {% endjavascripts %}
+        {% endblock %}
+    </body>
+</html>
