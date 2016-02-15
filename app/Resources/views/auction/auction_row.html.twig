@@ -1,0 +1,19 @@
+
+<h1>Auction auction_row.html.twig</h1>
+<h2>Embed the following snippet in User/show.html.twig </h2>
+{% for auction in buyingArray %}
+{{ include('auction/auction.html.twig', { 'auction': auction }) }}
+{% endfor %}
+
+{% for auction in sellingArray %}
+{{ include('auction/auction.html.twig', { 'auction': auction }) }}
+{% endfor %}
+
+
+{% for auction in boughtArray %}
+{{ include('auction/auction.html.twig', { 'auction': auction }) }}
+{% endfor %}
+
+
+
+<h3> Then, please write auction's view </h3>
