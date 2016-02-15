@@ -1,0 +1,6 @@
+
+<h1>Auction auction.html.twig</h1>
+<h2>Embed the following snippet in User/show.html.twig </h2>
+ {% for auction in buyingArray %}
+{{ include('auction/auction.html.twig', { 'auction': auction }) }}
+{% endfor %}

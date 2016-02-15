@@ -80,25 +80,6 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userID}/auctions", name="auction_list", requirements={"userID": "\d+"})
-     */
-    public function listAction($userID, Request $request){
-        //get buying
-        $buying = [];
-        //get selling
-        $selling = [];
-        //get bought
-        $bought = [];
-
-        return $this->render("auction/list.html.twig",array('buyingArray'=>$buying,
-                                                            'sellingArray'=>$selling,
-                                                            'boughtArray'=>$bought,
-                                                            'userID'=>$userID));
-    }
-
-    /**
-     *
-     *
      * @Route("/user/{userID}/auction/new", name="auction_new", requirements={"userID": "\d+"})
      */
     public function newAction( $userID, Request $request ) {
