@@ -123,7 +123,7 @@ class UserController extends Controller {
         //get bought
         $bought = [];
 
-        return $this->render("auction/list.html.twig",array('buyingArray'=>$buying,
+        return $this->render("user/show.html.twig",array('buyingArray'=>$buying,
                                                             'sellingArray'=>$selling,
                                                             'boughtArray'=>$bought,
                                                             "user"=>$user ));
