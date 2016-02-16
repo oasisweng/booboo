@@ -89,6 +89,7 @@ Edit an auction | auction_edit  | /auction/{auctionID}/edit | `{{ path('auction_
 Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}`  
 Place a bid | bid_bid | /auction/{auctionID}/bid | `{{ path('bid_bid', {'auctionID': 1}) }}`
 Search for auction | auction_search | /auctions/{page} | *Use Form* |
+Leave an feedback | feedback_new | /feedback/{auctionID} | `{{ path('feedback_new', {'auctionID': 1}) }}`
 
 ###How to embed views in other views
 1. Embed bid form in auction's page
@@ -129,6 +130,12 @@ Copy i.e.
 from `auction/auction_row.html.twig` to `user/show.html.twig`
 
  <mark>Please delete everything and write HTML code for rendering the row for each auction in `auction_row.html.twig`</mark>
+
+
+###Feedback
+This feature consists of two steps.
+First of all, in user's profile page, only for bought and sold item, you should check if, i.e, bought["canFeedback"] is true, and display an feedback button
+Secondly, when user clicks on feedback button, it should take user to /feedback/{auctionID}. This page will show basic information about the auction and a feedback form. Upon submission, it will redirect user back to his/her profile page.
 
 ### Assets(Images,JS,CSS)
 >Javascript and CSS files are combined in a unified file. Please refer to base.html.twig to see the update(within javascript and css block respectively).
