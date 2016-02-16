@@ -398,6 +398,27 @@ class DatabaseConnection {
     return $auctions;
   }
 
+  public function getSoldAuctions($connection,$userID){
+    $query = "SELECT * FROM ";
+    $query .= "auction ";
+    $query .= "WHERE ";
+    $query .= "sellerID = {$userID} ";
+    $query .= "AND ended=1";
+
+    $result = mysqli_query($connection,$query);
+
+    $auctions = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (getSoldAuctions). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+  }
+
   /*
    * get new auction for homepage, defined by the date of creation
    */
@@ -814,7 +835,7 @@ class DatabaseConnection {
 
     $result = mysqli_query($connection,$query);
     if ($result){
-      $canFeedback = mysqli_fetch_assoc($result));
+      $canFeedback = mysqli_fetch_assoc($result);
       return $canFeedback["CanFeedback"];
     } else {
       die( "Database query failed (canFeedback). " . mysqli_error( $connection ) );
@@ -823,9 +844,14 @@ class DatabaseConnection {
 
   } 
   
+  /*
+   * @return ["status" : can be success, warning, danger, info, 
+   *          "reason": reason of failure, 
+   *          "id": the generated id of a new feedback]
+   */
   public function feedback($connection,$giverID,$receiverID,$auctionID,$rating,$comment){
     //double check if one can leave feedback
-    $canFeedback = $this->canFeedback($connection,$giverID,$receiverID,$auctionID)
+    $canFeedback = $this->canFeedback($connection,$giverID,$receiverID,$auctionID);
     if ($canFeedback["status"]=="success"){
       $query = "INSERT INTO feedback (giverID,receiverID,rating,comment,auctionID) ";
       $query .= "VALUES ({$giverID},{$receiverID},{$rating},{$comment},{$auctionID})";
@@ -833,14 +859,14 @@ class DatabaseConnection {
       $result = mysqli_query( $connection, $query );
       if ( $result ) {
         $id =  mysqli_insert_id( $connection );
-        return ["status":"success","feedback_id":$id];
+        return array("status"=>"success","feedback_id"=>$id);
       } else {
         die( "Database query failed (feedback). " . mysqli_error( $connection ) );
         return false;
       }
     } else {
       //TODO: next version, it will check why feedback failed
-      return ["status":"warning","reason":"You can't leave this feedback."];
+      return array("status"=>"warning","reason"=>"You can't leave this feedback.");
     }
   }
 
@@ -849,7 +875,7 @@ class DatabaseConnection {
    * @return: average rating for this user and total number of feedbacks received.
    */
   public function getAverageRating($connection,$userID){
-    $query = "SELECT AVG(ratings) AS Rating, COUNT(*) AS NumOfFeedbacks ";
+    $query = "SELECT AVG(rating) AS AvgRating, COUNT(*) AS NumOfFeedbacks ";
     $query .= "FROM feedback ";
     $query .= "WHERE receiverID={$userID} ";
 
