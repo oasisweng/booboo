@@ -17,6 +17,7 @@ use AppBundle\Form\Type\UpdateProfileType;
 use AppBundle\Form\Type\ChangePasswordType;
 use AppBundle\Form\Type\LoginType;
 use AppBundle\Entity\User;
+use AppBundle\Entity\Auction;
 
 
 class UserController extends Controller {
@@ -151,8 +152,8 @@ class UserController extends Controller {
     public function showAction( $userID, Request $request ) {
         //passing through entire session as parameter instead of just userID
         //entire session required to check whether user is 'LOGGED IN' or 'NOT LOGGED IN'
-        $con = $this->get( "db" )->connect();
-        $userEntry = $this->get( "db" )->selectOne( $con, 'user', $userID );
+        $connection = $this->get( "db" )->connect();
+        $userEntry = $this->get( "db" )->selectOne( $connection, 'user', $userID );
         $user = new User( $userEntry );
 
         if ( !$user ) {
@@ -160,17 +161,37 @@ class UserController extends Controller {
         }
 
         $session = $request->getSession();
-        $owner = $session->get( 'userID' );
+        //check if current user owns this profile
+        $owner = $session->get( 'userID' ) == $userID ;
 
-        if ( $owner == $userID ) {
+        if ( $owner ) {
             //if current user profile page belongs to current logged-in user, get detailed information
 
             //get buying auctions
+            $buyingEntries = $this->get('db')->getBuyingAuctions($connection,$userID);
             $buying = [];
+            foreach ($buyingEntries as $buyingEntry){
+                if ($buyingEntry){
+                    $buying[] = new Auction($buyingEntry);    
+                }
+            }
             //get selling
+            $sellingEntries = $this->get('db')->getSellingAuctions($connection,$userID);
             $selling = [];
+            foreach ($sellingEntries as $sellingEntry){
+                if ($sellingEntry){
+                    $selling[] = new Auction($sellingEntry);    
+                }
+            }
             //get bought
+            $boughtEntries = $this->get('db')->getBoughtAuctions($connection,$userID);
             $bought = [];
+            foreach ($boughtEntries as $boughtEntry){
+                if ($boughtEntry){
+                    $bought[] = new Auction($boughtEntry);    
+                }
+            }
+
             return $this->render( "user/show.html.twig", array( 'buyingArray'=>$buying,
                     'sellingArray'=>$selling,
                     'boughtArray'=>$bought,
@@ -179,7 +200,14 @@ class UserController extends Controller {
         } else {
             //if current user profile page is other people's, get only selling array
             //get selling
+            $sellingEntries = $this->get('db')->getSellingAuctions($connection,$userID);
             $selling = [];
+            foreach ($sellingEntries as $sellingEntry){
+                if ($sellingEntry){
+                    $selling[] = new Auction($sellingEntry);    
+                }
+            }
+
             return $this->render( "user/show.html.twig", array( 'sellingArray'=>$selling,
                     "user"=>$user,
                     'owner' => $owner ) );

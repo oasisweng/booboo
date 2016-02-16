@@ -332,15 +332,65 @@ class DatabaseConnection {
   }
 
   public function getBuyingAuctions($connection,$userID){
+    $query = "SELECT auction.* FROM ";
+    $query .= "auction ";
+    $query .= "INNER JOIN ";
+    $query .= "bid ON auction.id = bid.auctionID ";
+    $query .= "WHERE ";
+    $query .= "bid.buyerID = {$userID} ";
 
+    $result = mysqli_query($connection,$query);
+
+    $auctions = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (getBuyingAuctions). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
   }
 
   public function getSellingAuctions($connection,$userID){
+    $query = "SELECT * FROM ";
+    $query .= "auction ";
+    $query .= "WHERE ";
+    $query .= "sellerID = {$userID} ";
 
+    $result = mysqli_query($connection,$query);
+
+    $auctions = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (getBuyingAuctions). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
   }
 
   public function getBoughtAuctions($connection,$userID){
+    $query = "SELECT * FROM ";
+    $query .= "auction ";
+    $query .= "WHERE ";
+    $query .= "winnerID = {$userID} ";
 
+    $result = mysqli_query($connection,$query);
+
+    $auctions = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (getBuyingAuctions). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
   }
 
   /*
