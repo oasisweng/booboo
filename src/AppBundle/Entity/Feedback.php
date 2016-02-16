@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Feedback {
 
-    public $$id;
+    public $id;
 
     public $auctionID;
 

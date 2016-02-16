@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Feedback new.html.twig</h1>
+    
+    <div> Auction {{ auction.id }}</div>
+    {{ form_start(form) }}
+    {{ form_errors(form) }}
+    {{ form_end(form) }}
+
+{% endblock %}
+

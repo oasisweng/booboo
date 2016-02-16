@@ -823,7 +823,7 @@ class DatabaseConnection {
    */
   public function canFeedback($connection,$giverID,$receiverID,$auctionID){
     $query = "SELECT ";
-    $query .= "(CASE WHEN {$giverID} <> {$receiverID} THEN 0 ELSE 1 END) AS CanFeedback ";
+    $query .= "(CASE WHEN {$giverID} <> {$receiverID} THEN 1 ELSE 0 END) AS CanFeedback ";
     $query .= "FROM auction WHERE ";
     $query .= "auction.id = {$auctionID} AND auction.ended = 1 AND NOT EXISTS( ";
     $query .= "SELECT * FROM feedback WHERE ";
@@ -849,7 +849,12 @@ class DatabaseConnection {
    *          "reason": reason of failure, 
    *          "id": the generated id of a new feedback]
    */
-  public function feedback($connection,$giverID,$receiverID,$auctionID,$rating,$comment){
+  public function feedback($connection,$feedback){
+    $giverID=$feedback["giverID"];
+    $receiverID=$feedback["receiverID"];
+    $auctionID=$feedback["auctionID"];
+    $rating=$feedback["rating"];
+    $comment=$feedback["comment"];
     //double check if one can leave feedback
     $canFeedback = $this->canFeedback($connection,$giverID,$receiverID,$auctionID);
     if ($canFeedback["status"]=="success"){
@@ -866,7 +871,7 @@ class DatabaseConnection {
       }
     } else {
       //TODO: next version, it will check why feedback failed
-      return array("status"=>"warning","reason"=>"You can't leave this feedback.");
+      return array("status"=>"warning","reason"=>"You can't leave feedback for this auction.");
     }
   }
 
