@@ -137,13 +137,21 @@ class AuctionController extends Controller {
         //get userID, or null if not logged in
         $session = $request->getSession();   
         $userID = $session->get('userID');
-        
+
         $ended = $auction->ended;
-        //placed a bid
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 
+        //get all bids for this auction
+        $bidEntries = $this->get('db')->getAllBids($connection,$auctionID);
+        //$this->get('dump')->d($bidEntries);
+        $bids = [];
+        foreach ($bidEntries as $bidEntry){
+            if ($bidEntry){
+                $bids[] = new Bid($bidEntry);    
+            }
+        }
 
         //bid form
         $bid = new Bid();
@@ -223,7 +231,8 @@ class AuctionController extends Controller {
             "bidded"=>$bidded,
             "won"=>$won,
             "winning"=>$winning,
-            'bid_form' => $bidForm->createView() );
+            "bid_form" => $bidForm->createView(),
+            "bids" => $bids );
 
         return $this->render( 'auction/show.html.twig',
             $params );

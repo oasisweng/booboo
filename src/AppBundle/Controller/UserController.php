@@ -79,7 +79,9 @@ class UserController extends Controller {
         );
     }
 
-     /**
+    /**
+     *
+     *
      * @Route("/logout", name="user_logout")
      */
     public function logoutAction( Request $request ) {
@@ -95,7 +97,7 @@ class UserController extends Controller {
      */
     public function loginAction( Request $request ) {
         $session = $request->getSession();
-        if ($session->get('userID')) {
+        if ( $session->get( 'userID' ) ) {
             return $this->redirectToRoute( 'homepage', array(), 301 );
         }
 
@@ -119,6 +121,7 @@ class UserController extends Controller {
 
                 $session->set( 'userID', $id );
 
+
                 $redirectRoute = $request->get( 'redirectRoute' );
                 if ( isset( $redirectRoute ) ) {
                     return $this->redirectToRoute( $redirectRoute, array(), 301 );
@@ -136,7 +139,7 @@ class UserController extends Controller {
 
         return $this->render(
             'user/login.html.twig',
-            array( 'form' => $form->createView() )
+            array( 'form' => $form->createView(),  'is_logged_in' => $session->get( 'userID' ) )
         );
     }
 
@@ -145,22 +148,42 @@ class UserController extends Controller {
      *
      * @Route("/user/{userID}", name="user_show", requirements={"userID": "\d+"})
      */
-    public function showAction( $userID ) {
+    public function showAction( $userID, Request $request ) {
+        //passing through entire session as parameter instead of just userID
+        //entire session required to check whether user is 'LOGGED IN' or 'NOT LOGGED IN'
         $con = $this->get( "db" )->connect();
-        $user = $this->get( "db" )->selectOne( $con, 'user', $userID );
-        var_dump( $user );
+        $userEntry = $this->get( "db" )->selectOne( $con, 'user', $userID );
+        $user = new User( $userEntry );
 
-        //get buying auctions
-        $buying = [];
-        //get selling
-        $selling = [];
-        //get bought
-        $bought = [];
+        if ( !$user ) {
+            return $this->redirectToRoute( 'homepage' );
+        }
 
-        return $this->render( "user/show.html.twig", array( 'buyingArray'=>$buying,
-                'sellingArray'=>$selling,
-                'boughtArray'=>$bought,
-                "user"=>$user ) );
+        $session = $request->getSession();
+        $owner = $session->get( 'userID' );
+
+        if ( $owner == $userID ) {
+            //if current user profile page belongs to current logged-in user, get detailed information
+
+            //get buying auctions
+            $buying = [];
+            //get selling
+            $selling = [];
+            //get bought
+            $bought = [];
+            return $this->render( "user/show.html.twig", array( 'buyingArray'=>$buying,
+                    'sellingArray'=>$selling,
+                    'boughtArray'=>$bought,
+                    "user"=>$user,
+                    'owner' => $owner ) );
+        } else {
+            //if current user profile page is other people's, get only selling array
+            //get selling
+            $selling = [];
+            return $this->render( "user/show.html.twig", array( 'sellingArray'=>$selling,
+                    "user"=>$user,
+                    'owner' => $owner ) );
+        }
 
     }
 

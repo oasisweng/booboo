@@ -253,8 +253,8 @@ class DatabaseConnection {
     $query .= ") AS hot_bid ON hot_bid.auctionID = auction.id ";
     $query .= "INNER JOIN ";
     $query .= "item ON item.id = auction.itemID ";
-    $query .= "WHERE  ";
-    $query .= "auction.endAt>NOW() ";
+//    $query .= "WHERE  ";
+//    $query .= "auction.endAt>NOW() ";
     $query .= "ORDER BY ";
     $query .= "hot_bid.ct DESC ";
     $query .= "LIMIT 10 ";
@@ -329,6 +329,18 @@ class DatabaseConnection {
     } 
 
     return ["auctions"=>$auctions,"totalPages"=>$totalPages];
+  }
+
+  public function getBuyingAuctions($connection,$userID){
+
+  }
+
+  public function getSellingAuctions($connection,$userID){
+
+  }
+
+  public function getBoughtAuctions($connection,$userID){
+
   }
 
   /*
@@ -607,6 +619,22 @@ class DatabaseConnection {
       //return false and report auction is over.
       return array( "status"=>"fail", "message"=>"Auction is over" );
     }
+  }
+
+  public function getAllBids($connection,$auctionID){
+    $query = "SELECT * FROM bid WHERE auctionID={$auctionID} ORDER BY createdAt DESC";
+    $result = mysqli_query($connection,$query);
+    $bids = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $bids[] = $row;
+      }
+    } else {
+      die( "Database query failed (getAllBids). " . mysqli_error( $connection ) );
+      return false;
+    }
+
+    return $bids;
   }
 
   public function bidded( $connection, $auctionID, $userID ) {

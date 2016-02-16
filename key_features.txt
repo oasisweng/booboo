@@ -6,6 +6,7 @@ Key Features:
 4. One of the biggest challenges is to monitor when each auction ends, because auction may end without user interaction. In order to solve this, we implemented three ways to end an auction. One is through Mysql Scheduled Event that runs every minute, another is before auction shows, and last but not least is auction countdown timer goes to zero on an active screen. This way, we ensure a smooth auction experience for users.
 5. Furthermore, we implemented a recommendation system whose algorithm will recommend similar auctions in the same categories as those of items on which the user has ever bidden, ordered by occurrence of such category from most to least. If there aren't enough auctions, the algorithm will fill it with random ones.
 6. We discovered that only one user can be outbid per bid. Therefore, we will find the outbid user and send him an notification about the outbid.
+7. We added category filters to and paginated search results.
 
 To do:
 1. Add more checkpoints to end auctions such as one in expiring auction.

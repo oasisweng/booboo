@@ -27,7 +27,8 @@
                                         </ul>
                         </li>
                         {% if is_logged_in %}
-                            <li><a class="icon fa-sign-in" href="{{ path('user_logout')}}"><span>Logout</span></a></li>
+                            <li><a class="icon fa-user" href="{{ path('user_show', {'userID': is_logged_in})}}"><span>My Profile/Feed </span></a></li>
+                            <li><a class="icon fa-sign-out" href="{{ path('user_logout')}}"><span>Sign Out</span></a></li>
                         {% else %}
                             <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
                         {% endif %}
@@ -58,28 +59,33 @@
         </div>
     </div>
 
-    <!-- Features -->
+    <!-- Hot Auctions Feature -->
     <div id="features-wrapper">
         <section id="features" class="container">
             <header>
                 <h2>Gentlemen, behold! This is <strong>Strongly Typed</strong>!</h2>
             </header>
             <div class="row">
-                {% for auction in hot_auctions %}
-                    {{ auction.id }} {{ auction.imageURL }}
-                    <div class="4u 12u(mobile) {% if loop.first %} active {% endif %}">
-
-                        <!-- Feature -->
-                        <section>
-                            <a href="#" class="image featured"><img src="" alt="" /></a>
-                            <header>
-                                <h3></h3>
-                            </header>
-                            <p></p>
-                        </section>
-
+                <div class="col-md-12">
+                    <div class="carousel slide" id="myCarousel">
+                        <div class="carousel-inner">
+                            {% for auction in hot_auctions %}
+                                <div class="item {% if loop.first %} active {% endif %}">
+                                  <div class="col-md-4">
+                                    <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
+                                        <div class="text-center">
+                                            <h4><a href="#">{{ auction.id }}</a></h4>
+                                            <p></p>
+                                            <a class="label label-success" href="{{ path('auction_show', {'auctionID': auction.id})}}">readmore</a>   
+                                        </div>
+                                  </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                          <a class="left carousel-control" href="#myCarousel" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
+                          <a class="right carousel-control" href="#myCarousel" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
                     </div>
-                {% endfor %}
+                </div>
             </div>
         </section>
     </div>
@@ -342,6 +348,11 @@
                                                         #header.container{
                                                             height:530px;
                                                         }
+
+                                                        .carousel-inner .active.left { left: -33%; }
+                                                        .carousel-inner .next        { left:  33%; }
+                                                        .carousel-inner .prev        { left: -33%; }
+                                                        .carousel-control.left,.carousel-control.right {background-image:none;}
                                                     </style> - See more at: http://www.csstutorial.net/css_misc_inserting.php#sthash.rfjVxTGP.dpuf
 
                                                     <!-- Scripts -->        
@@ -352,7 +363,26 @@
                                                     <script src="assets/js/util.js"></script>
                                                     <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
                                                     <script src="assets/js/main.js"></script>
+                                                    <script>
+                                                        $('#myCarousel').carousel({
+                                                          interval: 10000
+                                                        })
 
+                                                        $('.carousel .item').each(function(){
+                                                          var next = $(this).next();
+                                                          if (!next.length) {
+                                                            next = $(this).siblings(':first');
+                                                          }
+                                                          next.children(':first-child').clone().appendTo($(this));
+                                                          
+                                                          if (next.next().length>0) {
+                                                            next.next().children(':first-child').clone().appendTo($(this));
+                                                          }
+                                                          else {
+                                                            $(this).siblings(':first').children(':first-child').clone().appendTo($(this));
+                                                          }
+                                                        });
+                                                    </script>
                                                 </body>
                                                 {% endblock %}
                                                 {% block stylesheets %}
