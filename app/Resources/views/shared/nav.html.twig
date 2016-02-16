@@ -1,0 +1,47 @@
+<!-- Header -->
+<div id="header-wrapper">
+    <div id="header" class="container">
+        <!-- Nav -->
+        <nav id="nav">
+            <ul>
+                <li><a class="icon fa-home" href="{{ path('homepage')}}"><span>Home</span></a></li>
+                <li><a class="icon fa-tag" href="#"><span>Categories</span></a>
+                    <ul>
+                        <li><a href="#">Lorem ipsum dolor</a></li>
+                        <li><a href="#">Magna phasellus</a></li>
+                        <li><a href="#">Etiam dolore nisl</a></li>
+                        <li>
+                            <a href="#">Phasellus consequat</a>
+                            <ul>
+                                <li><a href="#">Magna phasellus</a></li>
+                                <li><a href="#">Etiam dolore nisl</a></li>
+                                <li><a href="#">Phasellus consequat</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Veroeros feugiat</a></li>
+                    </ul>
+                </li>
+                {% if app.session.get('userID') is not null %}
+                <li><a class="icon fa-user" href="{{ path('user_show', {'userID': is_logged_in})}}"><span>My Profile/Feed </span></a></li>
+                <li><a class="icon fa-sign-out" href="{{ path('user_logout')}}"><span>Sign Out</span></a></li>
+                {% else %}
+                <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
+                {% endif %}
+                <li><a class="icon fa-question" href="#"><span>Contact Us/ FAQ</span></a></li>
+                <a class="navbar-right">
+                    <!-- to include search bar in top navi for other pages outside of HOME/INDEX -->
+                </a>
+            </ul>
+        </nav>
+        <!--row:1 Index page title section -->
+        <h1 id="logo">Boo Boo.</h1>
+        <p>The fanciest auction system</p>
+        <br>
+        <form class="navbar-form">
+            <div class="form-group">
+                <input type="text" id="indexonly" placeholder="Enter search" class="form-control">
+            </div>
+            <button type="button" class="btn btn-def btn">Search</button>
+        </form>
+    </div>
+</div>

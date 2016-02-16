@@ -3,10 +3,11 @@
     <head>
         <meta charset="UTF-8" />
         <title>{% block title %}COMP3013 Group 3{% endblock %}</title>
-        {% block stylesheets %}
-            {% stylesheets 'assets/css/*' filter='cssrewrite' %}
+        {% stylesheets 'assets/css/*' filter='cssrewrite' %}
                 <link rel="stylesheet" href="{{ asset_url }}" />
             {% endstylesheets %}
+        {% block stylesheets %}
+            
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
         <link rel="stylesheet"
@@ -26,15 +27,19 @@
     </head>
 
     <body>
-        <div class="flash-messages">
-            {{ include('shared/flash.html.twig')}}
+        <div id="page-wrapper">
+            {{ include('shared/nav.html.twig')}}
+            <div class="flash-messages">
+                {{ include('shared/flash.html.twig')}}
+            </div>
+            {% block body %}
+            {% endblock %}
         </div>
-        {% block body %}
-        {% endblock %}
-        {% block javascripts %}
-            {% javascripts 'assets/js/*' %}
+        {% javascripts 'assets/js/*' %}
                 <script src="{{ asset_url }}"></script>
             {% endjavascripts %}
+        {% block javascripts %}
+            
         {% endblock %}
     </body>
 </html>

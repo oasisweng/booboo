@@ -246,9 +246,25 @@ class AuctionController extends Controller {
     public function editAction( $auctionID, Request $request ) {
         $connection = $this->get( "db" )->connect();
         if ( $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID ) ) {
+
+            //check if user has right to edit
+            $session = $request->getSession();   
+            $userID = $session->get('userID');
+
             $this->get( 'dump' )->d( $auctionEntry );
-            $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
             $auction = new Auction( $auctionEntry );
+
+            if ($auction->endAt>date("Y-m-d H:i:s")) {
+                // auction has ended
+                $this->addFlash(
+                    'warning',
+                    'This auction has ended'
+                );
+
+                return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
+            }
+            $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
+            
             $auction->item = new Item( $itemEntry );
 
             $form = $this->createForm( AuctionType::class, $auction );;
