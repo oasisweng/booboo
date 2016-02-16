@@ -61,7 +61,7 @@ class AuctionController extends Controller {
 
                 return $this->redirectToRoute( 'homepage' );
             }
-            echo $totalPages;
+            // echo $totalPages;
             $this->get( 'dump' )->d( $searchResults );
             $auctions = [];
             $items= [];
@@ -183,7 +183,7 @@ class AuctionController extends Controller {
                 //attempt to bid
                 $response = $this->get( 'db' )->bid( $connection, $bid, $auction );
                 $this->get( 'dump' )->d( $response );
-                if ( $response["status"] == "ok" ) {
+                if ( $response["status"] == "success" ) {
                     $this->addFlash(
                         'success',
                         $response["message"]

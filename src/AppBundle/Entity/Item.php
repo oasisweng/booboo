@@ -68,13 +68,13 @@ class Item
 
     public function __construct( $item = NULL) {
         if (isset($item)){
-        $this->id = $item["id"];
-        $this->itemName = $item["itemName"];
-        $this->description = $item["description"];
-        $this->imageURL = isset($item["imageURL"]) ? $item["imageURL"] : NULL;
-        $this->ownerID = $item["ownerID"];
-        $this->categoryID = $item["categoryID"];
-    }
+            $this->id = $item["id"];
+            $this->itemName = $item["itemName"];
+            $this->description = $item["description"];
+            $this->imageURL = isset($item["imageURL"]) ? $item["imageURL"] : NULL;
+            $this->ownerID = $item["ownerID"];
+            $this->categoryID = $item["categoryID"];
+        }
     }
 }
 ?>

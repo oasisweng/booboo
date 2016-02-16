@@ -148,6 +148,16 @@ class UserController extends Controller {
      *
      *
      * @Route("/user/{userID}", name="user_show", requirements={"userID": "\d+"})
+     *
+     * @return  'buyingArray' An array of Auction objects
+     * @return  'sellingArray' An array of Auction objects
+     * @return  'boughtArray' ["auction" : an Auction object, "canFeedback": a boolean indicating whether 
+     *                                 user can leave feedback for this auction ]
+     * @return  'soldArray' ["auction" : an Auction object, "canFeedback": a boolean indicating whether 
+     *                                 user can leave feedback for this auction ]
+     * @return  "user" is an User object of this user
+     * @return  'owner' is an boolean indicating whether current user owns this user profile
+     * @return  'averageRating' is an integer indicating average rating of this user
      */
     public function showAction( $userID, Request $request ) {
         //passing through entire session as parameter instead of just userID
@@ -163,6 +173,11 @@ class UserController extends Controller {
         $session = $request->getSession();
         //check if current user owns this profile
         $owner = $session->get( 'userID' ) == $userID ;
+
+        //get average rating and total number of feedbacks received
+        $rating = $this->get('db')->getAverageRating($connection,$userID);
+        $averageRating = $rating["AvgRating"];
+
 
         if ( $owner ) {
             //if current user profile page belongs to current logged-in user, get detailed information
@@ -188,15 +203,28 @@ class UserController extends Controller {
             $bought = [];
             foreach ($boughtEntries as $boughtEntry){
                 if ($boughtEntry){
-                    $bought[] = new Auction($boughtEntry);    
+                    $bought[] = new Auction($boughtEntry);
+                    //check if user should leave feedback    
                 }
             }
+            //get sold
+            $soldEntries = $this->get('db')->getSoldAuctions($connection,$userID);
+            $sold = [];
+            foreach ($soldEntries as $soldEntry){
+                if ($soldEntry){
+                    $sold[] = new Auction($soldEntry);
+                    //check if user should leave feedback    
+                }
+            }
+
 
             return $this->render( "user/show.html.twig", array( 'buyingArray'=>$buying,
                     'sellingArray'=>$selling,
                     'boughtArray'=>$bought,
+                    'soldArray'=>$sold,
                     "user"=>$user,
-                    'owner' => $owner ) );
+                    'owner' => $owner,
+                    'averageRating' => $averageRating ) );
         } else {
             //if current user profile page is other people's, get only selling array
             //get selling
@@ -210,7 +238,8 @@ class UserController extends Controller {
 
             return $this->render( "user/show.html.twig", array( 'sellingArray'=>$selling,
                     "user"=>$user,
-                    'owner' => $owner ) );
+                    'owner' => $owner,
+                    'averageRating' => $averageRating ) );
         }
 
     }

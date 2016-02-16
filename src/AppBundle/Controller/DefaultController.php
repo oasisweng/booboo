@@ -28,6 +28,8 @@ class DefaultController extends Controller
             $recommended_auctions = $this->get('db')->getRecommendedAuctions($connection,$userID);  
         }
         
+        //use this code to see what is in hot auctions
+        // $this->get('dump')->d($hot_auctions);
         return $this->render('default/index.html.twig', array(
             'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
             'hot_auctions' => $hot_auctions,

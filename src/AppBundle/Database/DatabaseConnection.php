@@ -13,7 +13,8 @@ class DatabaseConnection {
     $this->container = $container;
   }
 
-
+  // General
+  
   public function connect() {
     $dbhost = "127.0.0.1";
     $dbuser = "root";
@@ -53,6 +54,8 @@ class DatabaseConnection {
       return TRUE;
     }
   }
+
+  // Item
 
   public function addItem( $connection, $item ) {
     $itemName = $item->itemName;
@@ -123,6 +126,8 @@ class DatabaseConnection {
       return FALSE;
     }
   }
+
+  // Auction
 
   public function addAuction( $connection, $auction ) {
     $sellerID = $auction->sellerID;
@@ -236,7 +241,7 @@ class DatabaseConnection {
 
     $query = "SELECT ";
     $query .= "auction.id, ";
-    $query .= "item.imageURL ";
+    $query .= "item.imageURL, item.itemName ";
     $query .= "FROM ";
     $query .= "auction ";
     $query .= "INNER JOIN ";
@@ -580,6 +585,8 @@ class DatabaseConnection {
     return $auctions;
   }
 
+  // Bid
+
   public function addBid( $connection, $bid ) {
     $bidValue = $bid->bidValue;
     $buyerID = $bid->buyerID;
@@ -603,14 +610,19 @@ class DatabaseConnection {
     if ( $auction->endAt>$now ) {
       //check if currentBid is null
       if ( is_null( $auction->currentBid ) ) {
-        //save the bid and change current bid to the min value and winnerId to userId and return true and congrats
-        if ( $bid->id = $this->addBid( $connection, $bid ) ) {
-          $auction->currentBid = $auction->startingBid;
-          $auction->winnerID = $bid->buyerID;
-          $this->updateAuction( $connection, $auction );
-          return array( "status"=>"ok", "message"=>"Congratulations" );
+        //check if bid is higher than minimum bid
+        if ($bid->bidValue>$auction->startingBid){
+          //save the bid and change current bid to the min value and winnerId to userId and return true and congrats
+          if ( $bid->id = $this->addBid( $connection, $bid ) ) {
+            $auction->currentBid = $auction->startingBid;
+            $auction->winnerID = $bid->buyerID;
+            $this->updateAuction( $connection, $auction );
+            return array( "status"=>"success", "message"=>"Congratulations" );
+          } else {
+            return array( "status"=>"danger", "message"=>"Unable to get records" );
+          }
         } else {
-          return array( "status"=>"fail", "message"=>"Unable to get records" );
+          return array( "status"=>"warning", "message"=>"Bid value is lower than starting bid" );
         }
       } else {
         //check if bid is higher than currentBid+minInc
@@ -628,7 +640,7 @@ class DatabaseConnection {
             $secondHighestBid = mysqli_fetch_assoc( $result );
             if ( is_null( $highestBid ) || is_null( $secondHighestBid ) ) {
               //return server error
-              return array( "status"=>"fail", "message"=>"Unable to get records" );
+              return array( "status"=>"danger", "message"=>"Unable to get records" );
             }
             //check if the bid is highest bid
             if ( $bid->id == $highestBid["id"] ) {
@@ -642,9 +654,9 @@ class DatabaseConnection {
               $this->updateAuction( $connection, $auction );
               //send second person an email notification for being outbid if second person is not also the buyer
               if ($bid->buyerID != $secondHighestBid["buyerID"]){
-                return array( "status"=>"ok", "message"=>"Congratulations","second_buyerID"=>$secondHighestBid["buyerID"]);
+                return array( "status"=>"success", "message"=>"Congratulations","second_buyerID"=>$secondHighestBid["buyerID"]);
               } else {
-                return array( "status"=>"ok", "message"=>"Congratulations" );
+                return array( "status"=>"success", "message"=>"Congratulations" );
               }
               
             } else {
@@ -652,22 +664,22 @@ class DatabaseConnection {
               $auction->currentBid = $secondHighestBid["bidValue"];
               $auction->winnerID = $highestBid["buyerID"];
               $this->updateAuction( $connection, $auction );
-              return array( "status"=>"fail", "message"=>"Price outbid" );
+              return array( "status"=>"warning", "message"=>"Price outbid" );
             }
 
           } else {
             //return server error
-            return array( "status"=>"fail", "message"=>"Unable to save records" );
+            return array( "status"=>"danger", "message"=>"Unable to save records" );
           }
         } else {
           //return false and report price too low
-          return array( "status"=>"fail", "message"=>"Price too low" );
+          return array( "status"=>"warning", "message"=>"Price too low" );
         }
 
       }
     } else {
       //return false and report auction is over.
-      return array( "status"=>"fail", "message"=>"Auction is over" );
+      return array( "status"=>"warning", "message"=>"Auction is over" );
     }
   }
 
@@ -703,6 +715,8 @@ class DatabaseConnection {
     }
 
   }
+
+  // User
 
   public function addUser( $user ) {
     $connection = $this->connect();
@@ -780,6 +794,77 @@ class DatabaseConnection {
     }
   }
 
+  // feedback
+  
+  /*
+   * This function check if a giver can give a receiver feedback for an particular auction
+   * and gives failure reason if needed
+   */
+  public function canFeedback($connection,$giverID,$receiverID,$auctionID){
+    $query = "SELECT ";
+    $query .= "(CASE WHEN {$giverID} <> {$receiverID} THEN 0 ELSE 1 END) AS CanFeedback ";
+    $query .= "FROM auction WHERE ";
+    $query .= "auction.id = {$auctionID} AND auction.ended = 1 AND NOT EXISTS( ";
+    $query .= "SELECT * FROM feedback WHERE ";
+    $query .= "feedback.auctionID = {$auctionID}  ";
+    $query .= "AND feedback.giverID = {$giverID}  ";
+    $query .= "AND feedback.receiverID = {$receiverID})  ";
+    $query .= "AND(auction.sellerID = {$giverID} AND auction.winnerID = {$receiverID})  ";
+    $query .= "OR(auction.sellerID = {$receiverID} AND auction.winnerID = {$giverID}) ";
+
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      $canFeedback = mysqli_fetch_assoc($result));
+      return $canFeedback["CanFeedback"];
+    } else {
+      die( "Database query failed (canFeedback). " . mysqli_error( $connection ) );
+      return false;
+    }
+
+  } 
+  
+  public function feedback($connection,$giverID,$receiverID,$auctionID,$rating,$comment){
+    //double check if one can leave feedback
+    $canFeedback = $this->canFeedback($connection,$giverID,$receiverID,$auctionID)
+    if ($canFeedback["status"]=="success"){
+      $query = "INSERT INTO feedback (giverID,receiverID,rating,comment,auctionID) ";
+      $query .= "VALUES ({$giverID},{$receiverID},{$rating},{$comment},{$auctionID})";
+
+      $result = mysqli_query( $connection, $query );
+      if ( $result ) {
+        $id =  mysqli_insert_id( $connection );
+        return ["status":"success","feedback_id":$id];
+      } else {
+        die( "Database query failed (feedback). " . mysqli_error( $connection ) );
+        return false;
+      }
+    } else {
+      //TODO: next version, it will check why feedback failed
+      return ["status":"warning","reason":"You can't leave this feedback."];
+    }
+  }
+
+  /*
+   * Get ratings from all feedbacks received for particular user and return the average
+   * @return: average rating for this user and total number of feedbacks received.
+   */
+  public function getAverageRating($connection,$userID){
+    $query = "SELECT AVG(ratings) AS Rating, COUNT(*) AS NumOfFeedbacks ";
+    $query .= "FROM feedback ";
+    $query .= "WHERE receiverID={$userID} ";
+
+    $result = mysqli_query( $connection, $query );
+    if ( $result ) {
+      $rating =  mysqli_insert_id( $connection );
+      return $rating;
+    } else {
+      die( "Database query failed (getAverageRating). " . mysqli_error( $connection ) );
+      return false;
+    }
+  }
+
+  // category
+
   public function fetchCategories() {
     $con = $this->connect();
     $query = "SELECT * FROM category ORDER BY id ASC LIMIT 25";
@@ -791,6 +876,8 @@ class DatabaseConnection {
 
     return $categories;
   }
+
+  // misc
 
   private function e( $connection, $string ) {
     return mysqli_real_escape_string( $connection, $string );
