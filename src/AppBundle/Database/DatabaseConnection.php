@@ -537,10 +537,6 @@ class DatabaseConnection {
 
   public function bid( $connection, $bid, $auction ) {
     //check if auction is on,
-    echo "<pre>";
-    var_dump($bid);
-    var_dump($auction);
-    echo "<pre/>";
     $now = date( "Y-m-d H:i:s" );
     if ( $auction->endAt>$now ) {
       //check if currentBid is null

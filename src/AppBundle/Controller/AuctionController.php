@@ -7,11 +7,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 
 use AppBundle\Entity\Auction;
 use AppBundle\Entity\Item;
 use AppBundle\Form\Type\AuctionType;
+use AppBundle\Entity\Bid;
+use AppBundle\Form\Type\BidType;
 
 class AuctionController extends Controller {
 
@@ -95,14 +98,14 @@ class AuctionController extends Controller {
             $connection = $this->get( 'db' )->connect();
             if ( $auctionID = $this->get( 'db' )->addAuction( $connection, $auction ) ) {
                 $this->addFlash(
-                    'notice',
+                    'success',
                     'New Auction created!'
                 );
 
                 return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             } else {
                 $this->addFlash(
-                    'error',
+                    'warning',
                     'Creating auction went wrong! AuctionController.php'
                 );
             }
@@ -132,90 +135,95 @@ class AuctionController extends Controller {
         }
 
         //get userID, or null if not logged in
-        $userID = 1234;
-
+        $session = $request->getSession();   
+        $userID = $session->get('userID');
+        
         $ended = $auction->ended;
         //placed a bid
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 
+
         //bid form
         $bid = new Bid();
         $bid->auctionID = $auctionID;
-        //get userID
-        $userID = 9;//will use session
-        if ( !isset( $userID ) ) {
-            //return to login page
-            $this->addFlash(
-                'error',
-                'You need to login first!'
-            );
-
-            return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
-        } else if ( $userID == $auction->sellerID ) {
-                //return to auction page
-                $this->addFlash(
-                    'error',
-                    'You can\'t bid on your auction.' );
-            }
-
-        $bid->buyerID = $userID;
-
         $bidForm = $this->createForm( BidType::class, $bid );
 
+        //handle bid
         $bidForm->handleRequest( $request );
 
-        if ( $form->isSubmitted() && $form->isValid() ) {
+        if ( $bidForm->isSubmitted() && $bidForm->isValid() ) {
 
-            //attempt to bid
-            $response = $this->get( 'db' )->bid( $connection, $bid, $auction );
-
-            if ( $response["status"] ) {
+            if ( !isset( $userID ) ) {
+                //return to login page
                 $this->addFlash(
-                    'notice',
-                    $response["message"]
+                    'warning',
+                    'You need to login first!'
                 );
-                //get the user who has been outbid, send an email
-                if (!is_null($response["second_buyerID"])){
-                    //if someone has been outbid and its not current buyer, get user name
-                    $userEntry = $this->get('db')->selectOne($connection,"user",$response["second_buyerID"]);
-                    $name = $userEntry["name"];
-                    $email = $userEntry["email"];
-                     //send email
-                $message = \Swift_Message::newInstance()
-                ->setSubject( 'You are outbid!' )
-                ->setFrom( 'boobooauction@gmail.com' )
-                ->setTo( $email )
-                ->setBody(
-                    $this->renderView(
-                        'Emails/outbid.html.twig',
-                        array( 'name' => $name,
-                        'auctionID'=>$auctionID)
-                    ),
-                    'text/html'
-                );
-                $this->get( 'mailer' )->send( $message );
-                }
-
-               
-
-                return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
+                return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
+            } else if ( $userID == $auction->sellerID ) {
+                //return to auction page
+                $this->addFlash(
+                    'warning',
+                    'You can\'t bid on your auction.' );
             } else {
-                $this->addFlash(
-                    'error',
-                    $response["message"]
-                );
+
+                //set userID
+                $bid->buyerID = $userID;
+
+                //attempt to bid
+                $response = $this->get( 'db' )->bid( $connection, $bid, $auction );
+                $this->get( 'dump' )->d( $response );
+                if ( $response["status"] == "ok" ) {
+                    $this->addFlash(
+                        'success',
+                        $response["message"]
+                    );
+                    //get the user who has been outbid, send an email
+                    if ( array_key_exists( "second_buyerID", $response ) ) {
+
+                        echo "second buyer ID is ".$response["second_buyerID"];
+                        //if someone has been outbid and its not current buyer, get user name
+                        $userEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["second_buyerID"] );
+                        $name = $userEntry["name"];
+                        $email = $userEntry["email"];
+                        $this->get( 'dump' )->d( $userEntry );
+                        //send email
+                        $message = \Swift_Message::newInstance()
+                        ->setSubject( 'You are outbid!' )
+                        ->setFrom( 'boobooauction@gmail.com' )
+                        ->setTo( $email )
+                        ->setBody(
+                            $this->renderView(
+                                'Emails/outbid.html.twig',
+                                array( 'name' => $name,
+                                    'auctionID'=>$auctionID )
+                            ),
+                            'text/html'
+                        );
+                        $this->get( 'mailer' )->send( $message );
+                    }
+
+                } else {
+                    $this->addFlash(
+                        'warning',
+                        $response["message"]
+                    );
+                }
             }
+
+            //return $this->redirectToRoute( 'auction_show',array('auctionID'=>$auctionID), 301);
 
         }
 
+        //prepare return objects
         $params = array( "auction"=>$auction,
             "ended"=>$ended,
             "bidded"=>$bidded,
             "won"=>$won,
             "winning"=>$winning,
-            'bid_form' => $bidForm->createView(), );
+            'bid_form' => $bidForm->createView() );
 
         return $this->render( 'auction/show.html.twig',
             $params );
@@ -241,14 +249,14 @@ class AuctionController extends Controller {
             if ( $form->isSubmitted() && $form->isValid() ) {
                 if ( $this->get( 'db' )->updateAuction( $connection, $auction ) ) {
                     $this->addFlash(
-                        'notice',
+                        'success',
                         'Auction {$auctionID} updated!'
                     );
 
                     return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
                 } else {
                     $this->addFlash(
-                        'error',
+                        'warning',
                         'Updating Auction {$auctionID} went wrong! AuctionController.php'
                     );
                 }
@@ -259,7 +267,7 @@ class AuctionController extends Controller {
                 ) );
         } else {
             $this->addFlash(
-                'error',
+                'warning',
                 'The auction selected does not exist!'
             );
 
