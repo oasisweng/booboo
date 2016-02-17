@@ -256,6 +256,13 @@ class AuctionController extends Controller {
             //check if user has right to edit
             $session = $request->getSession();   
             $userID = $session->get('userID');
+            if ($userID != $auctionEntry["sellerID"]){
+                $this->addFlash(
+                    'warning',
+                    'You don\'t have rights to edit this auction!'
+                );
+                return $this->redirectToRoute( 'homepage' );
+            }
 
             $this->get( 'dump' )->d( $auctionEntry );
             $auction = new Auction( $auctionEntry );

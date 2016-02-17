@@ -264,7 +264,7 @@ class UserController extends Controller {
             return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
         } else if ($currentUserID != $userID){
             $this->addFlash(
-                'warning',
+                'danger',
                 'You don\'t have rights to change this user\'s password!'
             );
             return $this->redirectToRoute( 'homepage' );
