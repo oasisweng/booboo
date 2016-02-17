@@ -11,16 +11,16 @@
 		</div>
 		<div class="col-md-6">
     	<div class="row.30">
-    			<label>Category :</label>
+    			<label>Category :</label> {{ auction.item.categoryID}}
     		</div>
     		<div class="row.30">
-				<label>Description : {{ auction.item.description}}</label>
+				<label>Description :</label>{{ auction.item.description}}
 			</div>
 			<div class="row.30">
 				<label>Time Left :</label>
 			</div>
 			<div class="row.30">
-				<label>£ Current Price</label>
+				<label>£ Current Price :</label> {{ auction.currentBid}}
 			</div>
 			<div class="container">
             <!-- Button trigger modal -->
@@ -54,14 +54,14 @@
                 </div><!-- /.modal -->
             </div><!-- /.container -->
             <div class="row.30"> 
-            	{{ include('bid/bid.html.twig', { 'bid_form': bid_form }) }}
+            	{{ include('bid/bid.html.twig', {'bid_form': bid_form }) }}
 			</div>
 			<div class="row.30">
-				<label>View :</label>
+				<label>View :</label> {{ auction.viewCount}}
 			</div>
 			<div class="row.30">
 				<label>Seller :</label>
-				 <a href="{{ path('user_show', {'userID': 1}) }}">seller profile</a>
+				 <a href="{{ path('user_show', {'userID': auction.sellerID})}}">seller profile</a>
 			</div>
 		</div>
 

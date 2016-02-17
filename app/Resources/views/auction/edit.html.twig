@@ -1,9 +1,82 @@
 {% extends 'base.html.twig' %}
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
 
 {% block body %}
-    <h1>Auction edit.html.twig</h1>
-    {{ form_start(form) }}
-    {{ form_errors(form) }}
-    {{ form_end(form) }}
+<div class="container">    		
+     <div class="col-md-6 col-md-offset-3">
+		<h2>Edit Auction</h2>
+   		 {{ form_start(form) }}
+    		{{ form_errors(form) }}
+            <div>
+              {{ form_label(form.item.itemName, "Name") }}
+              {{ form_errors(form.item.itemName) }}
+              <div class="form-group input-group">
+                <span class="input-group-addon"><i class="fa fa-cube fa-fw"></i></span>
+                {{ form_widget(form.item.itemName) }}
+              </div>
+            </div>
+            <div>
+              {{ form_label(form.item.description) }}
+              {{ form_errors(form.item.description) }}
+              <div class="form-group input-group" >
+              	<span class="input-group-addon"></span>
+                {{ form_widget(form.item.description) }}
+              </div>
+            </div>
+            <div>
+              {{ form_label(form.item.image, "Image") }}
+              {{ form_errors(form.item.image) }}
+              <div class="form-group">
+                {{ form_widget(form.item.image) }} 
+              </div>             
+            </div>
+            <div>
+              {{ form_label(form.item.categoryID) }}
+              {{ form_errors(form.item.categoryID) }}
+              <div class="form-group input-group">
+                <span class="input-group-addon"><i class="fa fa-list-ol fa-fw"></i></span>
+                {{ form_widget(form.item.categoryID) }}
+              </div>
+            </div>
+            <div>
+              {{ form_label(form.startAt) }}
+              {{ form_errors(form.startAt) }}
+              <div class="input-group-custom form-group">
+              {{ form_widget(form.startAt) }}
+              </div>
+            </div>
+            <div>
+                 {{ form_label(form.endAt ) }}
+                 {{ form_errors(form.endAt) }}
+                <div class="input-group-custom form-group">
+                 {{ form_widget(form.endAt) }}
+             	</div>
+             </div>
+             <div>
+              {{ form_label(form.reservedPrice) }}
+              {{ form_errors(form.reservedPrice) }}
+               <div class="form-group">
+                {{ form_widget(form.reservedPrice) }}
+            	</div>
+             </div>
+             <div>
+              {{ form_label(form.startingBid) }}
+              {{ form_errors(form.startingBid) }}
+              	<div class="form-group">
+                	{{ form_widget(form.startingBid) }}
+            	</div>
+              </div>
+
+              <div class="form-group">
+              {{ form_label(form.minBidIncrease) }}
+              {{ form_errors(form.minBidIncrease) }}
+                {{ form_widget(form.minBidIncrease) }}
+              </div>
+    		<div>
+        		{{ form_widget(form.save, {'attr': {'class': 'col-md-6 col-md-offset-3 btn btn-def '}}) }}
+    		</div>
+    		{{ form_end(form) }}
+	</div>
+</div>
 
 {% endblock %}
