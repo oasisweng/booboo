@@ -267,7 +267,7 @@ class AuctionController extends Controller {
             $this->get( 'dump' )->d( $auctionEntry );
             $auction = new Auction( $auctionEntry );
 
-            if ($auction->endAt>date("Y-m-d H:i:s")) {
+            if ($auction->endAt<date("Y-m-d H:i:s")) {
                 // auction has ended
                 $this->addFlash(
                     'warning',
