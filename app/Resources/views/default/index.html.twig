@@ -1,64 +1,6 @@
-{% extends 'homebase.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block body %}
-<div id="page-wrapper">
-
-    <!-- Header -->
-    <div id="header-wrapper">
-        <div id="header" class="container">
-            <!-- Nav -->
-            <nav id="nav">
-                <ul>
-                        <li><a class="icon fa-home" href="{{ path('homepage')}}"><span>Home</span></a></li>
-                        <li><a class="icon fa-tag" href="#" ><span>Categories</span></a>
-                                        <ul>
-                                            <li><a href="#">Lorem ipsum dolor</a></li>
-                                            <li><a href="#">Magna phasellus</a></li>
-                                            <li><a href="#">Etiam dolore nisl</a></li>
-                                            <li>
-                                                <a href="#">Phasellus consequat</a>
-                                                <ul>
-                                                    <li><a href="#">Magna phasellus</a></li>
-                                                    <li><a href="#">Etiam dolore nisl</a></li>
-                                                    <li><a href="#">Phasellus consequat</a></li>
-                                                </ul>
-                                            </li>
-                                            <li><a href="#">Veroeros feugiat</a></li>
-                                        </ul>
-                        </li>
-                        {% if is_logged_in %}
-                            <li><a class="icon fa-user" href="{{ path('user_show', {'userID': is_logged_in})}}"><span>My Profile/Feed </span></a></li>
-                            <li><a class="icon fa-sign-out" href="{{ path('user_logout')}}"><span>Sign Out</span></a></li>
-                        {% else %}
-                            <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
-                        {% endif %}
-                        <li><a class="icon fa-question" href="#"><span>Contact Us/ FAQ</span></a></li>
-                  
-                    <a class="navbar-right">    
-                    <!-- to include search bar in top navi for other pages outside of HOME/INDEX -->    
-                    </a>
-                </ul>
-
-
-            </nav>
-
-            <!--row:1 Index page title section -->
-                <h1 id="logo">Boo Boo.</h1>
-                <p>The fanciest auction system</p>
-
-                <br>
-                    <form class="navbar-form">
-                        <div class="form-group" >
-                            <input type="text" id="indexonly" placeholder="Enter search" class="form-control">
-                        </div>
-                        <button type="button" class="btn btn-def btn">Search</button>
-                    </form>
-                
- 
-
-        </div>
-    </div>
-
     <!-- Hot Auctions Feature -->
     <div id="features-wrapper">
         <section id="features" class="container">
@@ -70,320 +12,265 @@
                     <div class="carousel slide" id="myCarousel">
                         <div class="carousel-inner">
                             {% for auction in hot_auctions %}
-                                <div class="item {% if loop.first %} active {% endif %}">
-                                  <div class="col-md-4">
+                            <div class="item {% if loop.first %} active {% endif %}">
+                                <div class="col-md-4">
                                     <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
-                                        <div class="text-center">
-                                            <h4><a href="#">{{ auction.id }}</a></h4>
-                                            <p></p>
-                                            <a class="label label-success" href="{{ path('auction_show', {'auctionID': auction.id})}}">readmore</a>   
-                                        </div>
-                                  </div>
+                                    <div class="text-center">
+                                        <h4><a href="#">{{ auction.id }}</a></h4>
+                                        <p></p>
+                                        <a class="label label-success" href="{{ path('auction_show', {'auctionID': auction.id})}}">readmore</a>
+                                    </div>
                                 </div>
+                            </div>
                             {% endfor %}
                         </div>
-                          <a class="left carousel-control" href="#myCarousel" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
-                          <a class="right carousel-control" href="#myCarousel" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
+                        <a class="left carousel-control" href="#myCarousel" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
+                        <a class="right carousel-control" href="#myCarousel" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
                     </div>
                 </div>
             </div>
         </section>
     </div>
-
-                <!-- Banner -->
-                <div id="header" class="container">
-
-                </div>
-
-                <!-- Main -->
-                <div id="main-wrapper">
-                    <div id="main" class="container">
-                        <div class="row">
-
-                            <!-- Content -->
-                            <div id="content" class="8u 12u(mobile)">
-
-                                <!-- Post -->
-                                <article class="box post">
-                                    <header>
-                                        <h2><a href="#">I don’t want to say <strong>it’s the aliens</strong> ...<br />
+    <!-- Banner -->
+    <div id="header" class="container">
+    </div>
+    <!-- Main -->
+    <div id="main-wrapper">
+        <div id="main" class="container">
+            <div class="row">
+                <!-- Content -->
+                <div id="content" class="8u 12u(mobile)">
+                    <!-- Post -->
+                    <article class="box post">
+                        <header>
+                            <h2><a href="#">I don’t want to say <strong>it’s the aliens</strong> ...<br />
                                             but it’s the aliens.</a></h2>
-                                        </header>
-                                        <a href="#" class="image featured"><img src="assets/images/pic04.jpg" alt="" /></a>
-                                        <h3>I mean isn't it possible?</h3>
-                                        <p>Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit
-                                            ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris
-                                            sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada
-                                            in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat
-                                            magna tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros
-                                            consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id
-                                            justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet
-                                            mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique.
-                                            Curabitur leo nibh, rutrum eu malesuada in, tristique at erat.</p>
-                                            <ul class="actions">
-                                                <li><a href="#" class="button icon fa-file">Continue Reading</a></li>
-                                            </ul>
-                                        </article>
-
-                                        <!-- Post -->
-                                        <article class="box post">
-                                            <header>
-                                                <h2><a href="#">By the way, many thanks to <strong>regularjane</strong>
+                        </header>
+                        <a href="#" class="image featured"><img src="assets/images/pic04.jpg" alt="" /></a>
+                        <h3>I mean isn't it possible?</h3>
+                        <p>Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat magna tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada in, tristique at erat.</p>
+                        <ul class="actions">
+                            <li><a href="#" class="button icon fa-file">Continue Reading</a></li>
+                        </ul>
+                    </article>
+                    <!-- Post -->
+                    <article class="box post">
+                        <header>
+                            <h2><a href="#">By the way, many thanks to <strong>regularjane</strong>
                                                     for these awesome demo photos</a></h2>
-                                                </header>
-                                                <a href="#" class="image featured"><img src="assets/images/pic05.jpg" alt="" /></a>
-                                                <h3>You should probably check out her work</h3>
-                                                <p>Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit
-                                                    ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris
-                                                    sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada
-                                                    in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat
-                                                    consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id
-                                                    in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat
-                                                    magna tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros
-                                                    consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id
-                                                    justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet
-                                                    mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique.
-                                                    Curabitur leo nibh, rutrum eu malesuada in, tristique at erat.</p>
-                                                    <p>Erat lorem ipsum veroeros consequat magna tempus lorem ipsum consequat
-                                                        Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit ligula
-                                                        vel quam viverra sit amet mollis tortor congue. Sed quis mauris sit amet
-                                                        magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada in,
-                                                        tristique at erat. Curabitur leo nibh, rutrum eu malesuada  in, tristique
-                                                        at erat lorem ipsum dolor sit amet lorem ipsum sed consequat magna
-                                                        tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros consequat
-                                                        magna tempus</p>
-                                                        <ul class="actions">
-                                                            <li><a href="#" class="button icon fa-file">Continue Reading</a></li>
-                                                        </ul>
-                                                    </article>
+                        </header>
+                        <a href="#" class="image featured"><img src="assets/images/pic05.jpg" alt="" /></a>
+                        <h3>You should probably check out her work</h3>
+                        <p>Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat magna tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada in, tristique at erat.</p>
+                        <p>Erat lorem ipsum veroeros consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada in, tristique at erat. Curabitur leo nibh, rutrum eu malesuada in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat magna tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros consequat magna tempus</p>
+                        <ul class="actions">
+                            <li><a href="#" class="button icon fa-file">Continue Reading</a></li>
+                        </ul>
+                    </article>
+                </div>
+                <!-- Sidebar -->
+                <div id="sidebar" class="4u 12u(mobile)">
+                    <!-- Excerpts -->
+                    <section>
+                        <ul class="divided">
+                            <li>
+                                <!-- Excerpt -->
+                                <article class="box excerpt">
+                                    <header>
+                                        <span class="date">July 30</span>
+                                        <h3><a href="#">Just another post</a></h3>
+                                    </header>
+                                    <p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
+                                </article>
+                            </li>
+                            <li>
+                                <!-- Excerpt -->
+                                <article class="box excerpt">
+                                    <header>
+                                        <span class="date">July 28</span>
+                                        <h3><a href="#">And another post</a></h3>
+                                    </header>
+                                    <p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
+                                </article>
+                            </li>
+                            <li>
+                                <!-- Excerpt -->
+                                <article class="box excerpt">
+                                    <header>
+                                        <span class="date">July 24</span>
+                                        <h3><a href="#">One more post</a></h3>
+                                    </header>
+                                    <p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
+                                </article>
+                            </li>
+                        </ul>
+                    </section>
+                    <!-- Highlights -->
+                    <section>
+                        <ul class="divided">
+                            <li>
+                                <!-- Highlight -->
+                                <article class="box highlight">
+                                    <header>
+                                        <h3><a href="#">Something of note</a></h3>
+                                    </header>
+                                    <a href="#" class="image left"><img src="assets/images/pic06.jpg" alt="" /></a>
+                                    <p>Phasellus sed laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet mollis tortor congue magna lorem ipsum dolor et quisque ut odio facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci. Ut interdum tempus facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci.</p>
+                                    <ul class="actions">
+                                        <li><a href="#" class="button icon fa-file">Learn More</a></li>
+                                    </ul>
+                                </article>
+                            </li>
+                            <li>
+                                <!-- Highlight -->
+                                <article class="box highlight">
+                                    <header>
+                                        <h3><a href="#">Something of less note</a></h3>
+                                    </header>
+                                    <a href="#" class="image left"><img src="assets/images/pic07.jpg" alt="" /></a>
+                                    <p>Phasellus sed laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet mollis tortor congue magna lorem ipsum dolor et quisque ut odio facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci. Ut interdum tempus facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci.</p>
+                                    <ul class="actions">
+                                        <li><a href="#" class="button icon fa-file">Learn More</a></li>
+                                    </ul>
+                                </article>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <div id="footer-wrapper">
+        <div id="footer" class="container">
+            <header>
+                <h2>Questions or comments? <strong>Get in touch:</strong></h2>
+            </header>
+            <div class="row">
+                <div class="6u 12u(mobile)">
+                    <section>
+                        <form method="post" action="#">
+                            <div class="row 50%">
+                                <div class="6u 12u(mobile)">
+                                    <input name="name" placeholder="Name" type="text" />
+                                </div>
+                                <div class="6u 12u(mobile)">
+                                    <input name="email" placeholder="Email" type="text" />
+                                </div>
+                            </div>
+                            <div class="row 50%">
+                                <div class="12u">
+                                    <textarea name="message" placeholder="Message"></textarea>
+                                </div>
+                            </div>
+                            <div class="row 50%">
+                                <div class="12u">
+                                    <a href="#" class="form-button-submit button icon fa-envelope">Send Message</a>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+                <div class="6u 12u(mobile)">
+                    <section>
+                        <p>Erat lorem ipsum veroeros consequat magna tempus lorem ipsum consequat Phaselamet mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada.</p>
+                        <div class="row">
+                            <div class="6u 12u(mobile)">
+                                <ul class="icons">
+                                    <li class="icon fa-home">
+                                        1234 Somewhere Road
+                                        <br /> Nashville, TN 00000
+                                        <br /> USA
+                                    </li>
+                                    <li class="icon fa-phone">
+                                        (000) 000-0000
+                                    </li>
+                                    <li class="icon fa-envelope">
+                                        <a href="#">info@untitled.tld</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="6u 12u(mobile)">
+                                <ul class="icons">
+                                    <li class="icon fa-twitter">
+                                        <a href="#">@untitled-tld</a>
+                                    </li>
+                                    <li class="icon fa-instagram">
+                                        <a href="#">instagram.com/untitled-tld</a>
+                                    </li>
+                                    <li class="icon fa-dribbble">
+                                        <a href="#">dribbble.com/untitled-tld</a>
+                                    </li>
+                                    <li class="icon fa-facebook">
+                                        <a href="#">facebook.com/untitled-tld</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div id="copyright" class="container">
+            <ul class="links">
+                <li>&copy; Untitled. All rights reserved.</li>
+                <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+            </ul>
+        </div>
+    </div>
 
-                                                </div>
+{% endblock %}
 
-                                                <!-- Sidebar -->
-                                                <div id="sidebar" class="4u 12u(mobile)">
+{% block stylesheets %}
+<style type="text/css">
+#indexonly {
+width: 350px!important;
+}
 
-                                                    <!-- Excerpts -->
-                                                    <section>
-                                                        <ul class="divided">
-                                                            <li>
+#header.container {
+height: 530px;
+}
 
-                                                                <!-- Excerpt -->
-                                                                <article class="box excerpt">
-                                                                    <header>
-                                                                        <span class="date">July 30</span>
-                                                                        <h3><a href="#">Just another post</a></h3>
-                                                                    </header>
-                                                                    <p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est
-                                                                        suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
-                                                                    </article>
+.carousel-inner .active.left {
+left: -33%;
+}
 
-                                                                </li>
-                                                                <li>
+.carousel-inner .next {
+left: 33%;
+}
 
-                                                                    <!-- Excerpt -->
-                                                                    <article class="box excerpt">
-                                                                        <header>
-                                                                            <span class="date">July 28</span>
-                                                                            <h3><a href="#">And another post</a></h3>
-                                                                        </header>
-                                                                        <p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est
-                                                                            suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
-                                                                        </article>
+.carousel-inner .prev {
+left: -33%;
+}
 
-                                                                    </li>
-                                                                    <li>
+.carousel-control.left,
+.carousel-control.right {
+background-image: none;
+}
+</style>
 
-                                                                        <!-- Excerpt -->
-                                                                        <article class="box excerpt">
-                                                                            <header>
-                                                                                <span class="date">July 24</span>
-                                                                                <h3><a href="#">One more post</a></h3>
-                                                                            </header>
-                                                                            <p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est
-                                                                                suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
-                                                                            </article>
+{% endblock %}
 
-                                                                        </li>
-                                                                    </ul>
-                                                                </section>
+{% block javascripts %}
+<script>
+$('#myCarousel').carousel({
+interval: 10000
+})
 
-                                                                <!-- Highlights -->
-                                                                <section>
-                                                                    <ul class="divided">
-                                                                        <li>
+$('.carousel .item').each(function() {
+var next = $(this).next();
+if (!next.length) {
+next = $(this).siblings(':first');
+}
+next.children(':first-child').clone().appendTo($(this));
 
-                                                                            <!-- Highlight -->
-                                                                            <article class="box highlight">
-                                                                                <header>
-                                                                                    <h3><a href="#">Something of note</a></h3>
-                                                                                </header>
-                                                                                <a href="#" class="image left"><img src="assets/images/pic06.jpg" alt="" /></a>
-                                                                                <p>Phasellus  sed laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam
-                                                                                    viverra sit amet mollis tortor congue magna lorem ipsum dolor et quisque ut odio facilisis
-                                                                                    convallis. Etiam non nunc vel est suscipit convallis non id orci. Ut interdum tempus
-                                                                                    facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci.</p>
-                                                                                    <ul class="actions">
-                                                                                        <li><a href="#" class="button icon fa-file">Learn More</a></li>
-                                                                                    </ul>
-                                                                                </article>
+if (next.next().length > 0) {
+next.next().children(':first-child').clone().appendTo($(this));
+} else {
+$(this).siblings(':first').children(':first-child').clone().appendTo($(this));
+}
+});
+</script>
 
-                                                                            </li>
-                                                                            <li>
+{% endblock %}
 
-                                                                                <!-- Highlight -->
-                                                                                <article class="box highlight">
-                                                                                    <header>
-                                                                                        <h3><a href="#">Something of less note</a></h3>
-                                                                                    </header>
-                                                                                    <a href="#" class="image left"><img src="images/pic07.jpg" alt="" /></a>
-                                                                                    <p>Phasellus  sed laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam
-                                                                                        viverra sit amet mollis tortor congue magna lorem ipsum dolor et quisque ut odio facilisis
-                                                                                        convallis. Etiam non nunc vel est suscipit convallis non id orci. Ut interdum tempus
-                                                                                        facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci.</p>
-                                                                                        <ul class="actions">
-                                                                                            <li><a href="#" class="button icon fa-file">Learn More</a></li>
-                                                                                        </ul>
-                                                                                    </article>
-
-                                                                                </li>
-                                                                            </ul>
-                                                                        </section>
-
-                                                                    </div>
-
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Footer -->
-                                                        <div id="footer-wrapper">
-                                                            <div id="footer" class="container">
-                                                                <header>
-                                                                    <h2>Questions or comments? <strong>Get in touch:</strong></h2>
-                                                                </header>
-                                                                <div class="row">
-                                                                    <div class="6u 12u(mobile)">
-                                                                        <section>
-                                                                            <form method="post" action="#">
-                                                                                <div class="row 50%">
-                                                                                    <div class="6u 12u(mobile)">
-                                                                                        <input name="name" placeholder="Name" type="text" />
-                                                                                    </div>
-                                                                                    <div class="6u 12u(mobile)">
-                                                                                        <input name="email" placeholder="Email" type="text" />
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="row 50%">
-                                                                                    <div class="12u">
-                                                                                        <textarea name="message" placeholder="Message"></textarea>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="row 50%">
-                                                                                    <div class="12u">
-                                                                                        <a href="#" class="form-button-submit button icon fa-envelope">Send Message</a>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </form>
-                                                                        </section>
-                                                                    </div>
-                                                                    <div class="6u 12u(mobile)">
-                                                                        <section>
-                                                                            <p>Erat lorem ipsum veroeros consequat magna tempus lorem ipsum consequat Phaselamet
-                                                                                mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur
-                                                                                leo nibh, rutrum eu malesuada.</p>
-                                                                                <div class="row">
-                                                                                    <div class="6u 12u(mobile)">
-                                                                                        <ul class="icons">
-                                                                                            <li class="icon fa-home">
-                                                                                                1234 Somewhere Road<br />
-                                                                                                Nashville, TN 00000<br />
-                                                                                                USA
-                                                                                            </li>
-                                                                                            <li class="icon fa-phone">
-                                                                                                (000) 000-0000
-                                                                                            </li>
-                                                                                            <li class="icon fa-envelope">
-                                                                                                <a href="#">info@untitled.tld</a>
-                                                                                            </li>
-                                                                                        </ul>
-                                                                                    </div>
-                                                                                    <div class="6u 12u(mobile)">
-                                                                                        <ul class="icons">
-                                                                                            <li class="icon fa-twitter">
-                                                                                                <a href="#">@untitled-tld</a>
-                                                                                            </li>
-                                                                                            <li class="icon fa-instagram">
-                                                                                                <a href="#">instagram.com/untitled-tld</a>
-                                                                                            </li>
-                                                                                            <li class="icon fa-dribbble">
-                                                                                                <a href="#">dribbble.com/untitled-tld</a>
-                                                                                            </li>
-                                                                                            <li class="icon fa-facebook">
-                                                                                                <a href="#">facebook.com/untitled-tld</a>
-                                                                                            </li>
-                                                                                        </ul>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </section>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div id="copyright" class="container">
-                                                                    <ul class="links">
-                                                                        <li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-
-
-                                                        <!-- Overwriting Scripts -->
-                                                        <style type="text/css"> 
-
-                                                        #indexonly { 
-                                                            width:350px!important; 
-                                                        } 
-
-                                                        #header.container{
-                                                            height:530px;
-                                                        }
-
-                                                        .carousel-inner .active.left { left: -33%; }
-                                                        .carousel-inner .next        { left:  33%; }
-                                                        .carousel-inner .prev        { left: -33%; }
-                                                        .carousel-control.left,.carousel-control.right {background-image:none;}
-                                                    </style> - See more at: http://www.csstutorial.net/css_misc_inserting.php#sthash.rfjVxTGP.dpuf
-
-                                                    <!-- Scripts -->        
-                                                    <script src="assets/js/jquery.min.js"></script>
-                                                    <script src="assets/js/jquery.dropotron.min.js"></script>
-                                                    <script src="assets/js/skel.min.js"></script>
-                                                    <script src="assets/js/skel-viewport.min.js"></script>
-                                                    <script src="assets/js/util.js"></script>
-                                                    <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-                                                    <script src="assets/js/main.js"></script>
-                                                    <script>
-                                                        $('#myCarousel').carousel({
-                                                          interval: 10000
-                                                        })
-
-                                                        $('.carousel .item').each(function(){
-                                                          var next = $(this).next();
-                                                          if (!next.length) {
-                                                            next = $(this).siblings(':first');
-                                                          }
-                                                          next.children(':first-child').clone().appendTo($(this));
-                                                          
-                                                          if (next.next().length>0) {
-                                                            next.next().children(':first-child').clone().appendTo($(this));
-                                                          }
-                                                          else {
-                                                            $(this).siblings(':first').children(':first-child').clone().appendTo($(this));
-                                                          }
-                                                        });
-                                                    </script>
-                                                </body>
-                                                {% endblock %}
-                                                {% block stylesheets %}
-                                                {% endblock %}

@@ -2,52 +2,7 @@
 {% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
 
 {% block body %}
-<div id="page-wrapper">
 
-    <!-- Header -->
-    <div id="header-wrapper">
-        <div id="header" class="container">
-            <!-- Nav -->
-            <nav id="nav">
-                <ul>
-                        <li><a class="icon fa-home" href="{{ path('homepage')}}"><span>Home</span></a></li>
-                        <li><a class="icon fa-tag" href="#" ><span>Categories</span></a>
-                                        <ul>
-                                            <li><a href="#">Lorem ipsum dolor</a></li>
-                                            <li><a href="#">Magna phasellus</a></li>
-                                            <li><a href="#">Etiam dolore nisl</a></li>
-                                            <li>
-                                                <a href="#">Phasellus consequat</a>
-                                                <ul>
-                                                    <li><a href="#">Magna phasellus</a></li>
-                                                    <li><a href="#">Etiam dolore nisl</a></li>
-                                                    <li><a href="#">Phasellus consequat</a></li>
-                                                </ul>
-                                            </li>
-                                            <li><a href="#">Veroeros feugiat</a></li>
-                                        </ul>
-                        </li>
-                        {% if is_logged_in %}
-                            <li><a class="icon fa-user" href="{{ path('user_show')}}"><span>My Profile/Feed </span></a></li>
-                            <li><a class="icon fa-sign-out" href="{{ path('user_logout')}}"><span>Sign Out</span></a></li>
-                        {% else %}
-                            <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
-                        {% endif %}
-                        <li><a class="icon fa-question" href="#"><span>Contact Us/ FAQ</span></a></li>
-                  
-                    <a class="navbar-right">    
-                    <!-- to include search bar in top navi for other pages outside of HOME/INDEX -->    
-                    </a>
-                </ul>
-
-
-            </nav>
-
-                
- 
-
-        </div>
-    </div>
 
 <div class="container">     		
     <div class="col-md-6 col-md-offset-3">
@@ -78,6 +33,4 @@
             </div>
           	{{ form_end(form) }}
     </div> 
-</div>
-
 {% endblock %}

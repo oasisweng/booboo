@@ -850,16 +850,16 @@ class DatabaseConnection {
    *          "id": the generated id of a new feedback]
    */
   public function feedback($connection,$feedback){
-    $giverID=$feedback["giverID"];
-    $receiverID=$feedback["receiverID"];
-    $auctionID=$feedback["auctionID"];
-    $rating=$feedback["rating"];
-    $comment=$feedback["comment"];
+    $giverID=$feedback->giverID;
+    $receiverID=$feedback->receiverID;
+    $auctionID=$feedback->auctionID;
+    $rating=$feedback->rating;
+    $comment=$feedback->comment;
     //double check if one can leave feedback
     $canFeedback = $this->canFeedback($connection,$giverID,$receiverID,$auctionID);
-    if ($canFeedback["status"]=="success"){
+    if ($canFeedback){
       $query = "INSERT INTO feedback (giverID,receiverID,rating,comment,auctionID) ";
-      $query .= "VALUES ({$giverID},{$receiverID},{$rating},{$comment},{$auctionID})";
+      $query .= "VALUES ({$giverID},{$receiverID},{$rating},'{$comment}',{$auctionID})";
 
       $result = mysqli_query( $connection, $query );
       if ( $result ) {
