@@ -26,6 +26,9 @@ class FeedbackController extends Controller {
         //get auction
         $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
         $auction = new Auction( $auctionEntry );
+        $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
+        $item = new Item( $itemEntry );
+        $auction->item = $item;
 
         //get userID from session, if not logged in, redirect to login
         $session = $request->getSession();

@@ -165,7 +165,7 @@ class DatabaseConnection {
     $startingBid = $auction->startingBid;
     $minBidIncrease = $auction->minBidIncrease;
     $reservedPrice = $auction->reservedPrice;
-    $winnerID = $auction->winnerID;
+    $winnerID = is_null($auction->winnerID) ? "NULL": $auction->winnerID ;
     $ended = $auction->ended ? 1:0;
     $currentBid = $auction->currentBid;
 
@@ -337,13 +337,16 @@ class DatabaseConnection {
   }
 
   public function getBuyingAuctions($connection,$userID){
-    $query = "SELECT auction.* FROM ";
-    $query .= "auction ";
+    $query = "SELECT * FROM bid ";
     $query .= "INNER JOIN ";
-    $query .= "bid ON auction.id = bid.auctionID ";
+    $query .= "auction ON bid.auctionID = auction.ID ";
     $query .= "WHERE ";
-    $query .= "bid.buyerID = {$userID} ";
-
+    $query .= "bid.bidValue =( ";
+    $query .= "SELECT MAX(bid.bidValue) FROM bid ";
+    $query .= "WHERE  ";
+    $query .= "bid.auctionID = auction.ID  ";
+    $query .= "AND bid.buyerID = {$userID}) ";
+  
     $result = mysqli_query($connection,$query);
 
     $auctions = [];

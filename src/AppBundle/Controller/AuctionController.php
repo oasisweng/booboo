@@ -84,9 +84,21 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userID}/auction/new", name="auction_new", requirements={"userID": "\d+"})
+     * @Route("auction/new", name="auction_new")
      */
     public function newAction( $userID, Request $request ) {
+        //get user and check if user has logged in 
+        $session = $request->getSession();   
+        $userID = $session->get('userID');
+        if ( !isset( $userID ) ) {
+            //return to login page
+            $this->addFlash(
+                'warning',
+                'You need to login first!'
+            );
+            return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
+        } 
+
         $auction = new Auction();
         $auction->sellerID = $userID;
         $form = $this->createForm( AuctionType::class, $auction );
@@ -142,6 +154,7 @@ class AuctionController extends Controller {
         //get userID, or null if not logged in
         $session = $request->getSession();   
         $userID = $session->get('userID');
+
 
         $ended = $auction->ended;
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );

@@ -95,7 +95,7 @@ Login | user_log | /login | `{{ path('user_login'}}`
 Registration | user_registration  | /register | `{{ path('user_registration'}}`
 Show user profile | user_show  | /user/{userID} | `{{ path('user_show', {'userID': 1}) }}`
 Change user password | user_change_password | /user/{userID}/change_password | `{{ path('user_change_password', {'userID': 1}) }}`
-Create an auction | auction_new   | /user/{userID}/auction/new | `{{ path('auction_new', {'userID': 1}) }}`
+Create an auction | auction_new   | /auction/new | `{{ path('auction_new', {'userID': 1}) }}`
 Show an auction | auction_show  | /auction/{auctionID} | `{{ path('auction_show', {'auctionID': 1}) }}`
 Edit an auction | auction_edit  | /auction/{auctionID}/edit | `{{ path('auction_edit', {'auctionID': 1}) }}`
 Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}`  
