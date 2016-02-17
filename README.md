@@ -2,6 +2,18 @@
 ##the fanciest online auction system
 
 ### Before start
+
+To push the changes.
+
+* git add .
+* git commit -m "message"
+* git push origin master
+
+To pull the changes.
+
+* git fetch
+* git pull --rebase
+
 #####Composer
 Install [Composer](http://www.abeautifulsite.net/installing-composer-on-os-x/) for Mac OSX
 
