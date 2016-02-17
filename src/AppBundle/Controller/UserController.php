@@ -298,12 +298,12 @@ class UserController extends Controller {
                 }
 
                 return $this->render(
-                    'user/forgotten_password.html.twig',
+                    'user/change_password.html.twig',
                     array( 'form' => $form->createView() )
                 );
             } else {
                 return $this->render(
-                    'user/forgotten_password.html.twig',
+                    'user/change_password.html.twig',
                     array( 'form' => $form->createView() )
                 );
             }
