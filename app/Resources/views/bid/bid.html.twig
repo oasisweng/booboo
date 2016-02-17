@@ -1,19 +1,12 @@
-<div class="delete-us">
-<h1>Bid bid.html.twig</h1>
-<h2>Embed the following snippet(without comment brackets) in Auction/show.html.twig </h2>
-
-{# {{ include('bid/bid.html.twig', { 'bid_form': bid_form }) }} #}
-
-<h3><strike>Please remove this line and the content above</strike>Actual bid form</h3>
-</div>
-
+<div class="row.30"> 
 {{ form_start(bid_form) }}
-  {{ form_label(bid_form.bidValue) }}
-  {{ form_errors(bid_form.bidValue) }}
-  <div class="form-group input-group">
-    <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
-    {{ form_widget(bid_form.bidValue) }}
-  </div>
+ {{ form_label(bid_form.bidValue,"Bid") }}
+ {{ form_errors(bid_form.bidValue) }}
+  	<div class="form-group input-group">
+    	<span class="input-group-addon"><i class="fa fa-gavel fa-fw"></i></span>
+    	{{ form_widget(bid_form.bidValue) }}
+  	</div>
   
-  {{ form_widget(bid_form.bid, {'attr': {'class': 'col-md-9 col-md-offset-3 btn btn-def'}}) }}
+  	{{ form_widget(bid_form.bid, {'attr': {'class': 'col-md-9 btn btn-def'}}) }}
 {{ form_end(bid_form) }}
+</div>

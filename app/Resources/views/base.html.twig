@@ -26,9 +26,7 @@
     </head>
 
     <body>
-        <div class="flash-messages">
-            {{ include('shared/flash.html.twig')}}
-        </div>
+        {{ include('shared/flash.html.twig')}}
         {% block body %}
         {% endblock %}
         {% block javascripts %}
