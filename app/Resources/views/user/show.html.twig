@@ -2,15 +2,22 @@
 
 {% block body %}
 <div class="container">
-	<div class="col-md-8 col-md-offset-2">
-	{% if owner %}
-    <h2>User show.html.twig user is owner</h2>
-    <label> User Name : </label>{{user.name}}<br>
-    <label> Email : </label>{{user.email}}<br>
-    <a href="{{ path('user_change_password', {'userID': app.session.get('userID')}) }}"> Change Password</a>
-  {% else %}
-  <h2> user is not owner of profile page </h2>
-  {% endif %}
-  </div>
- </div>
+	<h2>User show.html.twig user is owner</h2>
+	<div class="row">	
+		{% if owner %}
+		<div class="col-md-4">
+			<img src="http://placehold.it/200/bbbbbb/fff&amp;text={{ user.id }}" class="img-responsive">
+		</div>
+
+		<div class="col-md-8">
+			<label> User Name : </label>{{user.name}}<br>
+			<label> Email : </label>{{user.email}}<br>
+			<label><a href="{{ path('user_change_password', {'userID': app.session.get('userID')}) }}"> Change Password</a></label>
+		</div>
+	</div>
+	{% else %}
+	<h2> user is not owner of profile page </h2>
+	{% endif %}
+
+</div>
 {% endblock %}
