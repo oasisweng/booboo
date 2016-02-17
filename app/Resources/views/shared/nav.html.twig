@@ -22,7 +22,7 @@
                     </ul>
                 </li>
                 {% if app.session.get('userID') is not null %}
-                <li><a class="icon fa-user" href="{{ path('user_show', {'userID': is_logged_in})}}"><span>My Profile/Feed </span></a></li>
+                <li><a class="icon fa-user" href="{{ path('user_show', {'userID': app.session.get('userID')})}}"><span>My Profile/Feed </span></a></li>
                 <li><a class="icon fa-sign-out" href="{{ path('user_logout')}}"><span>Sign Out</span></a></li>
                 {% else %}
                 <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
