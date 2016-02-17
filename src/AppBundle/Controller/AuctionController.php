@@ -86,7 +86,7 @@ class AuctionController extends Controller {
      *
      * @Route("auction/new", name="auction_new")
      */
-    public function newAction( $userID, Request $request ) {
+    public function newAction( Request $request ) {
         //get user and check if user has logged in 
         $session = $request->getSession();   
         $userID = $session->get('userID');
