@@ -55,7 +55,7 @@
                         {% for auction in new_auctions %}
                         <tr>
                             <td><a href="{{ path('auction_show', {'auctionID': auction.id})}}">{{ auction.id }}</a></td>
-                            <td><img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive"></td>
+                            <td><center><img src="http://placehold.it/100/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive"></center></td>
                             <td>..</td>
                         </tr>
                         {% endfor %}    
@@ -72,7 +72,7 @@
                         {% for auction in expiring_auctions %}
                         <tr>
                             <td><a href="{{ path('auction_show', {'auctionID': auction.id})}}">{{ auction.id }}</a></td>
-                            <td><img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive"></td>
+                            <td><center><img src="http://placehold.it/100/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive"></center></td>
                             <td>..</td>
                         </tr>
                         {% endfor %} 
