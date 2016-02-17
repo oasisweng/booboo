@@ -1,10 +1,16 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+<div class="container">
+	<div class="col-md-8 col-md-offset-2">
 	{% if owner %}
-    <h1>User show.html.twig user is owner</h1>
+    <h2>User show.html.twig user is owner</h2>
+    <label> User Name : </label>{{user.name}}<br>
+    <label> Email : </label>{{user.email}}<br>
+    <a href="{{ path('user_change_password', {'userID': app.session.get('userID')}) }}"> Change Password</a>
   {% else %}
-  <h1> user is not owner of profile page </h1>
+  <h2> user is not owner of profile page </h2>
   {% endif %}
-
+  </div>
+ </div>
 {% endblock %}
