@@ -250,6 +250,26 @@ class UserController extends Controller {
      * @Route("/user/{userID}/change_password", name="user_change_password",  requirements={"userID": "\d+"})
      */
     public function changePasswordAction( $userID, Request $request ) {
+        // check login and same user
+        $session = $request->getSession();
+        $currentUserID = $session->get( 'userID');
+
+        if (is_null($currentUserID)){
+            //login first 
+            //return to login page
+            $this->addFlash(
+                'warning',
+                'You need to login first!'
+            );
+            return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
+        } else if ($currentUserID != $userID){
+            $this->addFlash(
+                'warning',
+                'You don\'t have rights to change this user\'s password!'
+            );
+            return $this->redirectToRoute( 'homepage' );
+        }
+
         // 1) build the form
         $connection = $this->get( "db" )->connect();
         if ( $userEntry = $this->get( "db" )->selectOne( $connection, "user", $userID ) ) {

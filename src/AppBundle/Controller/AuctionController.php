@@ -14,6 +14,7 @@ use AppBundle\Entity\Auction;
 use AppBundle\Entity\Item;
 use AppBundle\Form\Type\AuctionType;
 use AppBundle\Entity\Bid;
+use AppBundle\Entity\User;
 use AppBundle\Form\Type\BidType;
 
 class AuctionController extends Controller {
