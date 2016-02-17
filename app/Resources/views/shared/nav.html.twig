@@ -33,6 +33,7 @@
                 </a>
             </ul>
         </nav>
+        {% if app.request.attributes.get('_route') == "homepage" %}
         <!--row:1 Index page title section -->
         <h1 id="logo">Boo Boo.</h1>
         <p>The fanciest auction system</p>
@@ -43,5 +44,6 @@
             </div>
             <button type="button" class="btn btn-def btn">Search</button>
         </form>
+        {% endif %}
     </div>
 </div>

@@ -28,10 +28,10 @@
 
     <body>
         <div id="page-wrapper">
-            {{ include('shared/nav.html.twig')}}
             <div class="flash-messages">
                 {{ include('shared/flash.html.twig')}}
             </div>
+            {{ include('shared/nav.html.twig')}}
             {% block body %}
             {% endblock %}
         </div>
