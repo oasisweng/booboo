@@ -128,6 +128,7 @@ class AuctionController extends Controller {
         $auction = new Auction( $auctionEntry );
         $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
         $item = new Item( $itemEntry );
+        $auction->item = $item;
 
         //if should finish auction through this way
         if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
