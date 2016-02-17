@@ -130,6 +130,9 @@ class AuctionController extends Controller {
         $item = new Item( $itemEntry );
         $auction->item = $item;
 
+        $sellerEntry = $this->get( "db" )->selectOne( $connection, 'user', $auction->sellerID );
+        $seller = new User($sellerEntry);
+
         //if should finish auction through this way
         if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
             $this->get( 'db' )->finishAuction( $connection, $auction );
@@ -233,7 +236,8 @@ class AuctionController extends Controller {
             "won"=>$won,
             "winning"=>$winning,
             "bid_form" => $bidForm->createView(),
-            "bids" => $bids );
+            "bids" => $bids,
+            "seller" => $seller );
 
         return $this->render( 'auction/show.html.twig',
             $params );
