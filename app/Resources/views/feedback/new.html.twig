@@ -1,12 +1,15 @@
 {% extends 'base.html.twig' %}
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
 
 {% block body %}
-    <h1>Feedback new.html.twig</h1>
-    
-    <div> Auction {{ auction.id }}</div>
-    {{ form_start(form) }}
-    {{ form_errors(form) }}
-    {{ form_end(form) }}
+<div class="container">
+	<div class="col-md-6 col-md-offset-3">
+    	<h2>Leave Feedback</h2>
+    	{{ form_start(form) }}
+    	{{ form_errors(form) }}
+    	{{ form_end(form) }}
+	</div>
+</div>
 
 {% endblock %}
 
