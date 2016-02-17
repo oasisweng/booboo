@@ -1,7 +1,15 @@
 <!-- Header -->
 <div id="header-wrapper">
+
+    <!-- fixing nav bar issue on other pages excluding home page -->
+
+    {% if app.request.attributes.get('_route') == "homepage" %}
     <div id="header" class="container">
+    {% else %}    
+    <div id="header" class="container"style="padding-top: 0.3em;">
+    {% endif %}    
         <!-- Nav -->
+
         <nav id="nav">
             <ul>
                 <li><a class="icon fa-home" href="{{ path('homepage')}}"><span>Home</span></a></li>
