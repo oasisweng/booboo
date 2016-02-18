@@ -137,6 +137,10 @@ class AuctionController extends Controller {
      */
     public function showAction( $auctionID, Request $request ) {
         $connection = $this->get( "db" )->connect();
+        // add view count
+        $this->get('db')->addAuctionViewCount($connection,$auctionID);
+
+        //get data
         $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
         $auction = new Auction( $auctionEntry );
         $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
@@ -149,6 +153,9 @@ class AuctionController extends Controller {
         $sellerEntry = $this->get( "db" )->selectOne( $connection, 'user', $auction->sellerID );
         $seller = new User($sellerEntry);
 
+
+        
+        
         //if should finish auction through this way
         if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
             $this->get( 'db' )->finishAuction( $connection, $auction );
