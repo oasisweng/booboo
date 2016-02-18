@@ -128,6 +128,21 @@ class DatabaseConnection {
   }
 
   // Auction
+  
+  // @param $connection database connection object
+  // @param $auctionID id of the subject auction
+  // @param $columns_a an array of the columns to be retrieved
+  public function selectAuctionColumns( $connection, $auctionID, $columns_a){
+    $columns_s = implode(",",$columns_a);
+    $query = "SELECT {$columns_s} FROM auction WHERE auction.id = {$auctionID} LIMIT 1";
+    $result = mysqli_query( $connection, $query );
+    if ( $result ) {
+      $object = mysqli_fetch_assoc( $result );
+      return $object;
+    } else {
+      return false;
+    }
+  }
 
   public function addAuction( $connection, $auction ) {
     $sellerID = $auction->sellerID;

@@ -68,23 +68,17 @@
 	</div>
     </div>
 </div>
-<style type="text/css">
-     #timeleft { width: 240px; height: 55px; }
-</style>
+
+{% endblock %}
+
+{% block stylesheets %}
+    <style type="text/css">
+         #timeleft { width: 240px; height: 55px; }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-<script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
-<script type="text/javascript">
-
-  var endTime = new Date().getTime() + 15000;
-  //var endTime = new Date({auction.endAt});
-  $('#timeleft').countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
-    var $this = $(this);
-    if (event.elapsed) {
-      $this.html(event.strftime('Auction has ended.'));
-    } else {
-      $this.html(event.strftime('Time Left : <span>%H hours : %M mins :%S seconds</span>'));
-    }
-  });
-
-</script>
+<script type="text/javascript" src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('assets/js/auction_show.js')}}"></script>
 {% endblock %}

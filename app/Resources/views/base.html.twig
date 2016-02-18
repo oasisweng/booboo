@@ -3,10 +3,6 @@
     <head>
         <meta charset="UTF-8" />
         <title>{% block title %}COMP3013 Group 3{% endblock %}</title>
-        {% stylesheets 'web/assets/css/*' filter='cssrewrite' output='web/assets/css/compiled/app.css' %}
-            <link rel="stylesheet" href="{{ asset_url }}" />
-        {% endstylesheets %}
-
         {% block stylesheets %}
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
@@ -39,11 +35,8 @@
             {% block body %}
             {% endblock %}
         </div>
-        {% javascripts 'assets/js/*' output='js/compiled/app.js'  %}
-            <script src="{{ asset_url }}"></script>
-        {% endjavascripts %}
+        
         {% block javascripts %}
-            
         {% endblock %}
     </body>
 </html>

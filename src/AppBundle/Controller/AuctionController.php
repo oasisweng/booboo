@@ -326,4 +326,40 @@ class AuctionController extends Controller {
         }
     }
 
+
+    /**
+     *
+     *
+     * @Route("/auction/{auctionID}/columns/{columns}", name="auction_columns_api", requirements={"auctionID": "\d+", "columns": ".+"})
+     */
+    public function getAuctionColumns($auctionID, $columns){
+        $columns_a = explode(" ",$columns);
+    
+        $connection = $this->get('db')->connect();
+
+        $auction = $this->get('db')->selectAuctionColumns($connection,$auctionID, $columns_a);
+
+
+        return new JsonResponse( ['auction'=>$auction] );
+    }
+
+    /**
+     *
+     *
+     * @Route("/auction/{auctionID}/finish", name="auction_finish_api", requirements={"auctionID": "\d+"})
+     */
+    public function finishAuction($auctionID){
+        $connection = $this->get('db')->connect();
+        $auctionEntry = $this->get('db')->selectOne($connection,'auction',$auctionID);
+        $auction = new Auction($auctionEntry);
+
+        if ($this->get('db')->shouldFinishAuction($auction)){
+            $this->get('db')->finishAuction($connection,$auction);
+            return new JsonResponse( ['status'=>'success','message'=>"finished."]);
+        } else {
+            return new JsonResponse( ['status'=>'warning','message'=>"not finished yet."]);
+        }
+
+    }
+
 }
