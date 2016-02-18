@@ -25,7 +25,7 @@
 			<div class="container">
             <!-- Button trigger modal -->
             <a data-toggle="modal" data-target="#history"> bid history</a>
-                <div class="modal fade" id="history" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal fade" id="history" tabindex="-1" role="dialog" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -36,20 +36,19 @@
                         <div class="modal-body">
                             <table id="table"
                                 data-toggle="table"
-                                data-height="299"
-                                data-url="../json/data1.json">
+                                data-height="299">
                               <thead>
                                 <tr>
                                     <th data-field="id">Time</th>
                                     <th data-field="name">User</th>
                                     <th data-field="price">Bid Value</th>
                                 </tr>
-                                {% for bid in bids %}
-                        		<tr>
-                            	<td>{{ bid.bidValue }}</a></td>
-                            <td></td>
-                            <td>{{ bid.buyerID }}</td>
-                        </tr>
+                        {% for bid in bids %}
+                        	<tr>
+                            	<td>{{ bid.createdAt | date('Y-m-d H:i:s') }}</a></td>
+                            	<td>{{ bid.buyerName }}</td>
+                            	<td>{{ bid.bidValue }}</td>
+                        	</tr>
                         {% endfor %} 
                                </thead>
                             </table>
