@@ -17,7 +17,7 @@
 				<label>Description :</label>{{ auction.item.description}}
 			</div>
 			<div class="row.30">
-				<label>Time Left : <div id="timeleft"></div></label>
+				<label id="timeleft"></label>
 			</div>
 			<div class="row.30">
 				<label>£ Current Price :</label> {{ auction.currentBid}}
@@ -72,14 +72,19 @@
      #timeleft { width: 240px; height: 55px; }
 </style>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-<script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.js')}}"></script>
+<script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
 <script type="text/javascript">
-    $(function () {
-    var endTime = new Date();
-    //endTime = new Date ({{auction.endAt}});
-    endTime = new Date(endTime.getFullYear() + 1, 1 - 1, 26);
-    $('#timeleft').countdown({until: endTime});
-    $('#year').text(endTime.getFullYear());
-});
+
+  var endTime = new Date().getTime() + 15000;
+  //var endTime = new Date({auction.endAt});
+  $('#timeleft').countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
+    var $this = $(this);
+    if (event.elapsed) {
+      $this.html(event.strftime('Auction has ended.'));
+    } else {
+      $this.html(event.strftime('Time Left : <span>%H hours : %M mins :%S seconds</span>'));
+    }
+  });
+
 </script>
 {% endblock %}
