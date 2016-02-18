@@ -14,7 +14,7 @@ $.ajax({
       //reload this page to
       location.reload();
     } else {
-      $this.html(event.strftime('Time Left : <span>%H hours : %M mins :%S seconds</span>'));
+      $this.html(event.strftime('<span>%H hours : %M mins :%S seconds</span>'));
     }
     });
   }
