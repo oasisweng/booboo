@@ -21,6 +21,7 @@ class Bid {
      */
     public $buyerID;
 
+    public $buyerName;
     /**
      */
     public $auctionID;
@@ -38,6 +39,7 @@ class Bid {
             $this->id = $bid["id"];
             $this->bidValue = $bid["bidValue"];
             $this->buyerID = $bid["buyerID"];
+            $this->buyerName = $bid["buyerName"];
             $this->auctionID = $bid["auctionID"];
             $this->createdAt = strtotime( $bid["createdAt"] );
         }

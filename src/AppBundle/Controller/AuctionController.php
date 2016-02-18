@@ -171,6 +171,8 @@ class AuctionController extends Controller {
             }
         }
 
+        var_dump($bids);
+
         //bid form
         $bid = new Bid();
         $bid->auctionID = $auctionID;
