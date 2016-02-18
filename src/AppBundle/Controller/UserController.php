@@ -303,7 +303,8 @@ class UserController extends Controller {
             return new JsonResponse(array( 'buying'=>$buying,
                     'selling'=>$selling,
                     'bought'=>$bought,
-                    'sold'=>$sold ));
+                    'sold'=>$sold,
+                    'averageRating' => $averageRating ));
 
     }
 
