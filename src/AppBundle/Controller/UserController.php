@@ -245,6 +245,69 @@ class UserController extends Controller {
     }
 
     /**
+     * @Route("/user/api/{userID}", name="user_api", requirements={"userID": "\d+"})
+     */
+    public function apiAction( $userID, Request $request ) {
+        //passing through entire session as parameter instead of just userID
+        //entire session required to check whether user is 'LOGGED IN' or 'NOT LOGGED IN'
+        $connection = $this->get( "db" )->connect();
+        $userEntry = $this->get( "db" )->selectOne( $connection, 'user', $userID );
+        $user = new User( $userEntry );
+
+        if ( !$user ) {
+            return new Response("Error", 400);
+        }
+
+        //get average rating and total number of feedbacks received
+        $rating = $this->get('db')->getAverageRating($connection,$userID);
+        $averageRating = $rating["AvgRating"];
+
+            //if current user profile page belongs to current logged-in user, get detailed information
+
+            //get buying auctions
+            $buyingEntries = $this->get('db')->getBuyingAuctions($connection,$userID);
+            $buying = [];
+            foreach ($buyingEntries as $buyingEntry){
+                if ($buyingEntry){
+                    $buying[] = new Auction($buyingEntry);    
+                }
+            }
+            //get selling
+            $sellingEntries = $this->get('db')->getSellingAuctions($connection,$userID);
+            $selling = [];
+            foreach ($sellingEntries as $sellingEntry){
+                if ($sellingEntry){
+                    $selling[] = new Auction($sellingEntry);    
+                }
+            }
+            //get bought
+            $boughtEntries = $this->get('db')->getBoughtAuctions($connection,$userID);
+            $bought = [];
+            foreach ($boughtEntries as $boughtEntry){
+                if ($boughtEntry){
+                    $bought[] = new Auction($boughtEntry);
+                    //check if user should leave feedback    
+                }
+            }
+            //get sold
+            $soldEntries = $this->get('db')->getSoldAuctions($connection,$userID);
+            $sold = [];
+            foreach ($soldEntries as $soldEntry){
+                if ($soldEntry){
+                    $sold[] = new Auction($soldEntry);
+                    //check if user should leave feedback    
+                }
+            }
+
+
+            return new JsonResponse(array( 'buying'=>$buying,
+                    'selling'=>$selling,
+                    'bought'=>$bought,
+                    'sold'=>$sold ));
+
+    }
+
+    /**
      *
      *
      * @Route("/user/{userID}/change_password", name="user_change_password",  requirements={"userID": "\d+"})

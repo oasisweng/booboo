@@ -2,9 +2,10 @@
 
 {% block body %}
 <div class="container">
+
+	{% if owner %}
 	<h2>User show.html.twig user is owner</h2>
 	<div class="row">	
-		{% if owner %}
 		<div class="col-md-4">
 			<img src="http://placehold.it/200/bbbbbb/fff&amp;text={{ user.id }}" class="img-responsive">
 		</div>
@@ -15,9 +16,120 @@
 			<label><a href="{{ path('user_change_password', {'userID': app.session.get('userID')}) }}"> Change Password</a></label>
 		</div>
 	</div>
-	{% else %}
-	<h2> user is not owner of profile page </h2>
-	{% endif %}
 
+	<div class="row">
+		<div class="col-md-12">
+			<!-- Nav tabs -->
+			<ul class="nav nav-tabs" role="tablist">
+				<li role="presentation" class="active"><a href="#buying" aria-controls="buying" role="tab" data-toggle="tab">Buying</a></li>
+				<li role="presentation"><a href="#selling" aria-controls="selling" role="tab" data-toggle="tab">Selling</a></li>
+				<li role="presentation"><a href="#bought" aria-controls="bought" role="tab" data-toggle="tab">Bought</a></li>
+				<li role="presentation"><a href="#sold" aria-controls="sold" role="tab" data-toggle="tab">Sold</a></li>
+			</ul>
+
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div role="tabpanel" class="tab-pane active" id="buying">
+					<table class="table table-striped">
+						<thead><tr><th>Item Name</th><th>Bid</th><th>Current Bid</th><th>Time Left</th><th>Details</th></tr></thead>
+						<tbody id="buying-table">
+						</tbody>
+					</table>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="selling">
+					<table class="table table-striped">
+						<thead><tr><th>Item Name</th><th>Bid</th><th>Current Bid</th><th>Time Left</th><th>Details</th></tr></thead>
+						<tbody id="selling-table">
+						</tbody>
+					</table>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="bought">
+					<table class="table table-striped">
+						<thead><tr><th>Item Name</th><th>Seller Name</th><th>Price</th><th>Date</th></tr></thead>
+						<tbody id="bought-table">
+						</tbody>
+					</table>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="sold">
+					<table class="table table-striped">
+						<thead><tr><th>Item Name</th><th>Seller Name</th><th>Price</th><th>Date</th></tr></thead>
+						<tbody id="sold-table">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	{% else %}
+	<div class="row">	
+		<h2> user is not owner of profile page </h2>
+		{% endif %}
+	</div>
 </div>
+
+<style>/*
+    tr {
+        width: 100%;
+        height: 100px;
+        display: inline-table;
+    }
+
+    table{
+        height: 300px;
+    }
+    tbody{
+        overflow-y: scroll;
+        height: 300px;
+        width: 100%;
+        position: absolute;
+    }*/
+</style>
+
+<script>
+var idGenerator = 0;
+var auctions = {
+	buying: {},
+	selling: {},
+	bought: {},
+	sold: {}
+};
+function updateTables() {
+	$.get('{{ path('user_api', {'userID': user.id })}}', function(data) {
+		for (var key in auctions.buying) {
+			if (auctions.buying.hasOwnProperty(key)) {
+				auctions.buying[key].pendingDelete = true;
+			}
+		}
+		// insert or update values
+		for (var i = 0; i < data.buying.length; ++i) {
+			if (auctions.buying[data.buying[i].id]) {
+
+			} else {
+				auctions.buying[data.buying[i].id] = data.buying[i];
+				auctions.buying[data.buying[i].id].el = $('<tr><td>' + auctions.buying[data.buying[i].id].itemName + '</td><td>' + auctions.buying[data.buying[i].id].bidValue + '</td><td>' + auctions.buying[data.buying[i].id].currentBid + '</td></tr>');
+				$('#buying-table').append(auctions.buying[data.buying[i].id].el);
+			}
+			auctions.buying[data.buying[i].id].pendingDelete = false;
+		}
+		// remove values
+		var toDelete = [];
+		for (var key in auctions.buying) {
+			if (auctions.buying.hasOwnProperty(key) && auctions.buying[key].pendingDelete) {
+				$(auctions.buying[key].el).remove();
+				toDelete.push(key);
+			}
+		}
+		for (var i = 0; i < toDelete.length; ++i) {
+			auctions.buying[toDelete[i]] = undefined;
+		}
+	});
+}
+updateTables();
+setInterval(updateTables, 5000);
+</script>
+
+
 {% endblock %}
+
