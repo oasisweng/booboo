@@ -171,6 +171,8 @@ class AuctionController extends Controller {
             }
         }
 
+        var_dump($bids);
+
         //bid form
         $bid = new Bid();
         $bid->auctionID = $auctionID;
@@ -333,12 +335,11 @@ class AuctionController extends Controller {
      * @Route("/auction/{auctionID}/columns/{columns}", name="auction_columns_api", requirements={"auctionID": "\d+", "columns": ".+"})
      */
     public function getAuctionColumns($auctionID, $columns){
-        $columns_a = explode(" ",$columns);
+        $columns_a = explode("/",$columns);
     
         $connection = $this->get('db')->connect();
 
         $auction = $this->get('db')->selectAuctionColumns($connection,$auctionID, $columns_a);
-
 
         return new JsonResponse( ['auction'=>$auction] );
     }

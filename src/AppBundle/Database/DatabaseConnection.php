@@ -734,7 +734,9 @@ class DatabaseConnection {
   }
 
   public function getAllBids($connection,$auctionID){
-    $query = "SELECT * FROM bid WHERE auctionID={$auctionID} ORDER BY createdAt DESC";
+    $query = "SELECT bid.*, user.name AS buyerName FROM bid ";
+    $query .= "INNER JOIN user ON user.id = bid.buyerID ";
+    $query .= "WHERE bid.auctionID={$auctionID} ORDER BY bid.createdAt DESC";
     $result = mysqli_query($connection,$query);
     $bids = [];
     if ($result){
