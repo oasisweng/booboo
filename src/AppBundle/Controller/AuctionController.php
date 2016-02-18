@@ -142,6 +142,9 @@ class AuctionController extends Controller {
         $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
         $item = new Item( $itemEntry );
         $auction->item = $item;
+        $category = $this->get( "db" )->selectOne( $connection, 'category', $auction->item->categoryID );
+        $item->categoryName = $category["categoryName"];
+        
 
         $sellerEntry = $this->get( "db" )->selectOne( $connection, 'user', $auction->sellerID );
         $seller = new User($sellerEntry);
@@ -187,7 +190,7 @@ class AuctionController extends Controller {
                     'warning',
                     'You need to login first!'
                 );
-                return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
+                return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ), "params"=>['auctionID'=>$auctionID] ), 301 );
             } else if ( $userID == $auction->sellerID ) {
                 //return to auction page
                 $this->addFlash(

@@ -124,8 +124,12 @@ class UserController extends Controller {
 
 
                 $redirectRoute = $request->get( 'redirectRoute' );
+                $params = $request->get( 'params' );
+                if (is_null($params)){
+                    $params = array();
+                }
                 if ( isset( $redirectRoute ) ) {
-                    return $this->redirectToRoute( $redirectRoute, array(), 301 );
+                    return $this->redirectToRoute( $redirectRoute, $params, 301 );
                 }
                 return $this->redirectToRoute( 'homepage', array(), 301 );
             } else {
