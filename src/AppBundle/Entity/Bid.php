@@ -2,6 +2,7 @@
 namespace AppBundle\Entity;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use \DateTime;
 
 /**
  */
@@ -41,7 +42,7 @@ class Bid {
             $this->buyerID = $bid["buyerID"];
             $this->buyerName = $bid["buyerName"];
             $this->auctionID = $bid["auctionID"];
-            $this->createdAt = strtotime( $bid["createdAt"] );
+            $this->createdAt = new DateTime( $bid["createdAt"] );
         }
     }
 }
