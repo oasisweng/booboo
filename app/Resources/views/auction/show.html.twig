@@ -17,7 +17,7 @@
 				<label>Description :</label>{{ auction.item.description}}
 			</div>
 			<div class="row.30">
-				<label>Time Left :</label>
+				<label>Time Left : <div id="timeleft"></div></label>
 			</div>
 			<div class="row.30">
 				<label>£ Current Price :</label> {{ auction.currentBid}}
@@ -55,7 +55,7 @@
             </div><!-- /.container -->
             <div class="row.30"> 
             	{{ include('bid/bid.html.twig', {'bid_form': bid_form }) }}
-			</div>
+			</div><br>
 			<div class="row.30">
 				<label>View :</label> {{ auction.viewCount}}
 			</div>
@@ -68,4 +68,18 @@
 	</div>
     </div>
 </div>
+<style type="text/css">
+     #timeleft { width: 240px; height: 55px; }
+</style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.js')}}"></script>
+<script type="text/javascript">
+    $(function () {
+    var endTime = new Date();
+    //endTime = new Date ({{auction.endAt}});
+    endTime = new Date(endTime.getFullYear() + 1, 1 - 1, 26);
+    $('#timeleft').countdown({until: endTime});
+    $('#year').text(endTime.getFullYear());
+});
+</script>
 {% endblock %}

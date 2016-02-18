@@ -7,6 +7,25 @@
     	<h2>Leave Feedback</h2>
     	{{ form_start(form) }}
     	{{ form_errors(form) }}
+ 
+    		{{ form_label(form.rating) }}
+            {{ form_errors(form.rating) }}
+        <div class="form-group input-group">
+            {{ form_widget(form.rating) }}
+    	</div>
+
+    	<div>
+              {{ form_label(form.comment, "Message") }}
+              {{ form_errors(form.comment) }}
+              <div class="form-group input-group" >
+              	<span class="input-group-addon"></span>
+                {{ form_widget(form.comment) }}
+              </div>
+            </div>
+
+    	<div>
+            {{ form_widget(form.finish, {'attr': {'class':  'col-md-6 col-md-offset-4 btn btn-def'}}) }}
+        </div>
     	{{ form_end(form) }}
 	</div>
 </div>
