@@ -340,12 +340,16 @@ class DatabaseConnection {
     $query = "SELECT * FROM bid ";
     $query .= "INNER JOIN ";
     $query .= "auction ON bid.auctionID = auction.ID ";
+    $query .= "INNER JOIN ";
+    $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
+    $query .= "auction.endAt >= NOW() and ";
     $query .= "bid.bidValue =( ";
     $query .= "SELECT MAX(bid.bidValue) FROM bid ";
     $query .= "WHERE  ";
     $query .= "bid.auctionID = auction.ID  ";
     $query .= "AND bid.buyerID = {$userID}) ";
+    $query .= "group by bid.auctionID";
   
     $result = mysqli_query($connection,$query);
 
@@ -364,6 +368,8 @@ class DatabaseConnection {
   public function getSellingAuctions($connection,$userID){
     $query = "SELECT * FROM ";
     $query .= "auction ";
+    $query .= "INNER JOIN ";
+    $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
     $query .= "sellerID = {$userID} ";
 
@@ -382,10 +388,15 @@ class DatabaseConnection {
   }
 
   public function getBoughtAuctions($connection,$userID){
-    $query = "SELECT * FROM ";
+    $query = "SELECT *, user.name as sellerName FROM ";
     $query .= "auction ";
+    $query .= "INNER JOIN ";
+    $query .= "user ON auction.sellerID = user.id "; 
+    $query .= "INNER JOIN ";
+    $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
     $query .= "winnerID = {$userID} ";
+    $query .= "and auction.endAt < NOW()";
 
     $result = mysqli_query($connection,$query);
 
