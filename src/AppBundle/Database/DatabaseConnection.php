@@ -352,9 +352,9 @@ class DatabaseConnection {
   }
 
   public function getBuyingAuctions($connection,$userID){
-    $query = "SELECT * FROM bid ";
+    $query = "SELECT * FROM auction ";
     $query .= "INNER JOIN ";
-    $query .= "auction ON bid.auctionID = auction.ID ";
+    $query .= "bid ON bid.auctionID = auction.ID ";
     $query .= "INNER JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";

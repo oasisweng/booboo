@@ -19,7 +19,7 @@ class FeedbackController extends Controller {
     /**
      *
      *
-     * @Route("/feedback/{auctionID}", name="item_show", requirements={"itemId": "\d+"})
+     * @Route("/feedback/{auctionID}", name="feedback_new", requirements={"auctionID": "\d+"})
      */
     public function newAction( $auctionID, Request $request ) {
         $connection = $this->get( "db" )->connect();

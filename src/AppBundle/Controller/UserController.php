@@ -194,6 +194,7 @@ class UserController extends Controller {
                     $buying[] = new Auction($buyingEntry);    
                 }
             }
+
             //get selling
             $sellingEntries = $this->get('db')->getSellingAuctions($connection,$userID);
             $selling = [];
