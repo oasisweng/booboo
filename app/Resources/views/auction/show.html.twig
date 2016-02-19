@@ -30,18 +30,15 @@
                         <div class="modal-content">
                             <div class="modal-header">
                             	<label>Bid History</label>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span></button>
                             </div>
                         <div class="modal-body">
-                            <table id="table"
-                                data-toggle="table"
-                                data-height="299">
+                            <table id="table" data-toggle="table" data-height="auto"
+                                align="center">
                               <thead>
                                 <tr>
-                                    <th data-field="id">Time</th>
-                                    <th data-field="name">User</th>
-                                    <th data-field="price">Bid Value</th>
+                                    <td><label>Time</label></td>
+                                    <td><label>User</label></td>
+                                    <td><label>Bid Value</label></td>
                                 </tr>
                         {% for bid in bids %}
                         	<tr>
@@ -52,9 +49,6 @@
                         {% endfor %} 
                                </thead>
                             </table>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                         </div><!-- /.modal-content -->
                     </div><!-- /.modal-dialog -->
