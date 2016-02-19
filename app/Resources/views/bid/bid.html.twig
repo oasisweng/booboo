@@ -1,12 +1,11 @@
-<div class="row.30"> 
-{{ form_start(bid_form) }}
- {{ form_label(bid_form.bidValue,"Bid") }}
+ {{ form_start(bid_form) }}
+ {{ form_label(bid_form.bidValue,"Bid", {'label_attr': {'class': 'label'}}) }}
  {{ form_errors(bid_form.bidValue) }}
-  	<div class="form-group input-group">
+  	<div class="input-group col-md-5" style="float:left">
     	<span class="input-group-addon"><i class="fa fa-gavel fa-fw"></i></span>
     	{{ form_widget(bid_form.bidValue) }}
   	</div>
-  
-  	{{ form_widget(bid_form.bid, {'attr': {'class': 'col-md-9 btn btn-def'}}) }}
+	<div style="float:right width:1">
+  	{{ form_widget(bid_form.bid, {'attr': {'class': 'col-md-2 btn btn-def'}}) }}
+  </div>
 {{ form_end(bid_form) }}
-</div>

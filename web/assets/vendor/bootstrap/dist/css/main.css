@@ -24,7 +24,6 @@
 
 	label {
 		margin: 1em;
-
 	}
 
 	h2 {
@@ -192,6 +191,9 @@
 	}
 
 /* Grid */
+	.row-custom{
+		display: inline;
+	}
 
 	.row {
 		border-bottom: solid 1px transparent;
