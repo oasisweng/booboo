@@ -144,7 +144,7 @@ class UserController extends Controller {
 
         return $this->render(
             'user/login.html.twig',
-            array( 'form' => $form->createView(),  'is_logged_in' => $session->get( 'userID' ) )
+            array( 'form' => $form->createView() )
         );
     }
 
@@ -260,7 +260,7 @@ class UserController extends Controller {
         $user = new User( $userEntry );
 
         if ( !$user ) {
-            return new Response("Error", 400);
+            return new JsonResponse(["status"=>"fail","message"=>"user does not exist"]);
         }
 
         //get average rating and total number of feedbacks received

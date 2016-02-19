@@ -35,8 +35,7 @@ class DefaultController extends Controller
             'hot_auctions' => $hot_auctions,
             'expiring_auctions' => $expiring_auctions,
             'new_auctions' => $new_auctions,
-            'recommended_auctions' => $recommended_auctions,
-            'is_logged_in' => $session->get('userID')
+            'recommended_auctions' => $recommended_auctions
         ));
     }
 }

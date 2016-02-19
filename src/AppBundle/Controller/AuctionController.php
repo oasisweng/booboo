@@ -181,6 +181,12 @@ class AuctionController extends Controller {
             }
         }
 
+        //get similar auctions
+        //get imageURL using similarAuctions[i].imageURL and 
+        //name using similarAuctions[i].itemName and id using similarAuctions[i].id
+        $similarAuctions = $this->get('db')->getSimilarAuctions($connection,$auction);
+        var_dump($similarAuctions);
+
         //bid form
         $bid = new Bid();
         $bid->auctionID = $auctionID;
@@ -261,7 +267,8 @@ class AuctionController extends Controller {
             "winning"=>$winning,
             "bid_form" => $bidForm->createView(),
             "bids" => $bids,
-            "seller" => $seller );
+            "seller" => $seller,
+            "similarAuctions" => $similarAuctions );
 
         return $this->render( 'auction/show.html.twig',
             $params );

@@ -352,10 +352,11 @@ class DatabaseConnection {
   }
 
   public function getBuyingAuctions($connection,$userID){
-    $query = "SELECT * FROM auction ";
-    $query .= "INNER JOIN ";
+    $query = "SELECT auction.*,bid.bidValue,bid.buyerID,item.itemName,item.description,";
+    $query .= "item.imageURL,item.ownerID,item.categoryID FROM auction ";
+    $query .= "LEFT JOIN ";
     $query .= "bid ON bid.auctionID = auction.ID ";
-    $query .= "INNER JOIN ";
+    $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
     $query .= "auction.endAt >= NOW() and ";
@@ -376,6 +377,8 @@ class DatabaseConnection {
     } else {
       die( "Database query failed (getBuyingAuctions). " . mysqli_error( $connection ) );
     }
+
+
 
     return $auctions;
   }
@@ -560,52 +563,55 @@ class DatabaseConnection {
     return $auctions;
   }
 
-  public function getRecommendedAuctions($connection,$userID){
+  public function getRecommendedAuctions($connection,$userID=0){
     //select all distinct categories user has bidded，ordered by number of categories
     //if results are not adequate, it will further select hottest auctions
     //in an attempt to attract user to bid them
     define("MAX_TOTAL_RECOMMENDATIONS",10);
-    $query = "SELECT ";
-    $query .= "auction.id,";
-    $query .= "item.imageURL ";
-    $query .= "FROM ";
-    $query .= "auction ";
-    $query .= "INNER JOIN ";
-    $query .= "item ON item.id = auction.itemID ";
-    $query .= "INNER JOIN ";
-    $query .= "( ";
-    $query .= "SELECT ";
-    $query .= "item.categoryID AS CategoryID, ";
-    $query .= "COUNT(item.id) AS Occurrence ";
-    $query .= "FROM ";
-    $query .= "item, ";
-    $query .= "( ";
-    $query .= "SELECT ";
-    $query .= "auction.itemID AS ItemID ";
-    $query .= "FROM ";
-    $query .= "auction, ";
-    $query .= "( ";
-    $query .= "SELECT DISTINCT ";
-    $query .= "bid.auctionID AS AuctionID ";
-    $query .= "FROM ";
-    $query .= "bid ";
-    $query .= "WHERE ";
-    $query .= "bid.buyerID = {$userID} ";
-    $query .= ") AS ab ";
-    $query .= "WHERE ";
-    $query .= "auction.id = ab.AuctionID ";
-    $query .= ") AS ai ";
-    $query .= "WHERE ";
-    $query .= "item.id = ai.ItemID ";
-    $query .= "GROUP BY ";
-    $query .= "item.categoryID ";
-    $query .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
-    $query .= "WHERE ";
-    $query .= "item.imageURL IS NOT NULL ";
-    $query .= "ORDER BY ";
-    $query .= "item_category.Occurrence DESC, ";
-    $query .= "auction.id DESC ";
-    $query .= "LIMIT 10; ";
+
+    if ($userID!=0){
+      $query = "SELECT ";
+      $query .= "auction.id,";
+      $query .= "item.imageURL ";
+      $query .= "FROM ";
+      $query .= "auction ";
+      $query .= "INNER JOIN ";
+      $query .= "item ON item.id = auction.itemID ";
+      $query .= "INNER JOIN ";
+      $query .= "( ";
+      $query .= "SELECT ";
+      $query .= "item.categoryID AS CategoryID, ";
+      $query .= "COUNT(item.id) AS Occurrence ";
+      $query .= "FROM ";
+      $query .= "item, ";
+      $query .= "( ";
+      $query .= "SELECT ";
+      $query .= "auction.itemID AS ItemID ";
+      $query .= "FROM ";
+      $query .= "auction, ";
+      $query .= "( ";
+      $query .= "SELECT DISTINCT ";
+      $query .= "bid.auctionID AS AuctionID ";
+      $query .= "FROM ";
+      $query .= "bid ";
+      $query .= "WHERE ";
+      $query .= "bid.buyerID = {$userID} ";
+      $query .= ") AS ab ";
+      $query .= "WHERE ";
+      $query .= "auction.id = ab.AuctionID ";
+      $query .= ") AS ai ";
+      $query .= "WHERE ";
+      $query .= "item.id = ai.ItemID ";
+      $query .= "GROUP BY ";
+      $query .= "item.categoryID ";
+      $query .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
+      $query .= "WHERE ";
+      $query .= "item.imageURL IS NOT NULL ";
+      $query .= "ORDER BY ";
+      $query .= "item_category.Occurrence DESC, ";
+      $query .= "auction.id DESC ";
+      $query .= "LIMIT 10; ";
+    }
 
     $result = mysqli_query( $connection, $query );
 
@@ -631,6 +637,27 @@ class DatabaseConnection {
         }
         
       }
+
+    return $auctions;
+  }
+
+  public function getSimilarAuctions($connection,$auction){
+    //get up to 10 auctions whose category is same as the auction user is viewing right now
+    $categoryID = $auction->item->categoryID;
+    $query = "SELECT auction.id,item.imageURL,item.itemName FROM auction ";
+    $query .= "INNER JOIN item ON item.id = auction.itemID ";
+    $query .= "WHERE item.categoryID={$categoryID} ORDER BY auction.createdAt DESC";
+    $result = mysqli_query( $connection, $query );
+
+    $auctions = array();
+    //get reco auctions
+    if ( $result ) {
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (get recommended auction). " . mysqli_error( $connection ) );
+    }
 
     return $auctions;
   }
