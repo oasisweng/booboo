@@ -635,6 +635,19 @@ class DatabaseConnection {
     return $auctions;
   }
 
+
+  public function addAuctionViewCount($connection,$auctionID){
+    $query = "UPDATE auction SET viewCount = viewCount + 1 WHERE auction.id = {$auctionID} ";
+    $result = mysqli_query( $connection, $query );
+    $affected = mysqli_affected_rows( $connection );
+    if ( $result && $affected >= 0 ) {
+      return true;
+    } else {
+      die( "Database query failed (addAuctionViewCount). " . mysqli_error( $connection ) );
+      return false;
+    }
+  }
+
   // Bid
 
   public function addBid( $connection, $bid ) {
