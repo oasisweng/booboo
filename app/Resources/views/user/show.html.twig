@@ -69,67 +69,91 @@
 	</div>
 </div>
 
-<style>/*
-    tr {
-        width: 100%;
-        height: 100px;
-        display: inline-table;
-    }
+{% endblock %}
 
-    table{
-        height: 300px;
-    }
-    tbody{
-        overflow-y: scroll;
-        height: 300px;
-        width: 100%;
-        position: absolute;
-    }*/
-</style>
-
+{% block javascripts %}
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
 <script>
-var idGenerator = 0;
 var auctions = {
 	buying: {},
 	selling: {},
 	bought: {},
 	sold: {}
 };
+var countDownRows = [];
+function updateTable(data, category, buttonName) {
+	function auctionShowURL(id) {
+		var url = '{{ path('auction_show', {'auctionID': 0 })}}';
+		return url.replace('0', id);
+	} 
+	function feedbackShowURL(id) {
+		var url = '#';
+		return url.replace('0', id);
+	}
+	for (var key in auctions[category]) {
+		if (auctions[category].hasOwnProperty(key)) {
+			auctions[category][key].pendingDelete = true;
+		}
+	}
+	// insert or update values
+	for (var i = 0; i < data[category].length; ++i) {
+		if (category == 'buying' || category == 'selling') {
+			if (auctions[category][data[category][i].id]) {
+				auctions[category][data[category][i].id].itemName = data[category][i].itemName;
+				auctions[category][data[category][i].id].bidValue = data[category][i].bidValue;
+				auctions[category][data[category][i].id].currentBid = data[category][i].currentBid;
+				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
+				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
+				$(tdArray[0]).html(auctions[category][data[category][i].id].itemName);
+				$(tdArray[1]).html(auctions[category][data[category][i].id].bidValue);
+				$(tdArray[2]).html(auctions[category][data[category][i].id].currentBid);
+			} else {
+				auctions[category][data[category][i].id] = data[category][i];
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + auctions[category][data[category][i].id].bidValue + '</td><td>' + auctions[category][data[category][i].id].currentBid + '</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
+				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
+				var endTime = new Date(auctions[category][data[category][i].id].endAt.date);
+				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
+				$(tdArray[3]).countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
+					var $this = $(this);
+					if (event.elapsed) {
+						$this.html('Ended');
+					} else {
+						$this.html(event.strftime('%H hours : %M mins : %S seconds'));
+					}
+				});
+			}
+		} else {
+			if (auctions[category][data[category][i].id]) {
+			} else {
+				auctions[category][data[category][i].id] = data[category][i];
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + auctions[category][data[category][i].id].sellerName + '</td><td>' + auctions[category][data[category][i].id].currentBid + '</td><td>' + auctions[category][data[category][i].id].endAt.date + '</td><td><a class="btn btn-primary" href="' + feedbackShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
+				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
+			}
+		}
+		auctions[category][data[category][i].id].pendingDelete = false;
+	}
+	// remove values
+	var toDelete = [];
+	for (var key in auctions[category]) {
+		if (auctions[category].hasOwnProperty(key) && auctions[category][key].pendingDelete) {
+			$(auctions[category][key].el).remove();
+			toDelete.push(key);
+		}
+	}
+	for (var i = 0; i < toDelete.length; ++i) {
+		auctions[category][toDelete[i]] = undefined;
+	}
+}
 function updateTables() {
 	$.get('{{ path('user_api', {'userID': user.id })}}', function(data) {
-		for (var key in auctions.buying) {
-			if (auctions.buying.hasOwnProperty(key)) {
-				auctions.buying[key].pendingDelete = true;
-			}
-		}
-		// insert or update values
-		for (var i = 0; i < data.buying.length; ++i) {
-			if (auctions.buying[data.buying[i].id]) {
-
-			} else {
-				auctions.buying[data.buying[i].id] = data.buying[i];
-				auctions.buying[data.buying[i].id].el = $('<tr><td>' + auctions.buying[data.buying[i].id].itemName + '</td><td>' + auctions.buying[data.buying[i].id].bidValue + '</td><td>' + auctions.buying[data.buying[i].id].currentBid + '</td></tr>');
-				$('#buying-table').append(auctions.buying[data.buying[i].id].el);
-			}
-			auctions.buying[data.buying[i].id].pendingDelete = false;
-		}
-		// remove values
-		var toDelete = [];
-		for (var key in auctions.buying) {
-			if (auctions.buying.hasOwnProperty(key) && auctions.buying[key].pendingDelete) {
-				$(auctions.buying[key].el).remove();
-				toDelete.push(key);
-			}
-		}
-		for (var i = 0; i < toDelete.length; ++i) {
-			auctions.buying[toDelete[i]] = undefined;
-		}
+		updateTable(data, 'buying', 'Go');
+		updateTable(data, 'selling', 'Edit');
+		updateTable(data, 'bought', 'Feedback');
+		updateTable(data, 'sold', 'Feedback');
 	});
 }
 updateTables();
 setInterval(updateTables, 5000);
 </script>
-
-
 {% endblock %}
-
