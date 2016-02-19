@@ -12,6 +12,7 @@ $.ajax({
     var $this = $(this);
     if (event.elapsed) {
       $this.html(event.strftime('Auction has ended.'));
+      $('#bid_form').hide();
       //reload this page to
       if (!ended){
         location.reload();
