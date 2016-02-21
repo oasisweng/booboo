@@ -185,7 +185,6 @@ class AuctionController extends Controller {
         //get imageURL using similarAuctions[i].imageURL and 
         //name using similarAuctions[i].itemName and id using similarAuctions[i].id
         $similarAuctions = $this->get('db')->getSimilarAuctions($connection,$auction);
-        var_dump($similarAuctions);
 
         //bid form
         $bid = new Bid();
