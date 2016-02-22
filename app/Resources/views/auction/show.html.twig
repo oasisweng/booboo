@@ -4,13 +4,76 @@
 <div class="container">
 	<div class="col-md-8 col-md-offset-2">
     <h2>Auction Detail</h2>
+    {% if ended %}
+        {% if bidded %}
+            {% if won %}
+            <div class="flash flash-success">
+                <div class="alert alert-success alert-dismissible fade in" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                Auction has ended. You won this auction!
+                </div>
+            </div>
+            {% else %}<!-- won -->
+            <div class="flash flash-warning">
+                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                Auction has ended. You didn't win this auction!
+                </div>
+            </div>
+            {% endif %}<!-- won -->
+        {% else %}<!-- bidded -->
+        <div class="flash flash-info">
+          <div class="alert alert-info alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+             Auction has ended.
+          </div>
+        </div>
+        {% endif %}<!-- bidded -->
+    {% else %}<!-- ended -->
+        {% if bidded %}
+            {% if winning %}
+            <div class="flash flash-success">
+                <div class="alert alert-success alert-dismissible fade in" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                    Good! You have the highest bid.
+                </div>      
+            </div>
+            {% else %}<!-- winning -->
+            <div class="flash flash-warning">
+                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                Warning : You have been outbid. Please increase your bid.
+                </div>
+            </div>
+            {% endif %}<!-- winning -->
+            {% else %}<!-- bidded -->
+            <div class="flash flash-info">
+                <div class="alert alert-info alert-dismissible fade in" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                You have not bid on this item.
+                </div>
+            </div>
+            {% endif %}<!-- bidded -->
+    {% endif %}<!-- ended -->
     <div class="row">
     	<div class="col-md-3">
     	<label> {{ auction.item.itemName}}</label>
     	<img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
 		</div>
 		<div class="col-md-7">
-    	<div class="row.10">
+    	   <div class="row.10">
     			<label>Category :</label> {{ auction.item.categoryName}}
     		</div>
     		<div class="row.10">
@@ -19,9 +82,17 @@
 			<div.inline>
 				<label id="timeleft"></label>
 			</div.inline>
+            {% if ended %}
 			<div class="row.10">
-				<label>£ Current Price :</label>{{ auction.currentBid}}
+                <label>£ Winning Price :</label>{{ auction.currentBid}}
 			</div>
+            <div class="row.10">
+                <label>Ended At :</label>{{ auction.endAt | date('Y - m - d  H:i:s')}}
+            </div>
+            {% else %}
+            <div class="row.10">
+                <label>£ Current Price :</label>{{ auction.currentBid}}
+            </div>
 			<br>
 			<div class="row.10">
             <!-- Bid History Table -->
@@ -56,9 +127,10 @@
                 </div><!-- /.modal -->
             </div><!-- /.row-->
             <br><br>
-            <div class="row.10" style="margin:-2em" id="bid_form">
+            <div class="row.10" style="margin:-2em">
             	{{ include('bid/bid.html.twig', {'bid_form': bid_form }) }}
 			</div><br><br>
+            {% endif %}
 			<div class="row.10">
 				<label>View :</label> {{ auction.viewCount}}
 			</div>
@@ -68,8 +140,8 @@
 			</div>
 		</div>
 	</div>
-    </div>
-</div>
+    </div><!-- /.col-->
+</div><!-- /.container-->
 <div id="features-wrapper" style="height: 590px; background:none; padding-top:0.1em;">
     <section id="header" class="container" style="padding-top: 0.1em; padding-bottom: 0px; height: 602px;">
         <header>
@@ -104,4 +176,25 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script type="text/javascript" src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('assets/js/auction_show.js')}}"></script>
+
+    <script>
+    $('#similarAuction').carousel({
+        interval: 10000
+    })
+
+    $('.carousel .item').each(function() {
+        var next = $(this).next();
+        if (!next.length) {
+            next = $(this).siblings(':first');
+        }
+        next.children(':first-child').clone().appendTo($(this));
+
+        if (next.next().length > 0) {
+            next.next().children(':first-child').clone().appendTo($(this));
+        } else {
+            $(this).siblings(':first').children(':first-child').clone().appendTo($(this));
+        }
+    });
+    </script>
+
 {% endblock %}
