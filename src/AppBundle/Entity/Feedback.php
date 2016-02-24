@@ -13,7 +13,11 @@ class Feedback {
 
     public $giverID;
 
+    public $giverName;
+
     public $receiverID;
+
+    public $receiverName;
 
     /*
      * @Assert\Range(

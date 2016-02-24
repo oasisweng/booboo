@@ -140,8 +140,8 @@ class AuctionController extends Controller {
                 return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             } else {
                 $this->addFlash(
-                    'warning',
-                    'Creating auction went wrong! AuctionController.php'
+                    'danger',
+                    'Auction failed to create!'
                 );
             }
 

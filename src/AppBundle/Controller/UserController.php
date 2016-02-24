@@ -182,6 +182,10 @@ class UserController extends Controller {
         $rating = $this->get('db')->getAverageRating($connection,$userID);
         $averageRating = $rating["AvgRating"];
 
+        //get list of feedbacks
+        //$feedbackEntries = $this->get('db')->getFeedbacks($connection,$userID);
+
+
 
         if ( $owner ) {
             //if current user profile page belongs to current logged-in user, get detailed information

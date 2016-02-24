@@ -45,6 +45,8 @@ class Auction {
 
     public $itemID;
 
+    public $item;
+
     /**
      *
      *

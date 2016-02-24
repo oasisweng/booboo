@@ -194,7 +194,7 @@ class DatabaseConnection {
       "ended={$ended}, " .
       "currentBid={$currentBid} " .
       "updatedAt=NOW() " .
-      "WHERE id={$id}";
+      "WHERE id={$id} ";
 
     $result = mysqli_query( $connection, $query );
     $affected = mysqli_affected_rows( $connection );
@@ -310,7 +310,7 @@ class DatabaseConnection {
     //apply filters first
     if (!empty($filter_categories)){
       $category_s = implode(",",$filter_categories);
-      $where .= "AND item.categoryID in {$category_s} ";
+      $where .= "AND item.categoryID in ({$category_s}) ";
     }
 
     $keywords_c = count($keywords);
@@ -933,6 +933,13 @@ class DatabaseConnection {
 
   // feedback
   
+  public function getFeedbacks($connection,$userID){
+// "SELECT feedback.*, FROM feedback ";
+// "INNER JOIN user ON user.id = feedback.receiverID ";
+// "INNER JOIN user ON user.id = feedback.giverID ";
+// "WHERE feedback.receiverID = {$userID}";
+  }
+
   /*
    * This function check if a giver can give a receiver feedback for an particular auction
    * and gives failure reason if needed
