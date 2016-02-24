@@ -802,7 +802,7 @@ class DatabaseConnection {
 
   public function bidded( $connection, $auctionID, $userID ) {
     $query = "SELECT COUNT(*) as totalno FROM bid ";
-    $query .= "WHERE auctionID={$auctionID},buyerID={$userID}";
+    $query .= "WHERE auctionID={$auctionID} AND buyerID={$userID}";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       $count = mysqli_fetch_assoc( $result );
