@@ -1,1 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
 <h1>Auction search.html.twig</h1>
+{{ form_start(filter_form) }}
+{{ form_errors(filter_form) }}
+{{ form_end(filter_form) }}
+{% endblock %}

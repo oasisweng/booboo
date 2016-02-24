@@ -25,7 +25,7 @@ class AuctionController extends Controller {
     /**
      *  get search result based on keywords and page number
      *
-     * @Route("/auctions/{page}", name = "auction_search",
+     * @Route("/search/{page}", name = "auction_search",
      *                            requirements = {"page": "\d+"},
      *                            defaults = {"page" : 1})
      */
@@ -48,11 +48,11 @@ class AuctionController extends Controller {
         }
 
         $connection = $this->get( 'db' )->connect();
-        $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25 );
 
-        //get filter form
+        //get filters
         // 1) build the form
         $filter = new Filter();
+        $filter->categories = NULL;
         $filter_form = $this->createForm( FilterType::class, $filter );
 
         // 2) handle the submit (will only happen on POST)
@@ -60,10 +60,16 @@ class AuctionController extends Controller {
         if ( $filter_form->isSubmitted() && $filter_form->isValid() ) {
             // ... do any other work - like send them an email, etc
             // maybe set a "flash" success message for the user
-            
+            $this->addFlash(
+                'success',
+                'Filtered!'
+            );
             
         }
 
+        //pass in filter
+        $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25, $filter->categories );
+        $this->get('dump')->d($searchResults);
         if ( $request->isXmlHttpRequest() ) {
             //return json
             return new JsonResponse( ['result'=>$searchResults, 'page'=>$page] );
@@ -82,7 +88,6 @@ class AuctionController extends Controller {
             // echo $totalPages;
             //$this->get( 'dump' )->d( $searchResults );
             $auctions = [];
-            $items= [];
             foreach ( $searchResults["auctions"] as $auctionEntry ) {
                 $auction = new Auction( $auctionEntry );
                 $auctions[] = $auction;
@@ -93,7 +98,8 @@ class AuctionController extends Controller {
             return $this->render( 'auction/search.html.twig', array(
                     'totalPages' => $totalPages,
                     'auctions' => $auctions,
-                    'page' => $page
+                    'page' => $page,
+                    'filter_form' => $filter_form->createView()
                 ) );
         }
     }

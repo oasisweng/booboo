@@ -4,20 +4,24 @@ namespace AppBundle\Form\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use AppBundle\Form\Type\CategoryType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
-class BidType extends AbstractType
+class FilterType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
-        $builder->add( 'bidValue', MoneyType::class, array("currency"=>false,"label"=>"Bid:") )
+        $builder->add( 'categories', CategoryType::class, array(
+                'label' => 'Filter Category',
+                'multiple' => true,
+                'expanded' => true
+            ))
         ->add( 'Filter', SubmitType::class);
 
     }
 
     public function configureOptions( OptionsResolver $resolver ) {
         $resolver->setDefaults( array(
-                'data_class' => 'AppBundle\Entity\Bid',
+                'data_class' => 'AppBundle\Entity\Filter',
             ) );
     }
 }

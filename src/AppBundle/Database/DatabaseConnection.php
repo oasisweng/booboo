@@ -295,7 +295,7 @@ class DatabaseConnection {
    * search for auctions based on keywords
    * @return: {"auctions"=>search result array, "totalPages"=>total number of pages}
    */
-  public function searchAuctions($connection,$keywords,$page,$perPage){
+  public function searchAuctions($connection,$keywords,$page,$perPage,$filter_categories=NULL){
     if ($page==0){
       return NULL;
     } 
@@ -304,15 +304,22 @@ class DatabaseConnection {
     //get offset
     $offset = ($page-1)*$perPage;
     //if there is keywords, do keyword search
-    $where = "";
+    $where = "WHERE auction.endAt>NOW() ";
+
+    //apply filters first
+    if (!empty($filter_categories)){
+      $category_s = implode(",",$filter_categories);
+      $where .= "AND item.categoryID in {$category_s} ";
+    }
+
     $keywords_c = count($keywords);
     if ($keywords_c>0){
       $first_keyword = $keywords[0];
-      $where = "WHERE item.itemName LIKE '%{$first_keyword}%' ";
+      $where .= "AND item.itemName LIKE '%{$first_keyword}%' ";
       //add second keyword and more
       for ($i = 1; $i<$keywords_c;$i++){
         $keyword = $keywords[$i];
-        $where = "OR item.itemName LIKE '%{$keyword}%' ";
+        $where .= "OR item.itemName LIKE '%{$keyword}%' ";
       }
       //get all auctions
       $query = "SELECT auction.* FROM auction ";
@@ -326,29 +333,61 @@ class DatabaseConnection {
           $auctions[] = $row;
         }
       }else {
-        die( "Database query failed (search auction). " . mysqli_error( $connection ) );
+        die( "Database query failed (search auction 1). " . mysqli_error( $connection ) );
       } 
+
+      //get total number of auctions
+      $query2 = "SELECT COUNT(*) AS count FROM auction ";
+      $query2 .= "INNER JOIN ";
+      $query2 .= "item ON auction.itemID = item.id ";
+      $query2 .= $where;
+
+      $totalPages = 1;
+      $result = mysqli_query($connection,$query2);
+      if ($result){
+        $count = mysqli_fetch_assoc($result);
+        $totalPages = ceil($count["count"]/$perPage);
+      }else {
+        die( "Database query failed (search auction 2). " . mysqli_error( $connection ) );
+      } 
+
+      
     } else {
       //if there is no keywords, get new auctions
-      $auctions = $this->getNewAuctions($connection,$page,$perPage,true);
+      $query_all = "SELECT * FROM auction ";
+      $query_count = "SELECT COUNT(*) AS count FROM auction ";
+      $query_limit ="LIMIT {$offset},{$perPage} ";
+
+      $query ="INNER JOIN ";
+      $query .="item ON item.id = auction.itemID ";
+      $query .=$where;
+      $query .="ORDER BY ";
+      $query .="auction.createdAt DESC ";
+
+      $result = mysqli_query($connection,$query_all.$query.$query_limit);
+      if ($result){
+        while ($row = mysqli_fetch_assoc($result)){
+          $auctions[] = $row;
+        }
+      }else {
+        die( "Database query failed (search auction). " . mysqli_error( $connection ) );
+      }
+
+      //get total pages for new auctions
+      $totalPages = 1;
+      $result = mysqli_query($connection,$query_count.$query);
+      if ($result){
+        $count = mysqli_fetch_assoc($result);
+        $totalPages = ceil($count["count"]/$perPage);
+      }else {
+        die( "Database query failed (search auction). " . mysqli_error( $connection ) );
+      } 
+      
     }
 
-    //get total number of auctions
-    $query2 = "SELECT COUNT(*) AS ct FROM auction ";
-    $query2 .= "INNER JOIN ";
-    $query2 .= "item ON auction.itemID = item.id ";
-    $query2 .= $where;
+    
 
-    $totalPages = 1;
-    $result = mysqli_query($connection,$query2);
-    if ($result){
-      $count = mysqli_fetch_assoc($result);
-      $totalPages = ceil($count["ct"]/$perPage);
-    }else {
-      die( "Database query failed (search auction). " . mysqli_error( $connection ) );
-    } 
-
-    return ["auctions"=>$auctions,"totalPages"=>$totalPages];
+    return ["auctions"=>$auctions,"totalPages"=>$totalPages>0 ? $totalPages : 1];
   }
 
   public function getBuyingAuctions($connection,$userID){
@@ -454,21 +493,17 @@ class DatabaseConnection {
   /*
    * get new auction for homepage, defined by the date of creation
    */
-  public function getNewAuctions($connection,$page,$perPage,$isSearch){
+  public function getNewAuctions($connection,$page,$perPage){
     $auctions = [];
     //get offset
     $offset = ($page-1)*$perPage;
 
     //get expiring auctions, ordered by how close they are to the end;
     $query ="SELECT ";
-    if ($isSearch){
-      $query .= "* FROM auction ";
-    } else {
-      $query .="auction.id, ";
-      $query .="item.imageURL ";
-      $query .="FROM ";
-      $query .="auction ";
-    }
+    $query .="auction.id, ";
+    $query .="item.imageURL ";
+    $query .="FROM ";
+    $query .="auction ";
     $query .="INNER JOIN ";
     $query .="item ON item.id = auction.itemID ";
     $query .="WHERE ";
