@@ -193,6 +193,7 @@ class DatabaseConnection {
       "winnerID={$winnerID}," .
       "ended={$ended}, " .
       "currentBid={$currentBid} " .
+      "updatedAt=NOW() " .
       "WHERE id={$id}";
 
     $result = mysqli_query( $connection, $query );

@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Auction;
 use AppBundle\Entity\Feedback;
+use AppBundle\Entity\Item;
 use AppBundle\Form\Type\FeedbackType;
 
 class FeedbackController extends Controller {
@@ -36,6 +37,13 @@ class FeedbackController extends Controller {
 
         //get receiverID
         $receiverID = $userID == $auction->sellerID ? $auction->winnerID : $auction->sellerID;
+
+        //get giver and receiver
+        $giverEntry = $this->get("db")->selectOne($connection, 'user', $userID);
+        $receiverEntry = $this->get("db")->selectOne($connection, 'user', $receiverID);
+        $giver = new User($giverEntry);
+        $receiverEntry = new User($receiverEntry);
+        
         if ( !isset( $userID ) ) {
             //return to login page
             $this->addFlash(
@@ -90,7 +98,8 @@ class FeedbackController extends Controller {
         }
 
 
-        return $this->render( 'feedback/new.html.twig', array( "form" => $form->createView(), "auction"=> $auction ) );
+
+        return $this->render( 'feedback/new.html.twig', array( "form" => $form->createView(), "auction"=> $auction, "giver"=>$giver, "receiver"=> $receiver ) );
     }
 
 
