@@ -4,20 +4,20 @@
 <div class="container">
 	<div class="col-md-8 col-md-offset-2">
 	<h2>Search Result</h2>
-	<div class="row">
+	<div class = "row">
 	{{ form_start(filter_form) }}
 	{{ form_errors(filter_form) }}
 
-		{{ form_label(filter_form.categories) }}
+		{{ form_label(filter_form.categories, "Category") }}
         {{ form_errors(filter_form.categories) }}
-        <div class="row">
-            {{ form_widget(filter_form.categories) }}
-    	</div>
-    	<div>
-            {{ form_widget(filter_form.filter, {'attr': {'class':  'col-md-6 col-md-offset-4 btn btn-def'}}) }}
+        {{ form_widget(filter_form.categories, {'attr': {'class': 'row'}}) }}
+    	
+    	<div class = "row">
+            {{ form_widget(filter_form.filter, {'attr': {'class':  'col-md-3 col-md-offset-4 btn btn-def'}}) }}
         </div>
 	{{ form_end(filter_form) }}
 	</div>
+	{% if auctions|length > 0 %}
     <table class="table table-striped">
         <thead><tr>
         		<td><label>Item </label></td>
@@ -34,6 +34,10 @@
                {% endfor %}    
            </tbody>
        </table>
+       {% else %}
+       			<br>
+				No matching items found for your serach. Please try again!
+       {% endif %}
 	</div>
 </div>
 {% endblock %}
