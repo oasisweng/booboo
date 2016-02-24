@@ -880,7 +880,7 @@ class DatabaseConnection {
   }
 
   public function updateUser( $connection, $user ) {
-    $id = $user->getId();
+    $id = $user->id();
     $name = $user->name;
     $email = $user->email;
     $password = $user->password;

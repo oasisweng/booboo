@@ -42,12 +42,12 @@ class FeedbackController extends Controller {
         $giverEntry = $this->get("db")->selectOne($connection, 'user', $userID);
         $receiverEntry = $this->get("db")->selectOne($connection, 'user', $receiverID);
         $giver = new User($giverEntry);
-        $receiverEntry = new User($receiverEntry);
-        
+        $receiver = new User($receiverEntry);    
+
         if ( !isset( $userID ) ) {
             //return to login page
             $this->addFlash(
-                'warning',
+                'warning',  
                 'You need to login first!'
             );
             return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
@@ -97,7 +97,9 @@ class FeedbackController extends Controller {
             return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
         }
 
-
+        $this->get('dump')->d($auction->item);
+        $this->get('dump')->d($giver);
+        $this->get('dump')->d($receiver);
 
         return $this->render( 'feedback/new.html.twig', array( "form" => $form->createView(), "auction"=> $auction, "giver"=>$giver, "receiver"=> $receiver ) );
     }
