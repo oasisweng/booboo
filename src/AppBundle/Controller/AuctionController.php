@@ -187,7 +187,7 @@ class AuctionController extends Controller {
 
         $ended = $auction->ended;
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
-       // echo $auctionID . " ". $userID . " "; var_dump($bidded);
+        echo $auctionID . " ". $userID . " "; var_dump($bidded);
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 

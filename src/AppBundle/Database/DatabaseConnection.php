@@ -842,7 +842,7 @@ class DatabaseConnection {
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       $count = mysqli_fetch_assoc( $result );
-      if ( $count["totalno"]>=0 ) {
+      if ( $count["totalno"]>0 ) {
         return true;
       } else {
         return false;
