@@ -15,7 +15,10 @@ use AppBundle\Entity\Item;
 use AppBundle\Form\Type\AuctionType;
 use AppBundle\Entity\Bid;
 use AppBundle\Entity\User;
+use AppBundle\Entity\Filter;
 use AppBundle\Form\Type\BidType;
+use AppBundle\Form\Type\FilterType;
+
 
 class AuctionController extends Controller {
 
@@ -26,7 +29,7 @@ class AuctionController extends Controller {
      *                            requirements = {"page": "\d+"},
      *                            defaults = {"page" : 1})
      */
-    public function searchAction( $page, Request $request ) {
+    public function searchAction( $page = 1, Request $request ) {
         //page cannot be zero
         if ( $page == 0 ) {
             $this->addFlash(
@@ -38,7 +41,7 @@ class AuctionController extends Controller {
         }
         //get data
         //remove leading and trailing whitespace for keywords
-        $keywords_s = ltrim( rtrim( $request->get( 'keywords', '' ) ) );
+        $keywords_s = ltrim( rtrim( $request->get( 'keywords' ) ) );
         $keywords_a = [];
         if ( strlen( $keywords_s )>0 ) {
             $keywords_a = explode( ' ', $keywords_s );
@@ -46,6 +49,20 @@ class AuctionController extends Controller {
 
         $connection = $this->get( 'db' )->connect();
         $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25 );
+
+        //get filter form
+        // 1) build the form
+        $filter = new Filter();
+        $filter_form = $this->createForm( FilterType::class, $filter );
+
+        // 2) handle the submit (will only happen on POST)
+        $filter_form->handleRequest( $request );
+        if ( $filter_form->isSubmitted() && $filter_form->isValid() ) {
+            // ... do any other work - like send them an email, etc
+            // maybe set a "flash" success message for the user
+            
+            
+        }
 
         if ( $request->isXmlHttpRequest() ) {
             //return json
@@ -63,19 +80,19 @@ class AuctionController extends Controller {
                 return $this->redirectToRoute( 'homepage' );
             }
             // echo $totalPages;
-            $this->get( 'dump' )->d( $searchResults );
+            //$this->get( 'dump' )->d( $searchResults );
             $auctions = [];
             $items= [];
             foreach ( $searchResults["auctions"] as $auctionEntry ) {
-                $auctions[] = new Auction( $auctionEntry );
+                $auction = new Auction( $auctionEntry );
+                $auctions[] = $auction;
                 $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
-                $items[] = new Item( $itemEntry );
-            }
+                $auction->item = new Item( $itemEntry );
 
+            }
             return $this->render( 'auction/search.html.twig', array(
                     'totalPages' => $totalPages,
                     'auctions' => $auctions,
-                    'items' => $items,
                     'page' => $page
                 ) );
         }

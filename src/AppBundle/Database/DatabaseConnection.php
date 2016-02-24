@@ -717,7 +717,9 @@ class DatabaseConnection {
       } else {
         //check if bid is higher than currentBid+minInc
         if ( $bid->bidValue>( $auction->currentBid+$auction->minBidIncrease ) ) {
-          //save the current bid
+          //if true, this bid has 3 cases: Highest new bid, Bidded by highest bidder but lower than highest bid, bidded by other but lower than highest bid
+          
+          //save the current bid because it is at least a valid bid
           if ( $bid->id=$this->addBid( $connection, $bid ) ) {
             //get two highest bid(sort by value DESC and time ASC)
             $auctionID = $auction->id;
@@ -730,25 +732,32 @@ class DatabaseConnection {
             $secondHighestBid = mysqli_fetch_assoc( $result );
             if ( is_null( $highestBid ) || is_null( $secondHighestBid ) ) {
               //return server error
-              return array( "status"=>"danger", "message"=>"Unable to get records" );
+              die("Unable to get records" );
             }
-            //check if the bid is highest bid
-            if ( $bid->id == $highestBid["id"] ) {
-              //change current bid to the bid and winnerId to userId and return true and congrats
-              if ($highestBid["bidValue"]>$secondHighestBid["bidValue"]+$auction->minBidIncrease){
-                $auction->currentBid = $secondHighestBid["bidValue"]+$auction->minBidIncrease;
-              } else {
-                $auction->currentBid = $highestBid["bidValue"];
-              }
-              $auction->winnerID = $bid->buyerID;
-              $this->updateAuction( $connection, $auction );
-              //send second person an email notification for being outbid if second person is not also the buyer
+            //check if the bid is highest bid, else the current value will become that of the bid
+            if ( $bid->bidValue == $highestBid["bidValue"] ) {
+      
+
               if ($bid->buyerID != $secondHighestBid["buyerID"]){
+                //change current bid to the bid and winnerId to userId and return true and congrats
+                if ($highestBid["bidValue"]>$secondHighestBid["bidValue"]+$auction->minBidIncrease){
+                  $auction->currentBid = $secondHighestBid["bidValue"]+$auction->minBidIncrease;
+                } else {
+                  $auction->currentBid = $highestBid["bidValue"];
+                }
+                $auction->winnerID = $bid->buyerID;
+                $this->updateAuction( $connection, $auction );
+                //send second person an email notification for being outbid if second person is not also the buyer
                 return array( "status"=>"success", "message"=>"Congratulations","second_buyerID"=>$secondHighestBid["buyerID"]);
               } else {
-                return array( "status"=>"success", "message"=>"Congratulations" );
+                //the bid is updated by current user, do not change the current bid value
+                return array( "status"=>"success", "message"=>"You successfully updated your bid." );
               }
               
+            } else if ($bid->buyerID == $highestBid["buyerID"] && $bid->bidValue < $highestBid["bidValue"]){
+              //if bid is from the highest bidder, but its value less than highest bid value. Alert price lower than his previous amount
+              $this->deleteOne($connection,"bid",$bid->id);
+              return array( "status"=>"warning", "message"=>"You are the current highest bidder. You cannot place a value lower than your current bid." );
             } else {
               // change current bid to the second highest bid and return false and report price outbid.
               $auction->currentBid = $secondHighestBid["bidValue"];
