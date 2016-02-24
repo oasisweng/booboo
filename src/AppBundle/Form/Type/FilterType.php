@@ -15,7 +15,7 @@ class FilterType extends AbstractType
                 'multiple' => true,
                 'expanded' => true
             ))
-        ->add( 'Filter', SubmitType::class);
+        ->add('filter', SubmitType::class);
 
     }
 

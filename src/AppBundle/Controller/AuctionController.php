@@ -85,8 +85,7 @@ class AuctionController extends Controller {
 
                 return $this->redirectToRoute( 'homepage' );
             }
-            // echo $totalPages;
-            //$this->get( 'dump' )->d( $searchResults );
+
             $auctions = [];
             foreach ( $searchResults["auctions"] as $auctionEntry ) {
                 $auction = new Auction( $auctionEntry );
@@ -175,9 +174,6 @@ class AuctionController extends Controller {
 
         $sellerEntry = $this->get( "db" )->selectOne( $connection, 'user', $auction->sellerID );
         $seller = new User($sellerEntry);
-
-
-        
         
         //if should finish auction through this way
         if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
@@ -191,7 +187,7 @@ class AuctionController extends Controller {
 
         $ended = $auction->ended;
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
-        echo $auctionID . " ". $userID . " "; var_dump($bidded);
+       // echo $auctionID . " ". $userID . " "; var_dump($bidded);
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 
