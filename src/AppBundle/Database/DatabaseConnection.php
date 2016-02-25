@@ -935,10 +935,23 @@ class DatabaseConnection {
   // feedback
   
   public function getFeedbacks($connection,$userID){
-// "SELECT feedback.*, FROM feedback ";
-// "INNER JOIN user ON user.id = feedback.receiverID ";
-// "INNER JOIN user ON user.id = feedback.giverID ";
-// "WHERE feedback.receiverID = {$userID}";
+    $query = "SELECT feedback.*, u1.name AS receiverName, u2.name AS giverName FROM feedback ";
+    $query .= "INNER JOIN user AS u1 ON u1.id = feedback.receiverID ";
+    $query .= "INNER JOIN user AS u2 ON u2.id = feedback.giverID ";
+    $query .= "WHERE feedback.receiverID = {$userID}";
+
+
+    $feedbacks = [];
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $feedbacks[] = $row;
+      }
+    }else {
+      die( "Database query failed (get feedbacks). " . mysqli_error( $connection ) );
+    }
+
+    return $feedbacks;
   }
 
   /*

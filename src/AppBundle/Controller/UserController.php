@@ -183,73 +183,19 @@ class UserController extends Controller {
         $averageRating = $rating["AvgRating"];
 
         //get list of feedbacks
-        //$feedbackEntries = $this->get('db')->getFeedbacks($connection,$userID);
-
-
-
-        if ( $owner ) {
-            //if current user profile page belongs to current logged-in user, get detailed information
-
-            //get buying auctions
-            $buyingEntries = $this->get('db')->getBuyingAuctions($connection,$userID);
-            $buying = [];
-            foreach ($buyingEntries as $buyingEntry){
-                if ($buyingEntry){
-                    $buying[] = new Auction($buyingEntry);    
+        $feedbackEntries = $this->get('db')->getFeedbacks($connection,$userID);
+        $feedbacks = [];
+            foreach ($feedbackEntries as $feedbackEntry){
+                if ($feedbackEntry){
+                    $feedbacks[] = new Feedback($feedbackEntry);    
                 }
             }
 
-            //get selling
-            $sellingEntries = $this->get('db')->getSellingAuctions($connection,$userID);
-            $selling = [];
-            foreach ($sellingEntries as $sellingEntry){
-                if ($sellingEntry){
-                    $selling[] = new Auction($sellingEntry);    
-                }
-            }
-            //get bought
-            $boughtEntries = $this->get('db')->getBoughtAuctions($connection,$userID);
-            $bought = [];
-            foreach ($boughtEntries as $boughtEntry){
-                if ($boughtEntry){
-                    $bought[] = new Auction($boughtEntry);
-                    //check if user should leave feedback    
-                }
-            }
-            //get sold
-            $soldEntries = $this->get('db')->getSoldAuctions($connection,$userID);
-            $sold = [];
-            foreach ($soldEntries as $soldEntry){
-                if ($soldEntry){
-                    $sold[] = new Auction($soldEntry);
-                    //check if user should leave feedback    
-                }
-            }
-
-
-            return $this->render( "user/show.html.twig", array( 'buyingArray'=>$buying,
-                    'sellingArray'=>$selling,
-                    'boughtArray'=>$bought,
-                    'soldArray'=>$sold,
+        return $this->render( "user/show.html.twig", array(
                     "user"=>$user,
                     'owner' => $owner,
-                    'averageRating' => $averageRating ) );
-        } else {
-            //if current user profile page is other people's, get only selling array
-            //get selling
-            $sellingEntries = $this->get('db')->getSellingAuctions($connection,$userID);
-            $selling = [];
-            foreach ($sellingEntries as $sellingEntry){
-                if ($sellingEntry){
-                    $selling[] = new Auction($sellingEntry);    
-                }
-            }
-
-            return $this->render( "user/show.html.twig", array( 'sellingArray'=>$selling,
-                    "user"=>$user,
-                    'owner' => $owner,
-                    'averageRating' => $averageRating ) );
-        }
+                    'averageRating' => $averageRating,
+                    'feedbacks' => $feedbacks ) );
 
     }
 
@@ -289,8 +235,6 @@ class UserController extends Controller {
                     $selling[] = new Auction($sellingEntry);    
                 }
             }
-
-
             //get bought
             $boughtEntries = $this->get('db')->getBoughtAuctions($connection,$userID);
             $bought = [];

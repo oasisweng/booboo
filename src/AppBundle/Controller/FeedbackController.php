@@ -82,7 +82,7 @@ class FeedbackController extends Controller {
             if ( !$canFeedback ) {
                 $this->addFlash(
                     'warning',
-                    'You can\'t leave feedback for this auction!'
+                    'You have left feedback already!'
 
                 );
               return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
@@ -195,19 +195,25 @@ class FeedbackController extends Controller {
             if ( !$canFeedback ) {
                 $this->addFlash(
                     'warning',
-                    'You can\'t leave feedback for this auction!'
+                    'You have left feedback already!'
 
                 );
               return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
             }
         }
 
+        //get feedback
+        $feedbackEntry = $this->get('db')->selectOne($connection,'feedback',$userID);
+        $feedback = new Feedback($feedbackEntry);
+
         $this->get('dump')->d($auction->item);
         $this->get('dump')->d($giver);
         $this->get('dump')->d($receiver);
+        $this->get('dump')->d($feedback);
 
         return $this->render( 'feedback/show.html.twig', array( "form" => $form->createView(), "auction"=> $auction, 
-                                                                "giver"=>$giver, "receiver"=> $receiver ) );
+                                                                "giver"=>$giver, "receiver"=> $receiver,
+                                                                "feedback"=>$feedback ) );
     }
 
 }
