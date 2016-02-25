@@ -26,7 +26,7 @@ class Auction {
     /**
      *
      *
-     * @Assert\NotBlank()
+     * @Assert\GreaterThan("today")
      * @Assert\DateTime()
      */
     public $startAt;
@@ -34,7 +34,7 @@ class Auction {
     /**
      *
      *
-     * @Assert\NotBlank()
+     * @Assert\GreaterThan("today")
      * @Assert\DateTime()
      */
     public $endAt;

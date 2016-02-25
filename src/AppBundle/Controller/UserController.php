@@ -289,6 +289,8 @@ class UserController extends Controller {
                     $selling[] = new Auction($sellingEntry);    
                 }
             }
+
+
             //get bought
             $boughtEntries = $this->get('db')->getBoughtAuctions($connection,$userID);
             $bought = [];

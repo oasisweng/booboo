@@ -402,8 +402,7 @@ class DatabaseConnection {
     $query .= "auction.endAt >= NOW() and ";
     $query .= "bid.bidValue =( ";
     $query .= "SELECT MAX(bid.bidValue) FROM bid ";
-    $query .= "WHERE  ";
-    $query .= "bid.auctionID = auction.ID  ";
+    $query .= "WHERE bid.auctionID = auction.id ";
     $query .= "AND bid.buyerID = {$userID}) ";
     $query .= "group by bid.auctionID";
   
@@ -424,10 +423,12 @@ class DatabaseConnection {
   }
 
   public function getSellingAuctions($connection,$userID){
-    $query = "SELECT * FROM ";
-    $query .= "auction ";
-    $query .= "INNER JOIN ";
+    $query = "SELECT auction.*,bid.bidValue,bid.buyerID,item.itemName,item.description,";
+    $query .= "item.imageURL,item.ownerID,item.categoryID FROM auction ";
+    $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "bid ON bid.auctionID = auction.id ";
     $query .= "WHERE ";
     $query .= "sellerID = {$userID} ";
 
@@ -439,7 +440,7 @@ class DatabaseConnection {
         $auctions[] = $row;
       }
     } else {
-      die( "Database query failed (getBuyingAuctions). " . mysqli_error( $connection ) );
+      die( "Database query failed (getSellingAuctions). " . mysqli_error( $connection ) );
     }
 
     return $auctions;

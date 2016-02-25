@@ -101,7 +101,8 @@ Edit an auction | auction_edit  | /auction/{auctionID}/edit | `{{ path('auction_
 Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}`  
 Place a bid | bid_bid | /auction/{auctionID}/bid | `{{ path('bid_bid', {'auctionID': 1}) }}`
 Search for auction | auction_search | /search/{page} | *Use Form* |
-Leave an feedback | feedback_new | /feedback/{auctionID} | `{{ path('feedback_new', {'auctionID': 1}) }}`
+Leave an feedback | feedback_new | /feedback/{auctionID}/new | `{{ path('feedback_new', {'auctionID': 1}) }}`
+View an feedback | feedback_show | /feedback/{auctionID} | `{{ path('feedback_show', {'auctionID': 1}) }}`
 Get user info | user_api | /user/api/{userID} | `{{ path('feedback_new', {'auctionID': 1}) }}`
 Get specific columns for an auction | auction_columns_api | /auction/{auctionID}/columns/{columns} | `{{ path('auction_columns_api', {'auctionID': 1,'columns':'id/endAt/ended'}) }}`
 Finish auction on the background | auction_finish_api | /auction/{auctionID}/finish | `{{ path('auction_columns_api', {'auctionID': 1}) }}`
