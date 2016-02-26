@@ -73,9 +73,24 @@
 	{% else %}
 	<div class="row">	
 		<h2> user is not owner of profile page </h2>
+
+		<div class="row">	
+			<div class="col-md-4">
+				<img src="http://placehold.it/200/bbbbbb/fff&amp;text={{ user.id }}" class="img-responsive">
+			</div>
+
+			<div class="col-md-8">
+				<label> User Name : </label>{{user.name}}<br>
+				<label> Email : </label>{{user.email}}<br>
+				<label> Average Rating: </label>   <br>
+			</div>
+		</div>
+	</div> 
+
+
 		{% endif %}
-	</div>
 </div>
+ 
 
 {% endblock %}
 
@@ -112,7 +127,7 @@ function updateTable(data, category, buttonName) {
 				auctions[category][data[category][i].id].itemName = data[category][i].itemName;
 				if (category == 'buying') {
 					auctions[category][data[category][i].id].bidValue = data[category][i].bidValue;
-				}
+ 				}
 				auctions[category][data[category][i].id].currentBid = (data[category][i].currentBid ? data[category][i].currentBid : 'No bid');
 				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');

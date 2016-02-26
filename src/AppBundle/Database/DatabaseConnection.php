@@ -499,7 +499,12 @@ class DatabaseConnection {
   public function getWatchingAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
     $query = "SELECT * FROM ";
-    $query .= "watching inner join auction on watching.auctionid = auction.id and watching.userid = {$userID} ";
+    $query .= "watching ";
+    $query .= "inner join auction ";
+    $query .= "on watching.auctionid = auction.id ";
+    $query .= "inner join item ";
+    $query .= "on auction.itemID = item.id ";
+    $query .= "and watching.userid = {$userID} ";
 
     $result = mysqli_query($connection,$query);
 
