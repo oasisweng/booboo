@@ -245,7 +245,7 @@ class DatabaseConnection {
     //if the current price is lowre than reserved price, set the current to reserved price
     
     if ($auction->currentBid<$auction->reservedPrice){
-      if ($bid["bidValue"]>$auction->reservedPrice){
+      if ($bid["bidValue"]>=$auction->reservedPrice){
         $auction->currentBid = $auction->reservedPrice;
         if ( $bid ) {
           $auction->winnerID = $bid["buyerID"];
@@ -510,13 +510,13 @@ class DatabaseConnection {
 
   public function getWatchingAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
-    $query = "SELECT * FROM ";
-    $query .= "watching ";
-    $query .= "inner join auction ";
-    $query .= "on watching.auctionid = auction.id ";
-    $query .= "inner join item ";
-    $query .= "on auction.itemID = item.id ";
-    $query .= "and watching.userid = {$userID} ";
+    $query = "SELECT auction.*,item.itemName,item.description,";
+    $query .= "item.imageURL,item.ownerID,item.categoryID FROM watching ";
+    $query .= "INNER JOIN auction ";
+    $query .= "ON watching.auctionid = auction.id ";
+    $query .= "INNER JOIN item ";
+    $query .= "ON auction.itemID = item.id ";
+    $query .= "WHERE watching.userid = {$userID} ";
 
     $result = mysqli_query($connection,$query);
 

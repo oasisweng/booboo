@@ -254,7 +254,7 @@ class UserController extends Controller {
                     //check if user should leave feedback    
                 }
             }
-            //get sold
+            //get watching
             $watchingEntries = $this->get('db')->getWatchingAuctions($connection,$userID);
             $watching = [];
             foreach ($watchingEntries as $watchingEntry){
