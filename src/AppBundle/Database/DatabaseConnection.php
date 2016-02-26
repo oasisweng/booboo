@@ -472,6 +472,7 @@ class DatabaseConnection {
   }
 
   public function getSoldAuctions($connection,$userID){
+    $userID = mysqli_real_escape_string($connection, $userID);
     $query = "SELECT * FROM ";
     $query .= "auction ";
     $query .= "WHERE ";
@@ -491,6 +492,33 @@ class DatabaseConnection {
 
     return $auctions;
   }
+
+
+/* get auctions said user is watching atm */
+
+  public function getWatchingAuctions($connection,$userID){
+    $userID = mysqli_real_escape_string($connection, $userID);
+    $query = "SELECT * FROM ";
+    $query .= "watching inner join auction on watching.auctionid = auction.id and watching.userid = {$userID} ";
+
+    $result = mysqli_query($connection,$query);
+
+    $auctions = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (getWatchingAuctions). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+  }
+
+
+
+
+
 
   /*
    * get new auction for homepage, defined by the date of creation

@@ -25,6 +25,7 @@
 				<li role="presentation"><a href="#selling" aria-controls="selling" role="tab" data-toggle="tab">Selling</a></li>
 				<li role="presentation"><a href="#bought" aria-controls="bought" role="tab" data-toggle="tab">Bought</a></li>
 				<li role="presentation"><a href="#sold" aria-controls="sold" role="tab" data-toggle="tab">Sold</a></li>
+				<li role="presentation"><a href="#watching" aria-controls="watching" role="tab" data-toggle="tab">Watching</a></li>
 			</ul>
 
 			<!-- Tab panes -->
@@ -38,7 +39,7 @@
 				</div>
 				<div role="tabpanel" class="tab-pane" id="selling">
 					<table class="table table-striped">
-						<thead><tr><th>Item Name</th><th>Bid</th><th>Current Bid</th><th>Time Left</th><th>Details</th></tr></thead>
+						<thead><tr><th>Item Name</th><th>Starting Bid</th><th>Current Bid</th><th>Time Left</th><th>Details</th></tr></thead>
 						<tbody id="selling-table">
 						</tbody>
 					</table>
@@ -54,6 +55,13 @@
 					<table class="table table-striped">
 						<thead><tr><th>Item Name</th><th>Seller Name</th><th>Price</th><th>Date</th></tr></thead>
 						<tbody id="sold-table">
+						</tbody>
+					</table>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="watching">
+					<table class="table table-striped">
+						<thead><tr><th>Item Name</th><th>Current Bid</th><th>Time Left</th><th>Details</th></tr></thead>
+						<tbody id="watching-table">
 						</tbody>
 					</table>
 				</div>
@@ -79,7 +87,8 @@ var auctions = {
 	buying: {},
 	selling: {},
 	bought: {},
-	sold: {}
+	sold: {},
+	watching: {}
 };
 var countDownRows = [];
 function updateTable(data, category, buttonName) {
@@ -101,8 +110,10 @@ function updateTable(data, category, buttonName) {
 		if (category == 'buying' || category == 'selling') {
 			if (auctions[category][data[category][i].id]) {
 				auctions[category][data[category][i].id].itemName = data[category][i].itemName;
-				auctions[category][data[category][i].id].bidValue = data[category][i].bidValue;
-				auctions[category][data[category][i].id].currentBid = data[category][i].currentBid;
+				if (category == 'buying') {
+					auctions[category][data[category][i].id].bidValue = data[category][i].bidValue;
+				}
+				auctions[category][data[category][i].id].currentBid = (data[category][i].currentBid ? data[category][i].currentBid : 'No bid');
 				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
 				$(tdArray[0]).html(auctions[category][data[category][i].id].itemName);
@@ -110,7 +121,31 @@ function updateTable(data, category, buttonName) {
 				$(tdArray[2]).html(auctions[category][data[category][i].id].currentBid);
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + auctions[category][data[category][i].id].bidValue + '</td><td>' + auctions[category][data[category][i].id].currentBid + '</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (category == 'buying' ? auctions[category][data[category][i].id].bidValue : auctions[category][data[category][i].id].startingBid) + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + '</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
+				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
+				var endTime = new Date(auctions[category][data[category][i].id].endAt.date);
+				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
+				$(tdArray[3]).countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
+					var $this = $(this);
+					if (event.elapsed) {
+						$this.html('Ended');
+					} else {
+						$this.html(event.strftime('%H hours : %M mins : %S seconds'));
+					}
+				});
+			}
+		} else if (category == 'watching') {
+			if (auctions[category][data[category][i].id]) {
+				auctions[category][data[category][i].id].itemName = data[category][i].itemName;
+				auctions[category][data[category][i].id].currentBid = (data[category][i].currentBid ? data[category][i].currentBid : 'No bid');
+				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
+				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
+				$(tdArray[0]).html(auctions[category][data[category][i].id].itemName);
+				$(tdArray[1]).html(auctions[category][data[category][i].id].bidValue);
+				$(tdArray[2]).html(auctions[category][data[category][i].id].currentBid);
+			} else {
+				auctions[category][data[category][i].id] = data[category][i];
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + '</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
 				var endTime = new Date(auctions[category][data[category][i].id].endAt.date);
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
@@ -151,6 +186,7 @@ function updateTables() {
 		updateTable(data, 'selling', 'Edit');
 		updateTable(data, 'bought', 'Feedback');
 		updateTable(data, 'sold', 'Feedback');
+		updateTable(data, 'watching', 'Go');
 	});
 }
 updateTables();

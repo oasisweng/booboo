@@ -253,12 +253,20 @@ class UserController extends Controller {
                     //check if user should leave feedback    
                 }
             }
-
-
+            //get sold
+            $watchingEntries = $this->get('db')->getWatchingAuctions($connection,$userID);
+            $watching = [];
+            foreach ($watchingEntries as $watchingEntry){
+                if ($watchingEntry){
+                    $watching[] = new Auction($watchingEntry);
+                    //check if user should leave feedback    
+                }
+            }
             return new JsonResponse(array( 'buying'=>$buying,
                     'selling'=>$selling,
                     'bought'=>$bought,
                     'sold'=>$sold,
+                    'watching'=>$watching,
                     'averageRating' => $averageRating ));
 
     }
