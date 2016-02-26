@@ -190,15 +190,11 @@ class FeedbackController extends Controller {
             );
             return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
         } else {
-            //check user can leave feedback, otherwise, redirect to user_profile
+            //check user can leave feedback, if so, redirect to new profile page
+            //otherwise, show feedback
             $canFeedback = $this->get( 'db' )->canFeedback( $connection, $userID, $receiverID, $auctionID );
-            if ( !$canFeedback ) {
-                $this->addFlash(
-                    'warning',
-                    'You have left feedback already!'
-
-                );
-              return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
+            if ($canFeedback ) {
+                return $this->redirectToRoute( 'feedback_new', array( "auctionID"=>$auctionID ), 301 );
             }
         }
 
