@@ -172,6 +172,18 @@ class FeedbackController extends Controller {
         $giver = new User($giverEntry);
         $receiver = new User($receiverEntry);    
 
+        //check if giver is eligible
+        $testGiverID = $receiverID == $auction->sellerID ? $auction->winnerID : $auction->sellerID;
+        if ($testGiverID != $userID){
+            $this->addFlash(
+                'warning',
+                'You are not eligible to view feedback for this auction!'
+
+            );
+
+            return $this->redirectToRoute( 'homepage' );
+        }
+        
         if ( !isset( $userID ) ) {
             //return to login page
             $this->addFlash(
@@ -183,7 +195,7 @@ class FeedbackController extends Controller {
             //check user can leave feedback, if so, redirect to new profile page
             //otherwise, show feedback
             $canFeedback = $this->get( 'db' )->canFeedback( $connection, $userID, $receiverID, $auctionID );
-            if ($canFeedback ) {
+            if ($canFeedback) {
                 return $this->redirectToRoute( 'feedback_new', array( "auctionID"=>$auctionID ), 301 );
             }
         }

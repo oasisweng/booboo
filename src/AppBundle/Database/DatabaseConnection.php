@@ -157,8 +157,8 @@ class DatabaseConnection {
     $itemId = $this->addItem( $connection, $item );
 
     $query =  "INSERT INTO auction ";
-    $query .= "(sellerID,startAt,endAt, itemId, startingBid, minBidIncrease, reservedPrice) ";
-    $query .= "VALUES ({$sellerID},'{$startAt}','{$endAt}',{$itemId},{$startingBid},";
+    $query .= "(sellerID,startAt,endAt, itemId, startingBid, minBidIncrease, reservedPrice,updatedAt) ";
+    $query .= "VALUES ({$sellerID},'{$startAt}','{$endAt}',{$itemId},{$startingBid},NOW()";
     $query .= ( isset( $minBidIncrease ) ? "{$minBidIncrease}" : "NULL" ) . ",";
     $query .= ( isset( $reservedPrice ) ? "{$reservedPrice}" : "NULL" ) . ")";
 
@@ -191,8 +191,8 @@ class DatabaseConnection {
       "minBidIncrease={$minBidIncrease}," .
       "reservedPrice={$reservedPrice}," .
       "winnerID={$winnerID}," .
-      "ended={$ended}, " .
-      "currentBid={$currentBid} " .
+      "ended={$ended}," .
+      "currentBid={$currentBid}," .
       "updatedAt=NOW() " .
       "WHERE id={$id} ";
 
@@ -235,15 +235,27 @@ class DatabaseConnection {
   public function finishAuction( $connection, $auction ) {
     $id = mysqli_real_escape_string( $connection, $auction->id );
     //get two highest bid(sort by value DESC and time ASC)
-    $query = "SELECT buyerID FROM bid WHERE ";
+    $query = "SELECT buyerID,bidValue FROM bid WHERE ";
     $query .= "auctionID={$id} ";
     $query .= "ORDER BY bidValue DESC, createdAt ASC ";
     $query .= "LIMIT 1";
     $result = mysqli_query( $connection, $query );
-    $object = mysqli_fetch_assoc( $result );
-    if ( $object ) {
-      $auction->winnerID = $object["buyerID"];
+    $bid = mysqli_fetch_assoc( $result );
+    //make sure the highest price is higher than $auction's reserved price
+    //if the current price is lowre than reserved price, set the current to reserved price
+    
+    if ($auction->currentBid<$auction->reservedPrice){
+      if ($bid["bidValue"]>$auction->reservedPrice){
+        $auction->currentBid = $auction->reservedPrice;
+        if ( $bid ) {
+          $auction->winnerID = $bid["buyerID"];
+        }
+      }
+    } else if ( $bid ) {
+      $auction->winnerID = $bid["buyerID"];
     }
+    
+    
     $auction->ended = true;
     $this->updateAuction( $connection, $auction );
   }
@@ -764,7 +776,29 @@ class DatabaseConnection {
     }
   }
 
-  public function bid( $connection, $bid, $auction ) {
+  public function updateBid( $connection, $bid ) {
+    $bidValue = $bid->bidValue;
+    $buyerID = $bid->buyerID;
+    $auctionID = $bid->auctionID;
+    $id=$bid->id;
+
+    $query = "UPDATE bid SET ".
+    $query .= "bidValue = {$bidValue},";
+    $query .= "buyerID={$buyerID}, ";
+    $query .= "auctionID={$auctionID} ";
+    $query .= "WHERE id={$id} ";
+
+    $result = mysqli_query( $connection, $query );
+    $affected = mysqli_affected_rows( $connection );
+    if ( $result && $affected >= 0 ) {
+      return true;
+    } else {
+      die( "Database query failed (Bid Update). " . mysqli_error( $connection ) );
+      return FALSE;
+    }
+  }
+
+  public function bid($connection, $bid, $auction ) {
     //check if auction is on,
     $now = date( "Y-m-d H:i:s" );
     if ( $auction->endAt>$now ) {
@@ -779,7 +813,7 @@ class DatabaseConnection {
             $this->updateAuction( $connection, $auction );
             return array( "status"=>"success", "message"=>"Congratulations" );
           } else {
-            return array( "status"=>"danger", "message"=>"Unable to get records" );
+            return array( "status"=>"danger", "message"=>"Unable to add bid" );
           }
         } else {
           return array( "status"=>"warning", "message"=>"Bid value is lower than starting bid" );
@@ -832,6 +866,9 @@ class DatabaseConnection {
               // change current bid to the second highest bid and return false and report price outbid.
               $auction->currentBid = $secondHighestBid["bidValue"];
               $auction->winnerID = $highestBid["buyerID"];
+              //change bidder to highest bidder
+              $bid->buyerID = $highestBid["buyerID"];
+              $this->updateBid($connection,$bid);
               $this->updateAuction( $connection, $auction );
               return array( "status"=>"warning", "message"=>"Price outbid" );
             }
