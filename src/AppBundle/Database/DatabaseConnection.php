@@ -995,9 +995,8 @@ class DatabaseConnection {
     $query .= "feedback.auctionID = {$auctionID}  ";
     $query .= "AND feedback.giverID = {$giverID}  ";
     $query .= "AND feedback.receiverID = {$receiverID})  ";
-    $query .= "AND(auction.sellerID = {$giverID} AND auction.winnerID = {$receiverID})  ";
-    $query .= "OR(auction.sellerID = {$receiverID} AND auction.winnerID = {$giverID}) ";
-
+    $query .= "AND (auction.sellerID = {$giverID} AND auction.winnerID = {$receiverID})  ";
+    $query .= "OR (auction.sellerID = {$receiverID} AND auction.winnerID = {$giverID}) ";
     $result = mysqli_query($connection,$query);
     if ($result){
       $canFeedback = mysqli_fetch_assoc($result);
@@ -1008,6 +1007,18 @@ class DatabaseConnection {
     }
 
   } 
+
+  public function selectFeedback($connection,$giverID,$receiverID,$auctionID){
+    $query = "SELECT * FROM feedback WHERE giverID={$giverID} AND receiverID={$receiverID} AND auctionID={$auctionID} LIMIT 1";
+    $result = mysqli_query( $connection, $query );
+    if ( $result ) {
+      $object = mysqli_fetch_assoc( $result );
+      return $object;
+    } else {
+      return false;
+    }
+
+  }
   
   /*
    * @return ["status" : can be success, warning, danger, info, 
@@ -1025,7 +1036,6 @@ class DatabaseConnection {
     if ($canFeedback){
       $query = "INSERT INTO feedback (giverID,receiverID,rating,comment,auctionID) ";
       $query .= "VALUES ({$giverID},{$receiverID},{$rating},'{$comment}',{$auctionID})";
-
       $result = mysqli_query( $connection, $query );
       if ( $result ) {
         $id =  mysqli_insert_id( $connection );
@@ -1034,6 +1044,7 @@ class DatabaseConnection {
         die( "Database query failed (feedback). " . mysqli_error( $connection ) );
         return false;
       }
+      return false;
     } else {
       //TODO: next version, it will check why feedback failed
       return array("status"=>"warning","reason"=>"You can't leave feedback for this auction.");
