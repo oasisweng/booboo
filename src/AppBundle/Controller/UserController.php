@@ -18,6 +18,7 @@ use AppBundle\Form\Type\ChangePasswordType;
 use AppBundle\Form\Type\LoginType;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Auction;
+use AppBundle\Entity\Feedback;
 
 
 class UserController extends Controller {
