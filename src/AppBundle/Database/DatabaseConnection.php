@@ -513,10 +513,10 @@ class DatabaseConnection {
     $query = "SELECT auction.*,item.itemName,item.description,";
     $query .= "item.imageURL,item.ownerID,item.categoryID FROM watching ";
     $query .= "INNER JOIN auction ";
-    $query .= "ON watching.auctionid = auction.id ";
+    $query .= "ON watching.auctionID = auction.id ";
     $query .= "INNER JOIN item ";
     $query .= "ON auction.itemID = item.id ";
-    $query .= "WHERE watching.userid = {$userID} ";
+    $query .= "WHERE watching.userID = {$userID} ";
 
     $result = mysqli_query($connection,$query);
 
