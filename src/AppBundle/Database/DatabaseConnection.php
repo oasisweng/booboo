@@ -16,10 +16,18 @@ class DatabaseConnection {
   // General
   
   public function connect() {
-    $dbhost = "127.0.0.1";
-    $dbuser = "root";
-    $dbpass = "root";
-    $dbname = "comp3013_db";
+    if (in_array($this->container->getParameter('kernel.environment'),array('test','dev'))) {
+      $dbhost = "127.0.0.1";
+      $dbuser = "root";
+      $dbpass = "root";
+      $dbname = "comp3013_db";
+    } else {
+      $dbhost = "eu-cdbr-azure-north-d.cloudapp.net";
+      $dbuser = "bcaee1cbd4c59b";
+      $dbpass = "4a3a7ecd";
+      $dbname = "comp3013_db";
+    }
+    
     $connection = mysqli_connect( $dbhost, $dbuser, $dbpass, $dbname );
     if ( mysqli_connect_errno() ) {
       die( "Database connection failed: ".
