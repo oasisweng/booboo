@@ -38,4 +38,11 @@ class DefaultController extends Controller
             'recommended_auctions' => $recommended_auctions
         ));
     }
+
+    /**
+     * @Route("/p", name="phpinfo")
+     */
+    public function phpinfoAction(){
+        return $this->render("phpinfo.php", array());
+    }
 }
