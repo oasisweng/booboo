@@ -258,7 +258,7 @@ class FeedbackController extends Controller {
             // maybe set a "flash" success message for the user
             // 
             
-            return $this->redirectToRoute( 'feedback_showt', array( "autionID"=>$auctionID ), 301 );
+            return $this->redirectToRoute( 'feedback_showt', array( "auctionID"=>$auctionID ), 301 );
         }
 
         return $this->render( 'feedback/new.html.twig', array( "form" => $form->createView(), "auction"=> $auction, 

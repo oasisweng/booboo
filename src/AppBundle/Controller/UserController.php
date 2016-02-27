@@ -192,9 +192,21 @@ class UserController extends Controller {
                 }
             }
 
+
+         //get selling
+            $sellingEntries = $this->get('db')->getSellingAuctions($connection,$userID);
+            $selling = [];
+            foreach ($sellingEntries as $sellingEntry){
+                if ($sellingEntry){
+                    $selling[] = new Auction($sellingEntry);    
+                }
+            }
+
+
         return $this->render( "user/show.html.twig", array(
                     "user"=>$user,
                     'owner' => $owner,
+                    'sellingArray'=>$selling,
                     'averageRating' => $averageRating,
                     'feedbacks' => $feedbacks ) );
 

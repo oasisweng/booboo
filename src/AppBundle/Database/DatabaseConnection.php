@@ -467,11 +467,11 @@ class DatabaseConnection {
   }
 
   public function getBoughtAuctions($connection,$userID){
-    $query = "SELECT *, user.name as sellerName FROM ";
-    $query .= "auction ";
-    $query .= "INNER JOIN ";
-    $query .= "user ON auction.sellerID = user.id "; 
-    $query .= "INNER JOIN ";
+    $query = "SELECT auction.*, user.name as sellerName, item.itemName,item.description,";
+    $query .= "item.imageURL,item.ownerID,item.categoryID FROM auction ";
+    $query .= "LEFT JOIN ";
+    $query .= "user ON auction.sellerID = user.id ";
+    $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
     $query .= "winnerID = {$userID} ";
