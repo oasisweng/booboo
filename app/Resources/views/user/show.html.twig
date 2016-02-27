@@ -182,7 +182,13 @@ function updateTable(data, category, buttonName) {
 				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
 				$(tdArray[0]).html(auctions[category][data[category][i].id].itemName);
-				$(tdArray[1]).html(auctions[category][data[category][i].id].bidValue);
+		//switches between bidValue and startingBid depending on whether the category is buying or selling	
+				if(category == 'buying'){
+					$(tdArray[1]).html(auctions[category][data[category][i].id].bidValue);
+				}else{
+					$(tdArray[1]).html(auctions[category][data[category][i].id].startingBid);
+				}
+
 				$(tdArray[2]).html(auctions[category][data[category][i].id].currentBid);
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
