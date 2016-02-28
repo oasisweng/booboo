@@ -172,7 +172,7 @@
                                 <div class="text-center">
                                     <h4><a href="#">{{ auction.id }}</a></h4>
                                     <p></p>
-                                    <a class="label label-success" href="{{ path('auction_show', {'auctionID': auction.id})}}">View item</a>
+                                    <a class="label label-danger" style="color:#fff;" href="{{ path('auction_show', {'auctionID': auction.id})}}">View item</a>
                                 </div>
                             </div>
                         {% endfor %}
@@ -186,6 +186,21 @@
 </div>
 
 {% endblock %}
+
+
+    {% block stylesheets %}
+    <style type="text/css">
+
+    .label-danger {
+        background-color: #ed786a!important;
+        padding: 5px!important;
+    }
+
+
+    </style>
+
+    {% endblock %}
+
 
 {% block javascripts %}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
