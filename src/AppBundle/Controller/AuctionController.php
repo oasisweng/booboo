@@ -146,6 +146,17 @@ class AuctionController extends Controller {
             ) );
     }
 
+     /**
+     *
+     *
+     * @Route("/auction/watch/{auctionID}/{userID}", name="auction_watch", requirements={"auctionID": "\d+", "userID": "\d+"})
+     */
+    public function watchAction( $auctionID, $userID, Request $request ) {
+        $connection = $this->get( "db" )->connect();
+        $result = $this->get('db')->setWatchingAuction($connection, $userID, $auctionID);
+        return new JsonResponse($result);
+    }
+
     /**
      *
      *

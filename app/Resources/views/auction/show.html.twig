@@ -146,6 +146,14 @@
             	{{ include('bid/bid.html.twig', {'bid_form': bid_form }) }}
 			</div><br><br>
             {% endif %}
+
+            
+            <div class="row.10">
+                <div id="watch-button">
+                </div>
+            </div>
+
+
 			<div class="row.10">
 				<label>View :</label> {{ auction.viewCount}}
 			</div>
@@ -206,7 +214,31 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script type="text/javascript" src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('assets/js/auction_show.js')}}"></script>
-
+<script>
+    var watchingFlag = false;
+    var pending = false;
+    function updateWatchingButton() {
+        pending = true;
+        if (watchingFlag) {
+            $('#watch-button').html('<a href="#">Remove from watch list.</a>');
+        } else {
+            $('#watch-button').html('<a href="#">Add to watch list.</a>');
+        }
+        $('#watch-button > a').click(function(e) {
+            e.preventDefault();
+            if (pending) {
+                return;
+            }
+            //path is semi broken for now. auctionID should be auto update. will fix later today 
+            $.get('{{ path('auction_watch', {'userID': app.session.get('userID')}{'auctionID': 8 })}}', function(data) {
+                watchingFlag = data;
+                updateWatchingButton();
+            });
+        });
+        pending = false;
+    }
+    updateWatchingButton();
+</script>
     <script>
     $('#similarAuction').carousel({
         interval: 10000

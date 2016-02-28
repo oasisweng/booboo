@@ -181,7 +181,32 @@ class UserController extends Controller {
 
         //get average rating and total number of feedbacks received
         $rating = $this->get('db')->getAverageRating($connection,$userID);
-        $averageRating = $rating["AvgRating"];
+
+        return $this->render( "user/show.html.twig", array(
+                    "user"=>$user,
+                    'owner' => $owner,
+                    'averageRating' => $rating,
+                    ) );
+
+    }
+
+    /**
+     * @Route("/user/show/api/{userID}", name="show_api", requirements={"userID": "\d+"})
+     */
+    public function showApiAction( $userID, Request $request ) {
+        //passing through entire session as parameter instead of just userID
+        //entire session required to check whether user is 'LOGGED IN' or 'NOT LOGGED IN'
+        $connection = $this->get( "db" )->connect();
+        $userEntry = $this->get( "db" )->selectOne( $connection, 'user', $userID );
+        $user = new User( $userEntry );
+
+        if ( !$user ) {
+            return $this->redirectToRoute( 'homepage' );
+        }
+
+        $session = $request->getSession();
+        //check if current user owns this profile
+        $owner = $session->get( 'userID' ) == $userID ;
 
         //get list of feedbacks
         $feedbackEntries = $this->get('db')->getFeedbacks($connection,$userID);
@@ -202,14 +227,10 @@ class UserController extends Controller {
                 }
             }
 
-
-        return $this->render( "user/show.html.twig", array(
-                    "user"=>$user,
-                    'owner' => $owner,
-                    'sellingArray'=>$selling,
-                    'averageRating' => $averageRating,
-                    'feedbacks' => $feedbacks ) );
-
+        return new JsonResponse(array(
+            'selling' => $selling,
+            'feedback' => $feedbacks
+            ));
     }
 
     /**
@@ -225,10 +246,6 @@ class UserController extends Controller {
         if ( !$user ) {
             return new JsonResponse(["status"=>"fail","message"=>"user does not exist"]);
         }
-
-        //get average rating and total number of feedbacks received
-        $rating = $this->get('db')->getAverageRating($connection,$userID);
-        $averageRating = $rating["AvgRating"];
 
             //if current user profile page belongs to current logged-in user, get detailed information
 
@@ -280,7 +297,7 @@ class UserController extends Controller {
                     'bought'=>$bought,
                     'sold'=>$sold,
                     'watching'=>$watching,
-                    'averageRating' => $averageRating ));
+                 ));
 
     }
 

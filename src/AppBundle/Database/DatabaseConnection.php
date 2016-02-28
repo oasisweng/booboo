@@ -451,7 +451,7 @@ class DatabaseConnection {
     $query .= "LEFT JOIN ";
     $query .= "bid ON bid.auctionID = auction.id ";
     $query .= "WHERE ";
-    $query .= "sellerID = {$userID} ";
+    $query .= "sellerID = {$userID} and auction.endAt > NOW()";
 
     $result = mysqli_query($connection,$query);
 
@@ -560,6 +560,23 @@ public function addWatch($connection,$userID, $auctionID){
     return $auctions;
   }
 */
+
+ public function setWatchingAuction($connection, $userID, $auctionID) {
+    $userID = mysqli_real_escape_string($connection, $userID);
+    $auctionID = mysqli_real_escape_string($connection, $auctionID);
+    $query = "select * from watching where userID = '{$userID}' and auctionID = '{$auctionID}'";
+    $result = mysqli_query($connection,$query);
+    if ($row = mysqli_fetch_assoc($result)) {
+      $query = "delete from watching where userID = '{$userID}' and auctionID = '{$auctionID}'";
+      mysqli_query($connection,$query);
+      return false;
+    } else {
+      $query = "insert into watching values ('{$userID}', '{$auctionID}')";
+      mysqli_query($connection,$query);
+      return true;
+    }
+  }
+
 
 
 
@@ -1140,8 +1157,12 @@ public function addWatch($connection,$userID, $auctionID){
 
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
-      $rating =  mysqli_insert_id( $connection );
-      return $rating;
+      $row = mysqli_fetch_assoc( $result );
+      if ( $row['NumOfFeedbacks'] == 0 ) {
+        return 0;
+      } else {
+        return $row['AvgRating'];
+      }
     } else {
       die( "Database query failed (getAverageRating). " . mysqli_error( $connection ) );
       return false;
