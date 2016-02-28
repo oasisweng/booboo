@@ -2,6 +2,13 @@
 
 {% block body %}
 <div class="container">
+    {% if auction.sellerID == app.session.get('userID') %}
+    <div class="row">
+      <div class="col-md-2 col-md-push-10">
+        <button style="padding-right: 25px; padding-left: 25px; padding-top: 7px; padding-bottom: 7px; margin-top: 15px;"><a  class="btn btn-def btn" style="color:#fff" href="{{ path('auction_edit', {'auctionID': auction.id}) }}"> Edit </a></button>
+        </div>  
+    </div>
+    {% endif %}
 	<div class="col-md-8 col-md-offset-2">
     <h2>Auction Detail</h2>
     {% if ended %}
@@ -57,14 +64,14 @@
             </div>
             {% endif %}<!-- winning -->
             {% else %}<!-- bidded -->
-            <div class="flash flash-info">
+            {# <div class="flash flash-info">
                 <div class="alert alert-info alert-dismissible fade in" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
                 You have not bid on this item.
                 </div>
-            </div>
+            </div> #}
             {% endif %}<!-- bidded -->
     {% endif %}<!-- ended -->
     <div class="row">
@@ -103,7 +110,6 @@
                 {% else %}
                     {{ auction.currentBid}}
                 {% endif %}
-                <p><small>Minimum bid increase is {{auction.minBidIncrease}}</small></p>
             </div>
 			<br>
 			<div class="row.10">
@@ -144,7 +150,9 @@
                     <p style="text-align:center;"><small>No one has bidded yet, <b>be the first one!</b></small></p>
                 {% endif %}
             	{{ include('bid/bid.html.twig', {'bid_form': bid_form }) }}
-			</div><br><br>
+                <p style="clear: both;text-align: center;"><small>Minimum bid increase is {{auction.minBidIncrease}}</small></p>
+			</div>
+            <br><br>
             {% endif %}
 
             

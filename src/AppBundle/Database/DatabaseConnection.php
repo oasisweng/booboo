@@ -167,9 +167,10 @@ class DatabaseConnection {
 
     $query =  "INSERT INTO auction ";
     $query .= "(sellerID,startAt,endAt, itemId, startingBid, minBidIncrease, reservedPrice,updatedAt) ";
-    $query .= "VALUES ({$sellerID},'{$startAt}','{$endAt}',{$itemId},{$startingBid},NOW()";
+    $query .= "VALUES ({$sellerID},'{$startAt}','{$endAt}',{$itemId},{$startingBid},";
     $query .= ( isset( $minBidIncrease ) ? "{$minBidIncrease}" : "NULL" ) . ",";
-    $query .= ( isset( $reservedPrice ) ? "{$reservedPrice}" : "NULL" ) . ")";
+    $query .= ( isset( $reservedPrice ) ? "{$reservedPrice}" : "NULL" ) . ",";
+    $query .= "NOW())";
 
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
@@ -204,7 +205,6 @@ class DatabaseConnection {
       "currentBid={$currentBid}," .
       "updatedAt=NOW() " .
       "WHERE id={$id} ";
-      var_dump($query);
     $result = mysqli_query( $connection, $query );
     $affected = mysqli_affected_rows( $connection );
     if ( $result && $affected >= 0 ) {
