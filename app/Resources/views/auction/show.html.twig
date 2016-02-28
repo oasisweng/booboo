@@ -238,7 +238,7 @@
                 return;
             }
             //path is semi broken for now. auctionID should be auto update. will fix later today 
-            $.get('{{ path('auction_watch', {'userID': app.session.get('userID')}{'auctionID': 8 })}}', function(data) {
+            $.get('{{ path('auction_watch', {'userID': app.session.get('userID'),'auctionID': 8 })}}', function(data) {
                 watchingFlag = data;
                 updateWatchingButton();
             });

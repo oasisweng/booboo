@@ -223,7 +223,7 @@ class AuctionController extends Controller {
 
                 //attempt to bid
                 $response = $this->get( 'db' )->bid( $connection, $bid, $auction );
-                $this->get( 'dump' )->d( $response );
+                //$this->get( 'dump' )->d( $response );
                 if ( $response["status"] == "success" ) {
                     $this->addFlash(
                         'success',
@@ -345,11 +345,11 @@ class AuctionController extends Controller {
                         'Auction "'.$auction->item->itemName.'" updated!'
                     );
 
-                    return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
+                    return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
                 } else {
                     $this->addFlash(
                         'warning',
-                        'Updating Auction {$auctionID} went wrong! AuctionController.php'
+                        'Something went wrong in updating this auction!'
                     );
                 }
             }

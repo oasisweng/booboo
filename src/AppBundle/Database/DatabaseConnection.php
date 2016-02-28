@@ -73,13 +73,13 @@ class DatabaseConnection {
     $escaped_name = $this->e( $connection, $itemName );
     $escaped_description = $this->e( $connection, $description );
     if ( isset( $image ) ) {
-      $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/uploads/photos/';
-      $generator = new SecureRandom();
-      $fileName = $generator->nextBytes( 10 );
+      $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/assets/photos/';
+      $fileName = $this->generateRandomString().".".$image->guessExtension();
       $image->move( $dir, $fileName );
       $imageURL = $fileName;
       $escaped_imageURL = $this->e( $connection, $imageURL );
     }
+
     $query = "INSERT INTO item (itemName,description,imageURL, categoryID) " .
       "VALUES ('{$escaped_name}','{$escaped_description}',"  .
       ( isset( $escaped_imageURL ) ? "'{$escaped_imageURL}'" : "NULL" ) .
@@ -104,7 +104,7 @@ class DatabaseConnection {
     $escaped_name = $this->e( $connection, $itemName );
     $escaped_description = $this->e( $connection, $description );
     if ( isset( $image ) ) {
-      $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/uploads/photos/';
+      $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/assets/photos';
       //remove old one
       $fs = new Filesystem();
       if ( $fs->exists( $dir.$imageURL ) ) {
@@ -112,27 +112,25 @@ class DatabaseConnection {
       }
 
       //create new one
-      $generator = new SecureRandom();
-      $fileName = $generator->nextBytes( 10 );
+      $fileName = $this->generateRandomString().".".$image->guessExtension();
       $image->move( $dir, $fileName );
       $item->imageURL = $fileName;
       $imageURL = $fileName;
     }
-
     $query = "UPDATE item SET ";
     $query .="itemName='{$escaped_name}', ";
     $query .="description='{$escaped_description}', ";
     if ($imageURL != NULL){
-      $query .="imageURL={$imageURL}, " ; 
+      $query .="imageURL='{$imageURL}', " ; 
     }
     $query .="categoryID={$categoryID} ";
     $query .="WHERE id={$id}";
-
     $result = mysqli_query( $connection, $query );
-    if ( $result && mysqli_affected_rows( $connection ) >= 0 ) {
-      return TRUE;
+    $rows = mysqli_affected_rows( $connection );
+    if ( $result && $rows >= 0 ) {
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
   }
 
@@ -334,6 +332,7 @@ class DatabaseConnection {
       $query ="SELECT ";
       $query .="auction.id, ";
       $query .="item.imageURL, ";
+      $query .="item.itemName, ";
       $query .="user.name, ";
       $query .="auction.sellerID ";
       $query .= "FROM auction ";
@@ -373,6 +372,7 @@ class DatabaseConnection {
       $query_all = "SELECT ";
       $query_all .="auction.id, ";
       $query_all .="item.imageURL, ";
+      $query_all .="item.itemName, ";
       $query_all .="user.name, ";
       $query_all .="auction.sellerID FROM auction ";
       $query_count = "SELECT COUNT(*) AS count FROM auction ";
@@ -1217,6 +1217,16 @@ public function addWatch($connection,$userID, $auctionID){
     $salt = substr( $modified_base64_string, 0, $length );
     return $salt;
 
+  }
+
+  private function generateRandomString($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
   }
 }
 
