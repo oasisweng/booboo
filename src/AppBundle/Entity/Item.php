@@ -74,6 +74,7 @@ class Item
             $this->itemName = $item["itemName"];
             $this->description = $item["description"];
             $this->imageURL = isset($item["imageURL"]) ? $item["imageURL"] : NULL;
+            // echo $this->imageURL;
             $this->ownerID = $item["ownerID"];
             $this->categoryID = $item["categoryID"];
         }

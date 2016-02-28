@@ -13,7 +13,7 @@
         <nav id="nav">
             <ul>
                 <li><a class="icon fa-home" href="{{ path('homepage')}}"><span>Home</span></a></li>
-                <li><a class="icon fa-tag" href="#"><span>Categories</span></a>
+                {# <li><a class="icon fa-tag" href="#"><span>Categories</span></a>
                     <ul>
                         <li><a href="#">Lorem ipsum dolor</a></li>
                         <li><a href="#">Magna phasellus</a></li>
@@ -27,7 +27,7 @@
                             </ul>
                         </li>
                         <li><a href="#">Veroeros feugiat</a></li>
-                    </ul>
+                    </ul>#}
                 </li>
                 {% if app.session.get('userID') is not null %}
                 <li><a class="icon fa-user" href="{{ path('user_show', {'userID': app.session.get('userID')})}}"><span>My Profile/Feed </span></a></li>
@@ -35,9 +35,17 @@
                 {% else %}
                 <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
                 {% endif %}
-                <li><a class="icon fa-question" href="#"><span>Contact Us/ FAQ</span></a></li>
+                {# <li><a class="icon fa-question" href="#"><span>Contact Us/ FAQ</span></a></li> #}
                 <a class="navbar-right">
                     <!-- to include search bar in top navi for other pages outside of HOME/INDEX -->
+                    {% if app.request.attributes.get('_route') != "homepage" %}
+                        <form class="navbar-form" action="{{path('auction_search')}}" method="get" target="_self">
+                        <div class="form-group">
+                            <input type="text" id="indexonly" name="keywords" placeholder="Enter search" class="keywords form-control">
+                        </div>
+                        <button type="submit" class="btn btn-def btn">Search</button>
+                    </form>
+                    {% endif %}
                 </a>
             </ul>
         </nav>

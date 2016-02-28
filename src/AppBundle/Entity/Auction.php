@@ -26,7 +26,7 @@ class Auction {
     /**
      *
      *
-     * @Assert\GreaterThan("today")
+     *
      * @Assert\DateTime()
      */
     public $startAt;

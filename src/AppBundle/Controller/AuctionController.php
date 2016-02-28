@@ -69,7 +69,7 @@ class AuctionController extends Controller {
 
         //pass in filter
         $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25, $filter->categories );
-        $this->get('dump')->d($searchResults);
+        // $this->get('dump')->d($searchResults);
         if ( $request->isXmlHttpRequest() ) {
             //return json
             return new JsonResponse( ['result'=>$searchResults, 'page'=>$page] );
@@ -86,17 +86,9 @@ class AuctionController extends Controller {
                 return $this->redirectToRoute( 'homepage' );
             }
 
-            $auctions = [];
-            foreach ( $searchResults["auctions"] as $auctionEntry ) {
-                $auction = new Auction( $auctionEntry );
-                $auctions[] = $auction;
-                $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
-                $auction->item = new Item( $itemEntry );
-
-            }
             return $this->render( 'auction/search.html.twig', array(
                     'totalPages' => $totalPages,
-                    'auctions' => $auctions,
+                    'auctions' => $searchResults["auctions"],
                     'page' => $page,
                     'filter_form' => $filter_form->createView()
                 ) );
@@ -130,6 +122,8 @@ class AuctionController extends Controller {
 
         if ( $form->isSubmitted() && $form->isValid() ) {
             // ... perform some action, such as saving the task to the database
+            // 
+            
             $connection = $this->get( 'db' )->connect();
             if ( $auctionID = $this->get( 'db' )->addAuction( $connection, $auction ) ) {
                 $this->addFlash(
@@ -183,23 +177,6 @@ class AuctionController extends Controller {
         //get userID, or null if not logged in
         $session = $request->getSession();   
         $userID = $session->get('userID');
-
-
-        $ended = $auction->ended;
-        $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
-        //echo $auctionID . " ". $userID . " "; var_dump($bidded);
-        $winning = $bidded && $auction->winnerID==$userID;
-        $won = $ended && $winning;
-
-        //get all bids for this auction
-        $bidEntries = $this->get('db')->getAllBids($connection,$auctionID);
-        //$this->get('dump')->d($bidEntries);
-        $bids = [];
-        foreach ($bidEntries as $bidEntry){
-            if ($bidEntry){
-                $bids[] = new Bid($bidEntry);    
-            }
-        }
 
         //get similar auctions
         //get imageURL using similarAuctions[i].imageURL and 
@@ -278,6 +255,22 @@ class AuctionController extends Controller {
 
         }
 
+                //get all bids for this auction
+        $bidEntries = $this->get('db')->getAllBids($connection,$auctionID);
+        //$this->get('dump')->d($bidEntries);
+        $bids = [];
+        foreach ($bidEntries as $bidEntry){
+            if ($bidEntry){
+                $bids[] = new Bid($bidEntry);    
+            }
+        }
+
+        $ended = $auction->ended;
+        $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
+        //echo $auctionID . " ". $userID . " "; var_dump($bidded);
+        $winning = $bidded && $auction->winnerID==$userID;
+        $won = $ended && $winning;
+
         //prepare return objects
         $params = array( "auction"=>$auction,
             "ended"=>$ended,
@@ -313,7 +306,7 @@ class AuctionController extends Controller {
                 return $this->redirectToRoute( 'homepage' );
             }
 
-            $this->get( 'dump' )->d( $auctionEntry );
+            // $this->get( 'dump' )->d( $auctionEntry );
             $auction = new Auction( $auctionEntry );
 
             if ($auction->endAt->format('Y-m-d H:i:s') <date("Y-m-d H:i:s")) {
@@ -335,12 +328,13 @@ class AuctionController extends Controller {
 
             if ( $form->isSubmitted() && $form->isValid() ) {
                 if ( $this->get( 'db' )->updateAuction( $connection, $auction ) ) {
+
                     $this->addFlash(
                         'success',
-                        'Auction {$auctionID} updated!'
+                        'Auction "'.$auction->item->itemName.'" updated!'
                     );
 
-                    return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
+                    return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
                 } else {
                     $this->addFlash(
                         'warning',

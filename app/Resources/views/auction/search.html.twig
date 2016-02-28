@@ -29,7 +29,7 @@
                <tr>
                    <td><a href="{{ path('auction_show', {'auctionID': auction.id})}}">{{ auction.id }}</a></td>
                    <td><center><img src="http://placehold.it/100/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive"></center></td>
-                   <td>..</td>
+                   <td><a href="{{ path('user_show', {'userID': auction.sellerID})}}">{{auction.name}}</a></td>
                </tr>
                {% endfor %}    
            </tbody>
