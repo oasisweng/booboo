@@ -539,9 +539,26 @@ class DatabaseConnection {
 
     return $auctions;
   }
+/*
+public function addWatch($connection,$userID, $auctionID){
+    $userID = mysqli_real_escape_string($connection, $userID, $auctionID);
+    $query = "INSERT INTO watching ";
+    $query .="VALUES({$userID}, {$auctionID}) ";   
 
+    $result = mysqli_query($connection,$query, $auctionID);
 
+    $auctions = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (getWatchingAuctions). " . mysqli_error( $connection ) );
+    }
 
+    return $auctions;
+  }
+*/
 
 
 

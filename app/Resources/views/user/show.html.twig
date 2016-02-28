@@ -209,27 +209,28 @@ function updateTable(data, category, buttonName) {
 			}
 		} else if (category == 'watching') {
 			if (auctions[category][data[category][i].id]) {
+
+
 				auctions[category][data[category][i].id].itemName = data[category][i].itemName;
-				auctions[category][data[category][i].id].currentBid = (data[category][i].currentBid ? data[category][i].currentBid : 'No bid');
 				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
 				$(tdArray[0]).html(auctions[category][data[category][i].id].itemName);
-				$(tdArray[1]).html(auctions[category][data[category][i].id].bidValue);
-				$(tdArray[2]).html(auctions[category][data[category][i].id].currentBid);
+				$(tdArray[1]).html(auctions[category][data[category][i].id].currentBid);
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + '</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + 
+					'</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
 				var endTime = new Date(auctions[category][data[category][i].id].endAt.date);
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
-				$(tdArray[3]).countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
+		 		$(tdArray[2]).countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
 					var $this = $(this);
 					if (event.elapsed) {
 						$this.html('Ended');
 					} else {
 						$this.html(event.strftime('%H hours : %M mins : %S seconds'));
-					}
-				});
+					} 
+				}); 
 			}
 		} else {
 			if (auctions[category][data[category][i].id]) {
