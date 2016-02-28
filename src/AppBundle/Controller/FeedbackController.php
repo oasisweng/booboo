@@ -144,7 +144,7 @@ class FeedbackController extends Controller {
         $auction = new Auction( $auctionEntry );
 
         //if auction has not ended yet , redirect to home page
-        if ($auction->endAt < date( "Y-m-d H:i:s" )){
+        if ($auction->endAt->format('Y-m-d H:i:s') > date( "Y-m-d H:i:s" )){
             $this->addFlash(
                 'warning',
                 'This auction has not ended yet!'
@@ -275,18 +275,6 @@ class FeedbackController extends Controller {
         //get auction
         $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
         $auction = new Auction( $auctionEntry );
-
-        //if auction has not ended yet , redirect to home page
-        if ($auction->endAt < date( "Y-m-d H:i:s" )){
-            $this->addFlash(
-                'warning',
-                'This auction has not ended yet!'
-
-            );
-
-            return $this->redirectToRoute( 'homepage' );
-        }
-
 
         $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
         $item = new Item( $itemEntry );

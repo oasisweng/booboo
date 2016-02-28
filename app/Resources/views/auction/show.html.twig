@@ -91,7 +91,13 @@
             </div>
             {% else %}
             <div class="row.10">
-                <label>£ Current Price :</label>{{ auction.currentBid}}
+                <label>£ Current Price :</label>
+                {% if auction.currentBid is null %}
+                    {{auction.startingBid}}&nbsp;<small>No one has bidded yet, <b>be the first one!</b></small>
+                {% else %}
+                    {{ auction.currentBid}}
+                {% endif %}
+                <p><small>Minimum bid increase is {{auction.minBidIncrease}}</small></p>
             </div>
 			<br>
 			<div class="row.10">

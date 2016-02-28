@@ -637,6 +637,9 @@ public function addWatch($connection,$userID, $auctionID){
       //get count
       $countEntry = mysqli_fetch_assoc($result);
       $count = $countEntry["ct"];
+      if ($count==0){
+        return $auctions;
+      }
       //get random auctions
       $rand_a = [];
       for ($i=0;$i<$limit;$i++){
@@ -1010,8 +1013,8 @@ public function addWatch($connection,$userID, $auctionID){
 
   public function login( $user ) {
     $connection = $this->connect();
-    $name = mysqli_real_escape_string( $connection, $user->name );
-    $query = "SELECT * FROM user WHERE name='{$name}' LIMIT 1";
+    $email = mysqli_real_escape_string( $connection, $user->email );
+    $query = "SELECT * FROM user WHERE email='{$email}' LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       $fetched_user = mysqli_fetch_assoc( $result );

@@ -23,7 +23,6 @@ app/logs/dev.log
 
 # Assets and user uploads
 /web/bundles/
-/web/uploads/
 
 
 # PHPUnit
