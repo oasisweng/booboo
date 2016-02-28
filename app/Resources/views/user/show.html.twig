@@ -310,7 +310,7 @@ function updateTable(data, category, buttonName) {
 				$(tdArray[2]).html(auctions[category][data[category][i].id].comment);
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td><a href="' + userShowURL(auctions[category][data[category][i].id].giverID) + '">' + auctions[category][data[category][i].id].giverName + '</a></td><td>' + auctions[category][data[category][i].id].rating + '</td><td>' + auctions[category][data[category][i].id].comment + '</td><td></td><td><a class="btn btn-primary" href="' + 
+				auctions[category][data[category][i].id].el = $('<tr><td><a href="' + userShowURL(auctions[category][data[category][i].id].giverID) + '">' + auctions[category][data[category][i].id].giverName + '</a></td><td>' + auctions[category][data[category][i].id].rating + '</td><td>' + auctions[category][data[category][i].id].comment + '</td><td><a class="btn btn-primary" href="' + 
 					auctionShowURL(auctions[category][data[category][i].id].auctionID) + '" role="button">' + buttonName + '</a></td></tr>');
 				
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
