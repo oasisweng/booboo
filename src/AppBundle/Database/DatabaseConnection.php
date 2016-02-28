@@ -561,6 +561,18 @@ public function addWatch($connection,$userID, $auctionID){
   }
 */
 
+  public function isWatchingAuction($connection, $userID, $auctionID) {
+    $userID = mysqli_real_escape_string($connection, $userID);
+    $auctionID = mysqli_real_escape_string($connection, $auctionID);
+    $query = "select * from watching where userID = '{$userID}' and auctionID = '{$auctionID}'";
+    $result = mysqli_query($connection,$query);
+    if (mysqli_fetch_assoc($result)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
  public function setWatchingAuction($connection, $userID, $auctionID) {
     $userID = mysqli_real_escape_string($connection, $userID);
     $auctionID = mysqli_real_escape_string($connection, $auctionID);

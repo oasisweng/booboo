@@ -223,7 +223,11 @@
 <script type="text/javascript" src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('assets/js/auction_show.js')}}"></script>
 <script>
+    {% if watching %}
+    var watchingFlag = true;
+    {% else %}
     var watchingFlag = false;
+    {% endif %}
     var pending = false;
     function updateWatchingButton() {
         pending = true;
@@ -237,10 +241,13 @@
             if (pending) {
                 return;
             }
+            pending = true;
+            $('#watch-button').html('Pending...');
             //path is semi broken for now. auctionID should be auto update. will fix later today 
-            $.get('{{ path('auction_watch', {'userID': app.session.get('userID'),'auctionID': 8 })}}', function(data) {
+            $.get('{{ path('auction_watch', {'userID': app.session.get('userID'), 'auctionID': auction.id }) }}', function(data) {
                 watchingFlag = data;
                 updateWatchingButton();
+                pending = false;
             });
         });
         pending = false;

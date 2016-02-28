@@ -282,6 +282,9 @@ class AuctionController extends Controller {
         $winning = $bidded && $auction->winnerID==$userID;
         $won = $ended && $winning;
 
+        //check if auction is alr being watched by user
+        $watching = $this->get('db')->isWatchingAuction($connection, $userID, $auctionID);
+
         //prepare return objects
         $params = array( "auction"=>$auction,
             "ended"=>$ended,
@@ -291,7 +294,8 @@ class AuctionController extends Controller {
             "bid_form" => $bidForm->createView(),
             "bids" => $bids,
             "seller" => $seller,
-            "similarAuctions" => $similarAuctions );
+            "similarAuctions" => $similarAuctions,
+            "watching" => $watching );
 
         return $this->render( 'auction/show.html.twig',
             $params );
