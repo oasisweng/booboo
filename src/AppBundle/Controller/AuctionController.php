@@ -367,7 +367,7 @@ class AuctionController extends Controller {
         $ended = $auction->ended;
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
         //echo $auctionID . " ". $userID . " "; var_dump($bidded);
-        $winning = $bidded && $auction->winnerID==$userID;
+        $winning = !$ended && $bidded && $this->get( 'db' )->getWinnerForAuction($connection,$auctionID)==$userID;
         $won = $ended && $winning;
 
         //check if auction is alr being watched by user

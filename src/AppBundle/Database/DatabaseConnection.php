@@ -252,14 +252,41 @@ class DatabaseConnection {
 
     if (!$bid){
       //no bid
-      return ["status":"warning","message":"no bid"];
+      return array("status"=>"warning","message"=>"no bid");
     } else if ($bid["bidValue"]<$auction->reservedPrice){
        //auction didnt receive enough price, aborted
-       return ["status":"warning","message":"reserved price unmet","winnerID":$bid["buyerID"]];
+       return array("status"=>"warning","message"=>"reserved price unmet","winnerID"=>$bid["buyerID"]);
     } else {
-      return ["status":"success","message":"fail to meet reserved price","winnerID":$bid["buyerID"]];
+      return array("status"=>"success","message"=>"fail to meet reserved price","winnerID"=>$bid["buyerID"]);
     }
     
+  }
+
+  public function getWinnerForAuction($connection,$auctionID){
+
+    $query = "SELECT buyerID AS winnerID, ";
+    $query .= "MAX(bid.bidValue), ";
+    $query .= "MIN(bid.createdAt), ";
+    $query .= "auctionID ";
+    $query .= "FROM bid  ";
+    $query .= "WHERE ";
+    $query .= "bid.auctionID={$auctionID} ";
+    $query .= "GROUP BY bid.auctionID ";
+
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      $winner = mysqli_fetch_assoc($result);
+
+      if (isset($winner["winnerID"])) {
+        return $winner["winnerID"];
+      }
+    }else {
+      die( "Database query failed (get winner for auction). " . mysqli_error( $connection ) );
+    }
+
+    return -1;
+
+
   }
 
   /*
@@ -467,7 +494,7 @@ class DatabaseConnection {
     $query .= "item.imageURL,item.ownerID,item.categoryID ";
     $query .= "FROM auction ";
     $query .= "LEFT JOIN ";
-    $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue),auctionID FROM bid GROUP BY bid.auctionID) as winner ";
+    $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue),MIN(bid.createdAt),auctionID FROM bid GROUP BY bid.auctionID) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "LEFT JOIN ";
     $query .= "user ON auction.sellerID = user.id ";
@@ -499,7 +526,7 @@ class DatabaseConnection {
     $query = "SELECT auction.*, winner.winnerID FROM ";
     $query .= "auction ";
     $query .= "LEFT JOIN ";
-    $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue),auctionID FROM bid GROUP BY bid.auctionID) as winner ";
+    $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue),MIN(bid.createdAt),auctionID FROM bid GROUP BY bid.auctionID) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "WHERE ";
     $query .= "auction.sellerID = {$userID} ";
