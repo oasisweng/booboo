@@ -317,10 +317,9 @@ class AuctionController extends Controller {
                         'success',
                         $response["message"]
                     );
+                    $auction->currentBid = $bid->bidValue;
                     //get the user who has been outbid, send an email
                     if ( array_key_exists( "second_buyerID", $response ) ) {
-
-                        echo "second buyer ID is ".$response["second_buyerID"];
                         //if someone has been outbid and its not current buyer, get user name
                         $userEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["second_buyerID"] );
                         $name = $userEntry["name"];
@@ -368,7 +367,6 @@ class AuctionController extends Controller {
         //echo $auctionID . " ". $userID . " "; var_dump($bidded);
         $winning = !$ended && $bidded && $this->get( 'db' )->getWinnerForAuction($connection,$auctionID)==$userID;
         $won = $ended && $winning;
-
         //check if auction is alr being watched by user
         $watching = $this->get('db')->isWatchingAuction($connection, $userID, $auctionID);
         //prepare return objects

@@ -7,35 +7,35 @@
 <div id="features-wrapper" style="height: 590px; background:none; padding-top:0.1em;">
     
 {% if loggedin %}
-<!--
-    <section id="header" class="container" style="padding-top: 0.1em; padding-bottom: 0px; height: 602px;">
-        <header>
-            <h2>Customers, behold! <strong>Recommended Auctions</strong> below!</h2>
-        </header>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="carousel slide" id="myCarousel">
-                    <div class="carousel-inner">
-                        {% for auction in recommended_auctions %}
-                        <div class="item {% if loop.first %} active {% endif %}">
-                            <div class="col-md-4">
-                                <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
-                                <div class="text-center">
-                                    <h4><a href="#">{{ auction.id }}</a></h4>
-                                    
-                                    <a class="label label-danger" href="{{ path('auction_show', {'auctionID': auction.id})}}">readmore</a>
-                                </div>
-                            </div>
+
+<section id="header" class="container" style="padding-top: 0.1em; padding-bottom: 0px; height: 602px;">
+<header>
+    <h2>Customers, behold! <strong>Recommended Auctions</strong> below!</h2>
+</header>
+<div class="row">
+    <div class="col-md-12">
+        <div class="carousel slide" id="myCarousel">
+            <div class="carousel-inner">
+                {% for auction in recommended_auctions %}
+                <div class="item {% if loop.first %} active {% endif %}">
+                    <div class="col-md-4">
+                        <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
+                        <div class="text-center">
+                            <h4><a href="#">{{ auction.id }}</a></h4>
+                            
+                            <a class="label label-danger" href="{{ path('auction_show', {'auctionID': auction.id})}}">readmore</a>
                         </div>
-                        {% endfor %}
                     </div>
-                    <a class="left carousel-control" href="#myCarousel" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
-                    <a class="right carousel-control" href="#myCarousel" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
                 </div>
+                {% endfor %}
             </div>
+            <a class="left carousel-control" href="#myCarousel" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
+            <a class="right carousel-control" href="#myCarousel" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
         </div>
-    </section>
--->
+    </div>
+</div>
+</section>
+
 {% else %}
     <section id="header" class="container" style="padding-top: 0.1em; padding-bottom: 0px; height: 602px;">
         <header>

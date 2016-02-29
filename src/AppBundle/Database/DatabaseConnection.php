@@ -151,7 +151,6 @@ class DatabaseConnection {
           $query2 .= "imageURL='{$imageURL}' ";
           $query2 .= "WHERE itemID={$id}";
         }
-        var_dump($query2);
 
         $result2 = mysqli_query( $connection, $query2 );
         $rows2 = mysqli_affected_rows( $connection );
@@ -246,7 +245,7 @@ class DatabaseConnection {
       if ( $response["status"] == "success" ) {
         return true;
       } else {
-        var_dump($response["message"]);
+        //var_dump($response["message"]);
         return false;
       }
     } else {
@@ -778,8 +777,9 @@ public function addWatch($connection,$userID, $auctionID){
       $rand_s = implode(",",$rand_a);
 
       $query = "SELECT ";
-      $query .= "auction.id, ";
-      $query .= "itemimage.imageURL ";
+      $query .="auction.id, ";
+      $query .="itemimage.imageURL, ";
+      $query .="item.itemName ";
       $query .= "FROM ";
       $query .= "auction ";
       $query .= "INNER JOIN ";
@@ -811,10 +811,13 @@ public function addWatch($connection,$userID, $auctionID){
     //in an attempt to attract user to bid them
     define("MAX_TOTAL_RECOMMENDATIONS",10);
 
+    $auctions=[];
     if ($userID!=0){
+
       $query = "SELECT ";
-      $query .= "auction.id,";
-      $query .= "itemimage.imageURL ";
+      $query .="auction.id, ";
+      $query .="itemimage.imageURL, ";
+      $query .="item.itemName ";
       $query .= "FROM auction ";
       $query .= "INNER JOIN ";
       $query .= "item ON item.id = auction.itemID ";
@@ -848,12 +851,12 @@ public function addWatch($connection,$userID, $auctionID){
       $query .= "auction.id DESC ";
       $query .= "LIMIT 10; ";
     } else {
-      return [];
+      return NULL;
     }
 
     $result = mysqli_query( $connection, $query );
 
-    $auctions = array();
+    $auctions = [];
     //get reco auctions
     if ( $result ) {
       while ($row = mysqli_fetch_assoc($result)){
@@ -871,7 +874,7 @@ public function addWatch($connection,$userID, $auctionID){
         if (count($auctions)== 0){
           $auctions = $random;
         } else {
-          array_push($auctions,$random);
+          $auctions = array_merge($auctions,$random);
         }
         
       }
@@ -982,33 +985,33 @@ public function addWatch($connection,$userID, $auctionID){
           } else {
             return array( "status"=>"warning", "message"=>"Bid value is lower than starting bid" );
           }
-        }
-
-        //check if the bid is higher than highest bid plus min increase
-        if ( $bid->bidValue >= $highestBid["bidValue"]+$auction->minBidIncrease ) {
-          if ( $bid->id=$this->addBid( $connection, $bid ) ) {
-            if ($bid->buyerID != $highestBid["buyerID"]){
-              //send old highest bidder an email
-              return array( "status"=>"success", "message"=>"Congratulations","second_buyerID"=>$highestBid["buyerID"]);
+        } else {
+          //check if the bid is higher than highest bid plus min increase
+          if ( $bid->bidValue >= $highestBid["bidValue"]+$auction->minBidIncrease ) {
+            if ( $bid->id=$this->addBid( $connection, $bid ) ) {
+              if ($bid->buyerID != $highestBid["buyerID"]){
+                //send old highest bidder an email
+                return array( "status"=>"success", "message"=>"Congratulations","second_buyerID"=>$highestBid["buyerID"]);
+              } else {
+                //update your bid
+                return array( "status"=>"success", "message"=>"You successfully updated your bid." );
+              }
             } else {
-              //update your bid
-              return array( "status"=>"success", "message"=>"You successfully updated your bid." );
+              //return server error
+              return array( "status"=>"danger", "message"=>"Unable to save records" );
+            }
+          } else if ($bid->bidValue <= $highestBid["bidValue"]) {
+            //price is lower than bid value
+             if ($bid->buyerID == $highestBid["buyerID"]){
+              //if bid is from the highest bidder, but its value less than highest bid value. Alert price lower than his previous amount
+              return array( "status"=>"warning", "message"=>"You are the current highest bidder. You cannot place a value lower than or equal to your current bid." );
+            } else {
+              return array( "status"=>"warning", "message"=>"Price too low" );
             }
           } else {
-            //return server error
-            return array( "status"=>"danger", "message"=>"Unable to save records" );
+            //price is lower than h bid + min inc but higher than h bid
+            return array( "status"=>"warning", "message"=>"The minimum bid increase is ".$auction->minBidIncrease);
           }
-        } else if ($bid->bidValue <= $highestBid["bidValue"]) {
-          //price is lower than bid value
-           if ($bid->buyerID == $highestBid["buyerID"]){
-            //if bid is from the highest bidder, but its value less than highest bid value. Alert price lower than his previous amount
-            return array( "status"=>"warning", "message"=>"You are the current highest bidder. You cannot place a value lower than or equal to your current bid." );
-          } else {
-            return array( "status"=>"warning", "message"=>"Price too low" );
-          }
-        } else {
-          //price is lower than h bid + min inc but higher than h bid
-          return array( "status"=>"warning", "message"=>"The minimum bid increase is ".$auction->minBidIncrease);
         }
       } else {
         die("can't get highest bid");
