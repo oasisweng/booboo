@@ -19,7 +19,7 @@ class ItemType extends AbstractType
             'required' => false,
         ) )
         ->add( 'image', FileType::class, array(
-            'required' => true,
+            'required' => false,
             ) )
         ->add( 'categoryID', CategoryType::class, array(
                 'placeholder' => 'Choose a category',
