@@ -182,7 +182,96 @@ class AuctionController extends Controller {
         
         //if should finish auction through this way
         if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
-            $this->get( 'db' )->finishAuction( $connection, $auction );
+            $response = $this->get( 'db' )->finishAuction( $connection, $auction );
+            if ($response['status']=='success'){
+                //send seller and winner congrad emails
+                $sellerEntry = $this->get( 'db' )->selectOne( $connection, "user", $auction->sellerID);
+                $name = $sellerEntry["name"];
+                $email = $sellerEntry["email"];
+                //send email
+                $message = \Swift_Message::newInstance()
+                ->setSubject( 'You sold'.$auction->item->itemName.'!' )
+                ->setFrom( 'boobooauction@gmail.com' )
+                ->setTo( $email )
+                ->setBody(
+                    $this->renderView(
+                        'Emails/sold.html.twig',
+                        array( 'name' => $name,
+                            'auctionID'=>$auctionID,
+                            'itemName'=>$auction->item->itemName )
+                    ),
+                    'text/html'
+                );
+                $this->get( 'mailer' )->send( $message );
+
+                $winnerEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["winnerID"]);
+                $wname = $winnerEntry["name"];
+                $wemail = $winnerEntry["email"];
+                //send email
+                $message = \Swift_Message::newInstance()
+                ->setSubject( 'You bought'.$auction->item->itemName.'!' )
+                ->setFrom( 'boobooauction@gmail.com' )
+                ->setTo( $wemail )
+                ->setBody(
+                    $this->renderView(
+                        'Emails/won.html.twig',
+                        array( 'name' => $wname,
+                            'auctionID'=>$auctionID,
+                            'itemName'=>$auction->item->itemName )
+                    ),
+                    'text/html'
+                );
+                $this->get( 'mailer' )->send( $message );
+            } else if ($response['status']=="warning"){
+                //send seller unsold email
+                $sellerEntry = $this->get( 'db' )->selectOne( $connection, "user", $auction->sellerID);
+                $name = $sellerEntry["name"];
+                $email = $sellerEntry["email"];
+                $reason = "";
+                if ($response['message']=="reserved price unmet"){
+                    $reason = "The highest bid did not meet the reserved price you have set";
+                } else if ($response['message']=="no bid"){
+                    $reason = "No one bidded your auction";
+                }
+                //send email
+                $message = \Swift_Message::newInstance()
+                ->setSubject( 'You sold'.$auction->item->itemName.'!' )
+                ->setFrom( 'boobooauction@gmail.com' )
+                ->setTo( $email )
+                ->setBody(
+                    $this->renderView(
+                        'Emails/unsold.html.twig',
+                        array( 'name' => $name,
+                            'auctionID'=>$auctionID,
+                            'itemName'=>$auction->item->itemName,
+                            'reason'=>$reason )
+                    ),
+                    'text/html'
+                );
+                $this->get( 'mailer' )->send( $message );
+                if ($response['message']=="reserved price unmet"){
+                    //send winner rpnm emails
+                    $winnerEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["winnerID"]);
+                    $wname = $winnerEntry["name"];
+                    $wemail = $winnerEntry["email"];
+                    //send email
+                    $message = \Swift_Message::newInstance()
+                    ->setSubject( 'You did not meet reserved price for '.$auction->item->itemName.'!' )
+                    ->setFrom( 'boobooauction@gmail.com' )
+                    ->setTo( $wemail )
+                    ->setBody(
+                        $this->renderView(
+                            'Emails/reservedPriceNotMeet.html.twig',
+                            array( 'name' => $wname,
+                                'auctionID'=>$auctionID,
+                                'itemName'=>$auction->item->itemName )
+                        ),
+                        'text/html'
+                    );
+                    $this->get( 'mailer' )->send( $message );
+                }
+            } 
+            $auction->ended = true;
         }
 
         //get userID, or null if not logged in
@@ -237,7 +326,6 @@ class AuctionController extends Controller {
                         $userEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["second_buyerID"] );
                         $name = $userEntry["name"];
                         $email = $userEntry["email"];
-                        $this->get( 'dump' )->d( $userEntry );
                         //send email
                         $message = \Swift_Message::newInstance()
                         ->setSubject( 'You are outbid!' )

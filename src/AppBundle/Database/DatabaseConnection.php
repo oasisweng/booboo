@@ -188,7 +188,6 @@ class DatabaseConnection {
     $startingBid = $auction->startingBid;
     $minBidIncrease = $auction->minBidIncrease;
     $reservedPrice = $auction->reservedPrice;
-    $winnerID = is_null($auction->winnerID) ? "NULL": $auction->winnerID ;
     $ended = $auction->ended ? 1:0;
     $currentBid = is_null($auction->currentBid) ? "NULL" : $auction->currentBid;
 
@@ -198,7 +197,6 @@ class DatabaseConnection {
       "startingBid={$startingBid},".
       "minBidIncrease={$minBidIncrease}," .
       "reservedPrice={$reservedPrice}," .
-      "winnerID={$winnerID}," .
       "ended={$ended}," .
       "currentBid={$currentBid}," .
       "updatedAt=NOW() " .
@@ -242,29 +240,26 @@ class DatabaseConnection {
   public function finishAuction( $connection, $auction ) {
     $id = mysqli_real_escape_string( $connection, $auction->id );
     //get two highest bid(sort by value DESC and time ASC)
-    $query = "SELECT buyerID,bidValue FROM bid WHERE ";
+    $query = "SELECT buyerID,MAX(bidValue) as bidValue,MIN(createdAt) as createdAt FROM bid WHERE ";
     $query .= "auctionID={$id} ";
-    $query .= "ORDER BY bidValue DESC, createdAt ASC ";
-    $query .= "LIMIT 1";
     $result = mysqli_query( $connection, $query );
     $bid = mysqli_fetch_assoc( $result );
     //make sure the highest price is higher than $auction's reserved price
     //if the current price is lowre than reserved price, set the current to reserved price
     
-    if ($auction->currentBid<$auction->reservedPrice){
-      if ($bid["bidValue"]>=$auction->reservedPrice){
-        $auction->currentBid = $auction->reservedPrice;
-        if ( $bid ) {
-          $auction->winnerID = $bid["buyerID"];
-        }
-      }
-    } else if ( $bid ) {
-      $auction->winnerID = $bid["buyerID"];
-    }
-    
-    
     $auction->ended = true;
     $this->updateAuction( $connection, $auction );
+
+    if (!$bid){
+      //no bid
+      return ["status":"warning","message":"no bid"];
+    } else if ($bid["bidValue"]<$auction->reservedPrice){
+       //auction didnt receive enough price, aborted
+       return ["status":"warning","message":"reserved price unmet","winnerID":$bid["buyerID"]];
+    } else {
+      return ["status":"success","message":"fail to meet reserved price","winnerID":$bid["buyerID"]];
+    }
+    
   }
 
   /*
@@ -468,22 +463,29 @@ class DatabaseConnection {
   }
 
   public function getBoughtAuctions($connection,$userID){
-    $query = "SELECT auction.*, user.name as sellerName, item.itemName,item.description,";
-    $query .= "item.imageURL,item.ownerID,item.categoryID FROM auction ";
+    $query = "SELECT auction.*, winner.winnerID, user.name as sellerName, item.itemName,item.description,";
+    $query .= "item.imageURL,item.ownerID,item.categoryID ";
+    $query .= "FROM auction ";
+    $query .= "LEFT JOIN ";
+    $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue),auctionID FROM bid GROUP BY bid.auctionID) as winner ";
+    $query .= "ON winner.auctionID=auction.id ";
     $query .= "LEFT JOIN ";
     $query .= "user ON auction.sellerID = user.id ";
     $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
-    $query .= "winnerID = {$userID} ";
-    $query .= "and auction.endAt < NOW()";
+    $query .= "winner.winnerID = {$userID} ";
+    $query .= "and auction.ended=1";
 
     $result = mysqli_query($connection,$query);
 
     $auctions = [];
     if ($result){
       while ($row = mysqli_fetch_assoc($result)){
+        $receiverID = $userID == $row["sellerID"] ? $row["winnerID"] : $row["sellerID"];
+        $row["didFeedback"] = $this->didFeedback($connection,$userID,$receiverID,$row["id"]);
         $auctions[] = $row;
+
       }
     } else {
       die( "Database query failed (getBuyingAuctions). " . mysqli_error( $connection ) );
@@ -494,17 +496,22 @@ class DatabaseConnection {
 
   public function getSoldAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
-    $query = "SELECT * FROM ";
+    $query = "SELECT auction.*, winner.winnerID FROM ";
     $query .= "auction ";
+    $query .= "LEFT JOIN ";
+    $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue),auctionID FROM bid GROUP BY bid.auctionID) as winner ";
+    $query .= "ON winner.auctionID=auction.id ";
     $query .= "WHERE ";
-    $query .= "sellerID = {$userID} ";
-    $query .= "AND ended=1";
+    $query .= "auction.sellerID = {$userID} ";
+    $query .= "AND auction.ended=1";
 
     $result = mysqli_query($connection,$query);
 
     $auctions = [];
     if ($result){
       while ($row = mysqli_fetch_assoc($result)){
+        $receiverID = $userID == $row["sellerID"] ? $row["winnerID"] : $row["sellerID"];
+        $row["didFeedback"] = $this->didFeedback($connection,$userID,$receiverID,$row["id"]);
         $auctions[] = $row;
       }
     } else {
@@ -721,27 +728,21 @@ public function addWatch($connection,$userID, $auctionID){
       $query = "SELECT ";
       $query .= "auction.id,";
       $query .= "item.imageURL ";
-      $query .= "FROM ";
-      $query .= "auction ";
+      $query .= "FROM auction ";
       $query .= "INNER JOIN ";
       $query .= "item ON item.id = auction.itemID ";
       $query .= "INNER JOIN ";
-      $query .= "( ";
-      $query .= "SELECT ";
+      $query .= "( SELECT ";
       $query .= "item.categoryID AS CategoryID, ";
       $query .= "COUNT(item.id) AS Occurrence ";
-      $query .= "FROM ";
-      $query .= "item, ";
-      $query .= "( ";
-      $query .= "SELECT ";
+      $query .= "FROM item, ";
+      $query .= "( SELECT ";
       $query .= "auction.itemID AS ItemID ";
       $query .= "FROM ";
       $query .= "auction, ";
-      $query .= "( ";
-      $query .= "SELECT DISTINCT ";
+      $query .= "(SELECT DISTINCT ";
       $query .= "bid.auctionID AS AuctionID ";
-      $query .= "FROM ";
-      $query .= "bid ";
+      $query .= "FROM bid ";
       $query .= "WHERE ";
       $query .= "bid.buyerID = {$userID} ";
       $query .= ") AS ab ";
@@ -759,6 +760,8 @@ public function addWatch($connection,$userID, $auctionID){
       $query .= "item_category.Occurrence DESC, ";
       $query .= "auction.id DESC ";
       $query .= "LIMIT 10; ";
+    } else {
+      return [];
     }
 
     $result = mysqli_query( $connection, $query );
@@ -875,7 +878,6 @@ public function addWatch($connection,$userID, $auctionID){
           //save the bid and change current bid to the min value and winnerId to userId and return true and congrats
           if ( $bid->id = $this->addBid( $connection, $bid ) ) {
             $auction->currentBid = $auction->startingBid;
-            $auction->winnerID = $bid->buyerID;
             $this->updateAuction( $connection, $auction );
             return array( "status"=>"success", "message"=>"Congratulations" );
           } else {
@@ -909,16 +911,14 @@ public function addWatch($connection,$userID, $auctionID){
       
 
               if ($bid->buyerID != $secondHighestBid["buyerID"]){
-                //change current bid to the bid and winnerId to userId and return true and congrats
+                //change current bid to the bid to userId and return true and congrats
                 $auction->currentBid = $highestBid["bidValue"];
-                $auction->winnerID = $bid->buyerID;
                 $this->updateAuction( $connection, $auction );
                 //send second person an email notification for being outbid if second person is not also the buyer
                 return array( "status"=>"success", "message"=>"Congratulations","second_buyerID"=>$secondHighestBid["buyerID"]);
               } else {
                 //the bid is updated by current user, do not change the current bid value
                 $auction->currentBid = $highestBid["bidValue"];
-                $auction->winnerID = $bid->buyerID;
                 $this->updateAuction( $connection, $auction );
                 return array( "status"=>"success", "message"=>"You successfully updated your bid." );
               }
@@ -930,7 +930,6 @@ public function addWatch($connection,$userID, $auctionID){
             } else {
               // change current bid to the second highest bid and return false and report price outbid.
               $auction->currentBid = $highestBid["bidValue"];
-              $auction->winnerID = $highestBid["buyerID"];
               //change bidder to highest bidder
               $bid->buyerID = $highestBid["buyerID"];
               $this->updateBid($connection,$bid);
@@ -1091,29 +1090,50 @@ public function addWatch($connection,$userID, $auctionID){
 
   /*
    * This function check if a giver can give a receiver feedback for an particular auction
-   * and gives failure reason if needed
+   * It is based on if user's eligibility and if user has already given feedback
    */
-  public function canFeedback($connection,$giverID,$receiverID,$auctionID){
-    $query = "SELECT ";
-    $query .= "(CASE WHEN {$giverID} <> {$receiverID} THEN 1 ELSE 0 END) AS CanFeedback ";
-    $query .= "FROM auction WHERE ";
-    $query .= "auction.id = {$auctionID} AND auction.ended = 1 AND NOT EXISTS( ";
-    $query .= "SELECT * FROM feedback WHERE ";
-    $query .= "feedback.auctionID = {$auctionID}  ";
-    $query .= "AND feedback.giverID = {$giverID}  ";
-    $query .= "AND feedback.receiverID = {$receiverID})  ";
-    $query .= "AND (auction.sellerID = {$giverID} AND auction.winnerID = {$receiverID})  ";
-    $query .= "OR (auction.sellerID = {$receiverID} AND auction.winnerID = {$giverID}) ";
+  public function shouldFeedback($connection,$giverID,$receiverID,$auctionID){
+    $query ="SELECT COUNT(*) AS ct  ";
+    $query .="FROM auction, ";
+    $query .="(SELECT buyerID AS id, MAX(bid.bidValue) FROM bid WHERE bid.auctionID={$auctionID}) as winner ";
+    $query .="WHERE ";
+    $query .="auction.id={$auctionID} ";
+    $query .="AND auction.ended=1 ";
+    $query .="AND (auction.sellerID={$giverID} ";
+    $query .="AND winner.id={$receiverID}) ";
+    $query .="OR (auction.sellerID={$receiverID} ";
+    $query .="AND winner.id=($giverID)) ";
     $result = mysqli_query($connection,$query);
     if ($result){
-      $canFeedback = mysqli_fetch_assoc($result);
-      return $canFeedback["CanFeedback"];
+      $count = mysqli_fetch_assoc($result);
+      return ($count["ct"]>1 && ! $this->didFeedback($connection,$giverID,$receiverID,$auctionID));
     } else {
-      die( "Database query failed (canFeedback). " . mysqli_error( $connection ) );
+      die( "Database query failed (shouldFeedback). " . mysqli_error( $connection ) );
       return false;
     }
 
   } 
+
+  public function didFeedback($connection,$giverID,$receiverID,$auctionID){
+    $query ="SELECT COUNT(*) as ct ";
+    $query .="FROM feedback ";
+    $query .="WHERE ";
+    $query .="feedback.giverID = {$giverID} ";
+    $query .="AND feedback.receiverID = {$receiverID} ";
+    $query .="AND feedback.auctionID = {$auctionID}";
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      $didFeedback = mysqli_fetch_assoc($result);
+      if ($didFeedback["ct"]==0){
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      die( "Database query failed (didFeedback). " . mysqli_error( $connection ) );
+      return false;
+    }
+  }
 
   public function selectFeedback($connection,$giverID,$receiverID,$auctionID){
     $query = "SELECT * FROM feedback WHERE giverID={$giverID} AND receiverID={$receiverID} AND auctionID={$auctionID} LIMIT 1";

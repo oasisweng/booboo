@@ -1,0 +1,10 @@
+<h3>Dear {{name}}:</h3>
+
+<p>Sorry! Your auction {{itemName}} has not been sold! The reason is {{reason}}! To view the item again, please click  <a href="{{ url('auction_show',{'auctionID':auctionID}) }}">this link</a>!</p>
+
+<p>Please try again!</p>
+
+{# Makes an absolute URL to the /images/logo.png file #}
+<img src="{{ absolute_url(asset('images/logo.png')) }}">
+
+

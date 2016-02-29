@@ -75,9 +75,21 @@
             {% endif %}<!-- bidded -->
     {% endif %}<!-- ended -->
     <div class="row">
+        <div class="col-md-12">
+            <b>{{ auction.item.itemName}}</b>
+        </div>
+    </div>
+    <div class="row">
     	<div class="col-md-3">
-    	<label> {{ auction.item.itemName}}</label>
-    	<img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
+        {% if auction.item.imageURL is not null %}
+            <td class="col-md-4 text-center">
+                <img src="{{asset('assets/photos/'~auction.item.imageURL) }}" alt="image" class="img-responsive">
+            </td>
+        {% else %}
+            <td class="col-md-4 text-center"> 
+                <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
+            </td> 
+        {% endif %}
 		</div>
 		<div class="col-md-7">
     	   <div class="row.10">

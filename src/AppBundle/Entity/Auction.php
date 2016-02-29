@@ -95,6 +95,8 @@ class Auction {
 
     public $sellerName;
 
+    public $didFeedback;
+
     public function __construct( $a = NULL ) {
         if ( isset($a) ) {
             $this->id = $a["id"];
@@ -102,7 +104,6 @@ class Auction {
             if (isset($a["sellerName"])) {
                 $this->sellerName = $a["sellerName"];
             }
-            $this->winnerID = $a["winnerID"];
             $this->startAt = new DateTime($a["startAt"]);
             $this->endAt = new DateTime($a["endAt"]);
             $this->itemID = $a["itemID"];
@@ -120,6 +121,11 @@ class Auction {
             if (isset($a["bidValue"])) {
                 $this->bidValue = $a["bidValue"];
             }
+            if ($this->ended == true && isset($a["didFeedback"])) {
+                $this->didFeedback = $a["didFeedback"];
+            }
+            
+
         } else {
 
             $this->startingBid = 1.0;
@@ -128,6 +134,7 @@ class Auction {
             $this->createdAt = date( "Y-m-d H:i:s" );
             $this->updatedAt = date( "Y-m-d H:i:s" );
             $this->ended = false;
+            $this->shouldFeedback = false;
         }
     }
 
