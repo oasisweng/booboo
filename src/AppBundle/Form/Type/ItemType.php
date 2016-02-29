@@ -12,12 +12,14 @@ use AppBundle\Form\Type\CategoryType;
 class ItemType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
-        $builder->add( 'itemName', TextType::class )
+        $builder->add( 'itemName', TextType::class,array(
+            'required' => true,
+            )  )
         ->add( 'description', TextareaType::class, array(
             'required' => false,
         ) )
         ->add( 'image', FileType::class, array(
-            'required' => false,
+            'required' => true,
             ) )
         ->add( 'categoryID', CategoryType::class, array(
                 'placeholder' => 'Choose a category',

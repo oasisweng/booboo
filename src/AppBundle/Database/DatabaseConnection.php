@@ -41,8 +41,22 @@ class DatabaseConnection {
 
   public function selectOne( $connection, $column, $id ) {
     $safe_id = mysqli_real_escape_string( $connection, $id );
-    $query = "SELECT * FROM {$column} WHERE id = {$safe_id} LIMIT 1";
-    $result = mysqli_query( $connection, $query );
+    $query = "SELECT * FROM {$column} ";
+    $where = "WHERE {$column}.id = {$safe_id} ";
+    $limit = "LIMIT 1";
+    //handle auction special case WinnerID
+    if ($column=="auction"){
+      //winnerID
+      $query .= "LEFT JOIN ";
+      $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue) AS currentBid,MIN(bid.createdAt),auctionID FROM bid WHERE bid.auctionID={$id}) as winner ";
+      $query .= "ON winner.auctionID={$id} ";
+    }
+    //handle item special case ImageURL
+    if ($column=="item"){
+      $query .= "LEFT JOIN ";
+      $query .= "itemimage ON itemimage.itemID={$id} ";
+    }
+    $result = mysqli_query( $connection, $query.$where.$limit );
     if ( $result ) {
       $object = mysqli_fetch_assoc( $result );
       return $object;
@@ -67,26 +81,36 @@ class DatabaseConnection {
 
   public function addItem( $connection, $item ) {
     $itemName = $item->itemName;
-    $description = $item->description;
+    $ownerID = $item->ownerID;
+    $description = isset($item->description) ? $item->description:"";
     $image = $item->image;
     $categoryID = $item->categoryID;
     $escaped_name = $this->e( $connection, $itemName );
     $escaped_description = $this->e( $connection, $description );
-    if ( isset( $image ) ) {
-      $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/assets/photos/';
-      $fileName = $this->generateRandomString().".".$image->guessExtension();
-      $image->move( $dir, $fileName );
-      $imageURL = $fileName;
-      $escaped_imageURL = $this->e( $connection, $imageURL );
-    }
 
-    $query = "INSERT INTO item (itemName,description,imageURL, categoryID) " .
-      "VALUES ('{$escaped_name}','{$escaped_description}',"  .
-      ( isset( $escaped_imageURL ) ? "'{$escaped_imageURL}'" : "NULL" ) .
-      ", {$categoryID})";
+    $query = "INSERT INTO item (itemName,description,ownerID,categoryID) " .
+      "VALUES ('{$escaped_name}','{$escaped_description}',{$ownerID},{$categoryID})";
+    
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       $id =  mysqli_insert_id( $connection );
+      //save image if exist
+      if ( isset( $image ) ) {
+        $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/assets/photos/';
+        $fileName = $this->generateRandomString().".".$image->guessExtension();
+        $image->move( $dir, $fileName );
+        $imageURL = $fileName;
+
+        $query2 = "INSERT INTO itemimage (itemID,imageURL) ";
+        $query2 .= "VALUES ({$id},'{$imageURL}')";
+
+        $result2 = mysqli_query( $connection, $query2 );
+        if ( $result2 ) {
+          return $id;
+        } else {
+          die( "Database query failed (Item Image). " . mysqli_error( $connection ) );
+        }
+      }
       return $id;
     } else {
       die( "Database query failed (Item). " . mysqli_error( $connection ) );
@@ -97,40 +121,49 @@ class DatabaseConnection {
   public function updateItem( $connection, $item ) {
     $id = $item->id;
     $itemName = $item->itemName;
-    $description = $item->description;
+    $description = $description = isset($item->description) ? $item->description:"";
     $image = $item->image;
     $categoryID = $item->categoryID;
     $imageURL = $item->imageURL;
     $escaped_name = $this->e( $connection, $itemName );
     $escaped_description = $this->e( $connection, $description );
-    if ( isset( $image ) ) {
-      $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/assets/photos';
-      //remove old one
-      $fs = new Filesystem();
-      if ( $fs->exists( $dir.$imageURL ) ) {
-        $fs->remove( $dir.$imageURL );
-      }
-
-      //create new one
-      $fileName = $this->generateRandomString().".".$image->guessExtension();
-      $image->move( $dir, $fileName );
-      $item->imageURL = $fileName;
-      $imageURL = $fileName;
-    }
     $query = "UPDATE item SET ";
     $query .="itemName='{$escaped_name}', ";
     $query .="description='{$escaped_description}', ";
-    if ($imageURL != NULL){
-      $query .="imageURL='{$imageURL}', " ; 
-    }
     $query .="categoryID={$categoryID} ";
     $query .="WHERE id={$id}";
     $result = mysqli_query( $connection, $query );
     $rows = mysqli_affected_rows( $connection );
     if ( $result && $rows >= 0 ) {
-      return true;
+      if ( isset( $image ) ) {
+        $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/assets/photos';
+        //create new one
+        $fileName = $this->generateRandomString().".".$image->guessExtension();
+        $image->move( $dir, $fileName );
+        $imageURL = $fileName;
+
+        //image might not exist initially
+        if (is_null($item->imageURL)){
+          $query2 = "INSERT INTO itemimage (itemID,imageURL) ";
+          $query2 .= "VALUES ({$id},'{$imageURL}')";
+        } else {
+          $query2 = "UPDATE itemimage SET ";
+          $query2 .= "imageURL='{$imageURL}' ";
+          $query2 .= "WHERE itemID={$id}";
+        }
+        var_dump($query2);
+
+        $result2 = mysqli_query( $connection, $query2 );
+        $rows2 = mysqli_affected_rows( $connection );
+        if ( $result2 && $rows2 >= 0 ) {
+          return array("status"=>"success","message"=>"");
+        } else {
+          return array("status"=>"danger","message"=>"image did not save");
+        }
+      }
+      return array("status"=>"success","message"=>"");
     } else {
-      return false;
+      return array("status"=>"danger","message"=>"item did not update");
     }
   }
 
@@ -156,6 +189,7 @@ class DatabaseConnection {
     $startAt = $auction->startAt->format( 'Y-m-d H:i:s' );
     $endAt = $auction->endAt->format( 'Y-m-d H:i:s' );
     $item  = $auction->item;
+    $item->ownerID = $auction->sellerID;
     $startingBid = $auction->startingBid;
     $minBidIncrease = $auction->minBidIncrease;
     $reservedPrice = $auction->reservedPrice;
@@ -189,7 +223,6 @@ class DatabaseConnection {
     $minBidIncrease = $auction->minBidIncrease;
     $reservedPrice = $auction->reservedPrice;
     $ended = $auction->ended ? 1:0;
-    $currentBid = is_null($auction->currentBid) ? "NULL" : $auction->currentBid;
 
     $query = "UPDATE auction SET ".
       "startAt='{$startAt}',".
@@ -198,7 +231,6 @@ class DatabaseConnection {
       "minBidIncrease={$minBidIncrease}," .
       "reservedPrice={$reservedPrice}," .
       "ended={$ended}," .
-      "currentBid={$currentBid}," .
       "updatedAt=NOW() " .
       "WHERE id={$id} ";
     $result = mysqli_query( $connection, $query );
@@ -210,14 +242,16 @@ class DatabaseConnection {
         return true;
       }
 
-      if ( $this->updateItem( $connection, $item ) ) {
+      $response = $this->updateItem( $connection, $item );
+      if ( $response["status"] == "success" ) {
         return true;
       } else {
+        var_dump($response["message"]);
         return false;
       }
     } else {
       die( "Database query failed (Auction Update). " . mysqli_error( $connection ) );
-      return FALSE;
+      return false;
     }
   }
 
@@ -298,12 +332,14 @@ class DatabaseConnection {
 
     $query ="SELECT ";
     $query .="auction.id, ";
-    $query .="item.imageURL, ";
+    $query .="itemimage.imageURL, ";
     $query .="item.itemName ";
     $query .="FROM ";
     $query .="auction ";
     $query .="INNER JOIN ";
     $query .="item ON item.id = auction.itemID ";
+    $query .="LEFT JOIN ";
+    $query .="itemimage on item.id = itemimage.itemID ";
     $query .="ORDER BY ";
     $query .="auction.viewCount DESC ";
     $query .="LIMIT 10 ";
@@ -314,7 +350,7 @@ class DatabaseConnection {
         $auctions[] = $row;
       }
     }else {
-      die( "Database query failed (expiring auction). " . mysqli_error( $connection ) );
+      die( "Database query failed (hot auction). " . mysqli_error( $connection ) );
     }
 
     return $auctions;
@@ -353,13 +389,15 @@ class DatabaseConnection {
       //get all auction
       $query ="SELECT ";
       $query .="auction.id, ";
-      $query .="item.imageURL, ";
+      $query .="itemimage.imageURL, ";
       $query .="item.itemName, ";
       $query .="user.name, ";
       $query .="auction.sellerID ";
       $query .= "FROM auction ";
       $query .= "INNER JOIN ";
       $query .= "item ON auction.itemID = item.id ";
+      $query .="LEFT JOIN ";
+      $query .="itemimage on item.id = itemimage.itemID ";
       $query .="INNER JOIN ";
       $query .="user ON user.id = auction.sellerID ";
       $query .= $where;
@@ -393,7 +431,7 @@ class DatabaseConnection {
       //if there is no keywords, get new auctions
       $query_all = "SELECT ";
       $query_all .="auction.id, ";
-      $query_all .="item.imageURL, ";
+      $query_all .="itemimage.imageURL, ";
       $query_all .="item.itemName, ";
       $query_all .="user.name, ";
       $query_all .="auction.sellerID FROM auction ";
@@ -402,6 +440,8 @@ class DatabaseConnection {
 
       $query ="INNER JOIN ";
       $query .="item ON item.id = auction.itemID ";
+      $query .="LEFT JOIN ";
+      $query .="itemimage on item.id = itemimage.itemID ";
       $query .="INNER JOIN ";
       $query .="user ON user.id = auction.sellerID ";
       $query .=$where;
@@ -436,11 +476,16 @@ class DatabaseConnection {
 
   public function getBuyingAuctions($connection,$userID){
     $query = "SELECT auction.*,bid.bidValue,bid.buyerID,item.itemName,item.description,";
-    $query .= "item.imageURL,item.ownerID,item.categoryID FROM auction ";
-    $query .= "LEFT JOIN ";
+    $query .= "itemimage.imageURL,item.ownerID,item.categoryID,currentBid.currentBid FROM auction ";
+    $query .= "INNER JOIN ";
     $query .= "bid ON bid.auctionID = auction.ID ";
-    $query .= "LEFT JOIN ";
+    $query .= "INNER JOIN ";
     $query .= "item ON auction.itemID = item.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "itemimage on item.id = itemimage.itemID ";
+    $query .= "LEFT JOIN ";
+    $query .= "(SELECT MAX(bid.bidValue) AS currentBid,bid.auctionID FROM bid GROUP BY bid.auctionID) AS currentBid ";
+    $query .= "ON currentBid.auctionID = auction.id ";
     $query .= "WHERE ";
     $query .= "auction.endAt >= NOW() and ";
     $query .= "bid.bidValue =( ";
@@ -467,11 +512,16 @@ class DatabaseConnection {
 
   public function getSellingAuctions($connection,$userID){
     $query = "SELECT auction.*,bid.bidValue,bid.buyerID,item.itemName,item.description,";
-    $query .= "item.imageURL,item.ownerID,item.categoryID FROM auction ";
+    $query .= "itemimage.imageURL,item.ownerID,item.categoryID,currentBid.currentBid FROM auction ";
     $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "LEFT JOIN ";
     $query .= "bid ON bid.auctionID = auction.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "itemimage on item.id = itemimage.itemID ";
+    $query .= "LEFT JOIN ";
+    $query .= "(SELECT MAX(bid.bidValue) AS currentBid,bid.auctionID FROM bid GROUP BY bid.auctionID) AS currentBid ";
+    $query .= "ON currentBid.auctionID = auction.id ";
     $query .= "WHERE ";
     $query .= "sellerID = {$userID} and auction.endAt > NOW()";
 
@@ -491,7 +541,7 @@ class DatabaseConnection {
 
   public function getBoughtAuctions($connection,$userID){
     $query = "SELECT auction.*, winner.winnerID, user.name as sellerName, item.itemName,item.description,";
-    $query .= "item.imageURL,item.ownerID,item.categoryID ";
+    $query .= "itemimage.imageURL,item.ownerID,item.categoryID ";
     $query .= "FROM auction ";
     $query .= "LEFT JOIN ";
     $query .= "(SELECT buyerID AS winnerID, MAX(bid.bidValue),MIN(bid.createdAt),auctionID FROM bid GROUP BY bid.auctionID) as winner ";
@@ -500,6 +550,8 @@ class DatabaseConnection {
     $query .= "user ON auction.sellerID = user.id ";
     $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
+    $query .="LEFT JOIN ";
+    $query .="itemimage on item.id = itemimage.itemID ";
     $query .= "WHERE ";
     $query .= "winner.winnerID = {$userID} ";
     $query .= "and auction.ended=1";
@@ -515,7 +567,7 @@ class DatabaseConnection {
 
       }
     } else {
-      die( "Database query failed (getBuyingAuctions). " . mysqli_error( $connection ) );
+      die( "Database query failed (getBoughtingAuctions). " . mysqli_error( $connection ) );
     }
 
     return $auctions;
@@ -554,11 +606,13 @@ class DatabaseConnection {
   public function getWatchingAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
     $query = "SELECT auction.*,item.itemName,item.description,";
-    $query .= "item.imageURL,item.ownerID,item.categoryID FROM watching ";
+    $query .= "itemimage.imageURL,item.ownerID,item.categoryID FROM watching ";
     $query .= "INNER JOIN auction ";
     $query .= "ON watching.auctionID = auction.id ";
     $query .= "INNER JOIN item ";
     $query .= "ON auction.itemID = item.id ";
+    $query .="LEFT JOIN ";
+    $query .="itemimage on item.id = itemimage.itemID ";
     $query .= "WHERE watching.userID = {$userID} ";
 
     $result = mysqli_query($connection,$query);
@@ -634,10 +688,10 @@ public function addWatch($connection,$userID, $auctionID){
     //get offset
     $offset = ($page-1)*$perPage;
 
-    //get expiring auctions, ordered by how close they are to the end;
+    //get new auctions, ordered by how close they are to the end;
     $query ="SELECT ";
     $query .="auction.id, ";
-    $query .="item.imageURL, ";
+    $query .="itemimage.imageURL, ";
     $query .="user.name, ";
     $query .="auction.sellerID ";
     $query .="FROM ";
@@ -646,6 +700,8 @@ public function addWatch($connection,$userID, $auctionID){
     $query .="item ON item.id = auction.itemID ";
     $query .="INNER JOIN ";
     $query .="user ON user.id = auction.sellerID ";
+    $query .="LEFT JOIN ";
+    $query .="itemimage on item.id = itemimage.itemID ";
     $query .="WHERE ";
     $query .="auction.endAt>NOW() ";
     $query .="ORDER BY ";
@@ -674,7 +730,7 @@ public function addWatch($connection,$userID, $auctionID){
     //get expiring auctions, ordered by how close they are to the end;
     $query ="SELECT ";
     $query .="auction.id, ";
-    $query .="item.imageURL, ";
+    $query .="itemimage.imageURL, ";
     $query .="user.name, ";
     $query .="auction.sellerID ";
     $query .="FROM ";
@@ -683,6 +739,8 @@ public function addWatch($connection,$userID, $auctionID){
     $query .="item ON item.id = auction.itemID ";
     $query .="INNER JOIN ";
     $query .="user ON user.id = auction.sellerID ";
+    $query .="LEFT JOIN ";
+    $query .="itemimage on item.id = itemimage.itemID ";
     $query .="WHERE ";
     $query .="auction.endAt>NOW() ";
     $query .="ORDER BY ";
@@ -721,11 +779,13 @@ public function addWatch($connection,$userID, $auctionID){
 
       $query = "SELECT ";
       $query .= "auction.id, ";
-      $query .= "item.imageURL ";
+      $query .= "itemimage.imageURL ";
       $query .= "FROM ";
       $query .= "auction ";
       $query .= "INNER JOIN ";
       $query .= "item ON item.id = auction.itemID ";
+      $query .="LEFT JOIN ";
+      $query .="itemimage on item.id = itemimage.itemID ";
       $query .= "WHERE ";
       $query .= "auction.id IN({$rand_s}); ";
 
@@ -754,10 +814,12 @@ public function addWatch($connection,$userID, $auctionID){
     if ($userID!=0){
       $query = "SELECT ";
       $query .= "auction.id,";
-      $query .= "item.imageURL ";
+      $query .= "itemimage.imageURL ";
       $query .= "FROM auction ";
       $query .= "INNER JOIN ";
       $query .= "item ON item.id = auction.itemID ";
+      $query .="INNER JOIN ";
+      $query .="itemimage on item.id = itemimage.itemID ";
       $query .= "INNER JOIN ";
       $query .= "( SELECT ";
       $query .= "item.categoryID AS CategoryID, ";
@@ -781,8 +843,6 @@ public function addWatch($connection,$userID, $auctionID){
       $query .= "GROUP BY ";
       $query .= "item.categoryID ";
       $query .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
-      $query .= "WHERE ";
-      $query .= "item.imageURL IS NOT NULL ";
       $query .= "ORDER BY ";
       $query .= "item_category.Occurrence DESC, ";
       $query .= "auction.id DESC ";
@@ -821,9 +881,12 @@ public function addWatch($connection,$userID, $auctionID){
 
   public function getSimilarAuctions($connection,$auction){
     //get up to 10 auctions whose category is same as the auction user is viewing right now
+
     $categoryID = $auction->item->categoryID;
-    $query = "SELECT auction.id,item.imageURL,item.itemName FROM auction ";
+    $query = "SELECT auction.id,itemimage.imageURL,item.itemName FROM auction ";
     $query .= "INNER JOIN item ON item.id = auction.itemID ";
+    $query .="LEFT JOIN ";
+    $query .="itemimage on item.id = itemimage.itemID ";
     $query .= "WHERE item.categoryID={$categoryID} ORDER BY auction.createdAt DESC";
     $result = mysqli_query( $connection, $query );
 
@@ -834,7 +897,7 @@ public function addWatch($connection,$userID, $auctionID){
         $auctions[] = $row;
       }
     } else {
-      die( "Database query failed (get recommended auction). " . mysqli_error( $connection ) );
+      die( "Database query failed (get similar auction). " . mysqli_error( $connection ) );
     }
 
     return $auctions;
@@ -898,81 +961,57 @@ public function addWatch($connection,$userID, $auctionID){
     //check if auction is on,
     $now = date( "Y-m-d H:i:s" );
     if ( $auction->endAt>$now ) {
-      //check if currentBid is null
-      if ( is_null( $auction->currentBid ) ) {
-        //check if bid is higher than minimum bid
-        if ($bid->bidValue>$auction->startingBid){
-          //save the bid and change current bid to the min value and winnerId to userId and return true and congrats
-          if ( $bid->id = $this->addBid( $connection, $bid ) ) {
-            $auction->currentBid = $auction->startingBid;
-            $this->updateAuction( $connection, $auction );
-            return array( "status"=>"success", "message"=>"Congratulations" );
-          } else {
-            return array( "status"=>"danger", "message"=>"Unable to add bid" );
-          }
-        } else {
-          return array( "status"=>"warning", "message"=>"Bid value is lower than starting bid" );
-        }
-      } else {
-        //check if bid is higher than currentBid+minInc
-        if ( $bid->bidValue>( $auction->currentBid+$auction->minBidIncrease ) ) {
-          //if true, this bid has 3 cases: Highest new bid, Bidded by highest bidder but lower than highest bid, bidded by other but lower than highest bid
-          
-          //save the current bid because it is at least a valid bid
-          if ( $bid->id=$this->addBid( $connection, $bid ) ) {
-            //get two highest bid(sort by value DESC and time ASC)
-            $auctionID = $auction->id;
-            $query = "SELECT * FROM bid WHERE ";
-            $query .= "auctionID={$auctionID} ";
-            $query .= "ORDER BY bidValue DESC, createdAt ASC ";
-            $query .= "LIMIT 2";
-            $result = mysqli_query( $connection, $query );
-            $highestBid = mysqli_fetch_assoc( $result );
-            $secondHighestBid = mysqli_fetch_assoc( $result );
-            if ( is_null( $highestBid ) || is_null( $secondHighestBid ) ) {
-              //return server error
-              die("Unable to get records" );
-            }
-            //check if the bid is highest bid, else the current value will become that of the bid
-            if ( $bid->bidValue == $highestBid["bidValue"] ) {
-      
-
-              if ($bid->buyerID != $secondHighestBid["buyerID"]){
-                //change current bid to the bid to userId and return true and congrats
-                $auction->currentBid = $highestBid["bidValue"];
-                $this->updateAuction( $connection, $auction );
-                //send second person an email notification for being outbid if second person is not also the buyer
-                return array( "status"=>"success", "message"=>"Congratulations","second_buyerID"=>$secondHighestBid["buyerID"]);
-              } else {
-                //the bid is updated by current user, do not change the current bid value
-                $auction->currentBid = $highestBid["bidValue"];
-                $this->updateAuction( $connection, $auction );
-                return array( "status"=>"success", "message"=>"You successfully updated your bid." );
-              }
-              
-            } else if ($bid->buyerID == $highestBid["buyerID"] && $bid->bidValue < $highestBid["bidValue"]){
-              //if bid is from the highest bidder, but its value less than highest bid value. Alert price lower than his previous amount
-              $this->deleteOne($connection,"bid",$bid->id);
-              return array( "status"=>"warning", "message"=>"You are the current highest bidder. You cannot place a value lower than your current bid." );
+      //if true, this bid has 3 cases: Highest new bid, Bidded by highest bidder but lower than highest bid, bidded by other but lower than highest bid
+      $auctionID = $auction->id;
+      $query = "SELECT *,MAX(bidValue),MIN(createdAt) FROM bid WHERE ";
+      $query .= "auctionID={$auctionID} ";
+      $query .= "LIMIT 1";
+      $result = mysqli_query( $connection, $query );
+      if ($result){
+        //get result
+        $highestBid = mysqli_fetch_assoc( $result );
+        if ( is_null( $highestBid ) ) {
+          //never bidded yet
+          if ($bid->bidValue>=$auction->startingBid){
+            //save the bid and change current bid to the min value and winnerId to userId and return true and congrats
+            if ( $bid->id = $this->addBid( $connection, $bid ) ) {
+              return array( "status"=>"success", "message"=>"Congratulations" );
             } else {
-              // change current bid to the second highest bid and return false and report price outbid.
-              $auction->currentBid = $highestBid["bidValue"];
-              //change bidder to highest bidder
-              $bid->buyerID = $highestBid["buyerID"];
-              $this->updateBid($connection,$bid);
-              $this->updateAuction( $connection, $auction );
-              return array( "status"=>"warning", "message"=>"Price outbid" );
+              return array( "status"=>"danger", "message"=>"Unable to add bid" );
             }
+          } else {
+            return array( "status"=>"warning", "message"=>"Bid value is lower than starting bid" );
+          }
+        }
 
+        //check if the bid is higher than highest bid plus min increase
+        if ( $bid->bidValue >= $highestBid["bidValue"]+$auction->minBidIncrease ) {
+          if ( $bid->id=$this->addBid( $connection, $bid ) ) {
+            if ($bid->buyerID != $highestBid["buyerID"]){
+              //send old highest bidder an email
+              return array( "status"=>"success", "message"=>"Congratulations","second_buyerID"=>$highestBid["buyerID"]);
+            } else {
+              //update your bid
+              return array( "status"=>"success", "message"=>"You successfully updated your bid." );
+            }
           } else {
             //return server error
             return array( "status"=>"danger", "message"=>"Unable to save records" );
           }
+        } else if ($bid->bidValue <= $highestBid["bidValue"]) {
+          //price is lower than bid value
+           if ($bid->buyerID == $highestBid["buyerID"]){
+            //if bid is from the highest bidder, but its value less than highest bid value. Alert price lower than his previous amount
+            return array( "status"=>"warning", "message"=>"You are the current highest bidder. You cannot place a value lower than or equal to your current bid." );
+          } else {
+            return array( "status"=>"warning", "message"=>"Price too low" );
+          }
         } else {
-          //return false and report price too low
-          return array( "status"=>"warning", "message"=>"Price too low" );
+          //price is lower than h bid + min inc but higher than h bid
+          return array( "status"=>"warning", "message"=>"The minimum bid increase is ".$auction->minBidIncrease);
         }
-
+      } else {
+        die("can't get highest bid");
       }
     } else {
       //return false and report auction is over.

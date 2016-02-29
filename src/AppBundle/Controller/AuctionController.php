@@ -175,7 +175,6 @@ class AuctionController extends Controller {
         $auction->item = $item;
         $category = $this->get( "db" )->selectOne( $connection, 'category', $auction->item->categoryID );
         $item->categoryName = $category["categoryName"];
-        
 
         $sellerEntry = $this->get( "db" )->selectOne( $connection, 'user', $auction->sellerID );
         $seller = new User($sellerEntry);
@@ -372,7 +371,6 @@ class AuctionController extends Controller {
 
         //check if auction is alr being watched by user
         $watching = $this->get('db')->isWatchingAuction($connection, $userID, $auctionID);
-
         //prepare return objects
         $params = array( "auction"=>$auction,
             "ended"=>$ended,
@@ -397,7 +395,6 @@ class AuctionController extends Controller {
     public function editAction( $auctionID, Request $request ) {
         $connection = $this->get( "db" )->connect();
         if ( $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID ) ) {
-
             //check if user has right to edit
             $session = $request->getSession();   
             $userID = $session->get('userID');
@@ -422,7 +419,6 @@ class AuctionController extends Controller {
                 return $this->redirectToRoute( 'auction_show', array( "auctionID"=>$auctionID ), 301 );
             }
             $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auctionEntry["itemID"] );
-            
             $auction->item = new Item( $itemEntry );
 
             $form = $this->createForm( AuctionType::class, $auction );;
@@ -448,6 +444,7 @@ class AuctionController extends Controller {
 
             return $this->render( 'auction/edit.html.twig', array(
                     'form' => $form->createView(),
+                    'auction' => $auction
                 ) );
         } else {
             $this->addFlash(

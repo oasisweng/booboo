@@ -11,6 +11,14 @@
     {% endif %}
 	<div class="col-md-8 col-md-offset-2">
     <h2>Auction Detail</h2>
+    {# show if this is user's own auction #}
+    {% if auction.sellerID == app.session.get('userID') %}
+         <div class="flash flash-info">
+          <div class="alert alert-info fade in" role="alert">
+             This is your auction.
+          </div>
+        </div>
+    {% endif %}
     {% if ended %}
         {% if bidded %}
             {% if won %}
@@ -74,7 +82,7 @@
             </div> #}
             {% endif %}<!-- bidded -->
     {% endif %}<!-- ended -->
-    <div class="row">
+    <div class="row" style="padding-top:12px;">
         <div class="col-md-12">
             <b>{{ auction.item.itemName}}</b>
         </div>
@@ -82,13 +90,9 @@
     <div class="row">
     	<div class="col-md-3">
         {% if auction.item.imageURL is not null %}
-            <td class="col-md-4 text-center">
-                <img src="{{asset('assets/photos/'~auction.item.imageURL) }}" alt="image" class="img-responsive">
-            </td>
+            <img src="{{asset('assets/photos/'~auction.item.imageURL) }}" alt="image" class="img-responsive">
         {% else %}
-            <td class="col-md-4 text-center"> 
-                <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
-            </td> 
+            <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
         {% endif %}
 		</div>
 		<div class="col-md-7">
@@ -158,7 +162,7 @@
             </div><!-- /.row-->
             <br><br>
             <div class="row.10" style="margin:-2em">
-                {% if auction.currentBid is null %}
+                {% if bids|length == 0 %}
                     <p style="text-align:center;"><small>No one has bidded yet, <b>be the first one!</b></small></p>
                 {% endif %}
             	{{ include('bid/bid.html.twig', {'bid_form': bid_form }) }}
@@ -196,12 +200,14 @@
                     <div class="carousel-inner">
                         {% for auction in similarAuctions %}
                             <div class="col-md-2">
-                                <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
-                                <div class="text-center">
-                                    <h4><a href="#">{{ auction.id }}</a></h4>
-                                    <p></p>
+                                 <div class="text-center">
                                     <a class="label label-danger" style="color:#fff;" href="{{ path('auction_show', {'auctionID': auction.id})}}">View item</a>
                                 </div>
+                                {% if auction.imageURL is not null %}
+                                    <img src="{{asset('assets/photos/'~auction.imageURL) }}" alt="image" class="img-responsive">
+                                {% else %}
+                                    <img src="http://placehold.it/500/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive">
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
