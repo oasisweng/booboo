@@ -134,6 +134,8 @@ class Auction {
             $this->startingBid = 1.0;
             $this->minBidIncrease = 0.5;
             $this->viewCount =  0;
+            $this->startAt = new DateTime(date( "Y-m-d H:i" ));
+            $this->endAt = new DateTime(date( "Y-m-d H:i" )); 
             $this->createdAt = date( "Y-m-d H:i:s" );
             $this->updatedAt = date( "Y-m-d H:i:s" );
             $this->ended = false;
