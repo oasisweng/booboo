@@ -104,7 +104,7 @@
                 {% if auction.item.description is null %}
                     This guy is too lazy to leave anything here.
                 {% else %}
-                    {{ auction.item.description}}
+                    <p>{{ auction.item.description}}</p>
                 {% endif %}
                 
 			</div>
@@ -123,19 +123,18 @@
                 <label>£ Current Price :</label>
                 {% if auction.currentBid is null %}
                     {{auction.startingBid}}&nbsp;
+                    <br><br><br>
                 {% else %}
                     {{ auction.currentBid}}
-                {% endif %}
-            </div>
-			<br>
-			<div class="row.10">
+
+            <div class="row.10">
             <!-- Bid History Table -->
             <a data-toggle="modal" data-target="#history" style="margin:8em"> bid history</a>
                 <div class="modal fade" id="history" tabindex="-1" role="dialog" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                            	<label>Bid History</label>
+                                <label>Bid History</label>
                             </div>
                         <div class="modal-body">
                             <table id="table" data-toggle="table" data-height="auto"
@@ -147,11 +146,11 @@
                                     <td><label>Bid Value</label></td>
                                 </tr>
                         {% for bid in bids %}
-                        	<tr>
-                            	<td>{{ bid.createdAt | date('Y-m-d H:i:s') }}</a></td>
-                            	<td>{{ bid.buyerName }}</td>
-                            	<td>{{ bid.bidValue }}</td>
-                        	</tr>
+                            <tr>
+                                <td>{{ bid.createdAt | date('Y-m-d H:i:s') }}</a></td>
+                                <td>{{ bid.buyerName }}</td>
+                                <td>{{ bid.bidValue }}</td>
+                            </tr>
                         {% endfor %} 
                                </thead>
                             </table>
@@ -161,6 +160,8 @@
                 </div><!-- /.modal -->
             </div><!-- /.row-->
             <br><br>
+                {% endif %}
+            </div>
             <div class="row.10" style="margin:-2em">
                 {% if bids|length == 0 %}
                     <p style="text-align:center;"><small>No one has bidded yet, <b>be the first one!</b></small></p>

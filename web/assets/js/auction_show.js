@@ -18,7 +18,7 @@ $.ajax({
       }
       
     } else {
-      $this.html(event.strftime('</span>Time Left : %H hours : %M mins : %S seconds</span>'));
+      $this.html(event.strftime('</span>Time Left : %D days %H hours : %M mins : %S seconds</span>'));
     }
     });
   }
