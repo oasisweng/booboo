@@ -95,7 +95,7 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/login", name="user_login")
+     * @Route("/logint", name="user_login")
      */
     public function loginAction( Request $request ) {
         $session = $request->getSession();
