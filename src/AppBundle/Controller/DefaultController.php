@@ -28,6 +28,11 @@ class DefaultController extends Controller
             $recommended_auctions = $this->get('db')->getRecommendedAuctions($connection,$userID);  
         }
         
+        //checking if user is logged in 
+        $loggedin = isset($userID) ;
+
+
+
         //use this code to see what is in hot auctions
         // $this->get('dump')->d($hot_auctions);
         return $this->render('default/index.html.twig', array(
@@ -35,7 +40,8 @@ class DefaultController extends Controller
             'hot_auctions' => $hot_auctions,
             'expiring_auctions' => $expiring_auctions,
             'new_auctions' => $new_auctions,
-            'recommended_auctions' => $recommended_auctions
+            'recommended_auctions' => $recommended_auctions,
+            'loggedin' => $loggedin
         ));
     }
 
