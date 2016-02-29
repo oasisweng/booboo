@@ -1123,7 +1123,7 @@ public function addWatch($connection,$userID, $auctionID){
       if ( $user->password == $fetched_user["password"] || $this->check_password( $user->password, $fetched_user["password"] ) ) {
         return $fetched_user["id"];
       } else {
-        die( "Database query failed (User login). " . mysqli_error( $connection ) );
+        die( "Database query failed (User login). wrong password" );
         return false;
       }
     } else {
