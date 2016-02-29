@@ -1095,7 +1095,7 @@ public function addWatch($connection,$userID, $auctionID){
         $query .= "WHERE id = {$id}";
       } else {
         $query = "UPDATE user SET ";
-        $query .= "name='{$name}' ";
+        $query .= "name='{$name}' ";  
         $query .= "WHERE id={$id}";
       }
 
@@ -1123,7 +1123,6 @@ public function addWatch($connection,$userID, $auctionID){
       if ( $user->password == $fetched_user["password"] || $this->check_password( $user->password, $fetched_user["password"] ) ) {
         return $fetched_user["id"];
       } else {
-        die( "Database query failed (User login). wrong password" );
         return false;
       }
     } else {
