@@ -298,13 +298,12 @@ class DatabaseConnection {
   public function getWinnerForAuction($connection,$auctionID){
 
     $query = "SELECT buyerID AS winnerID, ";
-    $query .= "MAX(bid.bidValue), ";
-    $query .= "MIN(bid.createdAt), ";
     $query .= "auctionID ";
     $query .= "FROM bid  ";
     $query .= "WHERE ";
     $query .= "bid.auctionID={$auctionID} ";
-    $query .= "GROUP BY bid.auctionID ";
+    $query .= "ORDER BY bid.bidValue DESC, bid.createdAt ASC ";
+    $query .= "LIMIT 1";
 
     $result = mysqli_query($connection,$query);
     if ($result){
@@ -966,8 +965,9 @@ public function addWatch($connection,$userID, $auctionID){
     if ( $auction->endAt>$now ) {
       //if true, this bid has 3 cases: Highest new bid, Bidded by highest bidder but lower than highest bid, bidded by other but lower than highest bid
       $auctionID = $auction->id;
-      $query = "SELECT *,MAX(bidValue),MIN(createdAt) FROM bid WHERE ";
+      $query = "SELECT * FROM bid WHERE ";
       $query .= "auctionID={$auctionID} ";
+      $query .= "ORDER BY bidValue DESC,createdAt ASC ";
       $query .= "LIMIT 1";
       $result = mysqli_query( $connection, $query );
       if ($result){
