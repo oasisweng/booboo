@@ -48,7 +48,7 @@ class DatabaseConnection {
     if ($column=="auction"){
       //winnerID
       $query .= "LEFT JOIN ";
-      $query .= "(SELECT bid.buyerID AS id, bid.bidValue AS currentBid FROM bid WHERE bid.auctionID={$auctionID} ORDER BY bid.bidValue DESC LIMIT 1) as winner ";
+      $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID FROM bid GROUP BY bid.auctionID ORDER BY bid.bidValue DESC) as winner ";
       $query .= "ON winner.auctionID={$id} ";
     }
     //handle item special case ImageURL
@@ -542,7 +542,7 @@ class DatabaseConnection {
     $query .= "itemimage.imageURL,item.ownerID,item.categoryID ";
     $query .= "FROM auction ";
     $query .= "LEFT JOIN ";
-    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid FROM bid WHERE bid.auctionID={$auctionID} ORDER BY bid.bidValue DESC LIMIT 1) as winner ";
+    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID FROM bid GROUP BY bid.auctionID ORDER BY bid.bidValue DESC) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "LEFT JOIN ";
     $query .= "user ON auction.sellerID = user.id ";
@@ -576,7 +576,7 @@ class DatabaseConnection {
     $query = "SELECT auction.*, winner.winnerID FROM ";
     $query .= "auction ";
     $query .= "LEFT JOIN ";
-    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid FROM bid WHERE bid.auctionID={$auctionID} ORDER BY bid.bidValue DESC LIMIT 1) as winner ";
+    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid,bid.auctionID FROM bid GROUP BY bid.auctionID ORDER BY bid.bidValue DESC) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "WHERE ";
     $query .= "auction.sellerID = {$userID} ";
@@ -610,7 +610,7 @@ class DatabaseConnection {
     $query .= "INNER JOIN item ";
     $query .= "ON auction.itemID = item.id ";
     $query .= "LEFT JOIN ";
-    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid FROM bid WHERE bid.auctionID={$auctionID} ORDER BY bid.bidValue DESC LIMIT 1) as winner ";
+    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID FROM bid GROUP BY bid.auctionID ORDER BY bid.bidValue DESC) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .="LEFT JOIN ";
     $query .="itemimage on item.id = itemimage.itemID ";
