@@ -292,6 +292,7 @@ class UserController extends Controller {
                     //check if user should leave feedback    
                 }
             }
+
             return new JsonResponse(array( 'buying'=>$buying,
                     'selling'=>$selling,
                     'bought'=>$bought,

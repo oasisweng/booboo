@@ -616,15 +616,6 @@ class DatabaseConnection {
 
   public function getWatchingAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
-<<<<<<< HEAD
-    $query = "SELECT auction.*, bid.bidValue, item.itemName FROM watching ";
-    $query .="INNER JOIN auction ";
-    $query .="ON watching.auctionID = auction.id ";
-    $query .="INNER JOIN bid ";
-    $query .="ON auction.id = bid.auctionID ";
-    $query .= "INNER JOIN item ";
-    $query .="ON auction.itemID = item.id ";
-=======
     $query = "SELECT auction.*,winner.winnerID, winner.currentBid, item.itemName,item.description,";
     $query .= "itemimage.imageURL,item.ownerID,item.categoryID FROM watching ";
     $query .= "INNER JOIN auction ";
@@ -637,10 +628,9 @@ class DatabaseConnection {
     $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
     $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
->>>>>>>   1 Auction will properly end via auction_show
     $query .="LEFT JOIN ";
     $query .="itemimage on item.id = itemimage.itemID ";
-    $query .="WHERE watching.userID = {$userID} and bid.bidValue =(SELECT MAX(bid.bidValue) FROM bid WHERE bid.auctionID = auction.id)";
+    $query .= "WHERE watching.userID = {$userID} ";
 
     $result = mysqli_query($connection,$query);
 

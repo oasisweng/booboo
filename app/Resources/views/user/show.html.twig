@@ -225,7 +225,7 @@ function updateTable(data, category, buttonName) {
 				$(tdArray[1]).html(auctions[category][data[category][i].id].bidValue);
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].bidValue : 'No bid') + 
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + 
 					'</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
 				var endTime = new Date(auctions[category][data[category][i].id].endAt.date);
