@@ -709,6 +709,7 @@ public function addWatch($connection,$userID, $auctionID){
     $query ="SELECT ";
     $query .="auction.id, ";
     $query .="itemimage.imageURL, ";
+    $query .="item.itemName, ";
     $query .="user.name, ";
     $query .="auction.sellerID ";
     $query .="FROM ";
@@ -748,6 +749,7 @@ public function addWatch($connection,$userID, $auctionID){
     $query ="SELECT ";
     $query .="auction.id, ";
     $query .="itemimage.imageURL, ";
+    $query .="item.itemName, ";
     $query .="user.name, ";
     $query .="auction.sellerID ";
     $query .="FROM ";
