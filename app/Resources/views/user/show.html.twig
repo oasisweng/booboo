@@ -188,7 +188,8 @@ function updateTable(data, category, buttonName) {
 				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
 
-				$(tdArray[0]).html(auctions[category][data[category][i].id].itemName);
+				$(tdArray[0]).html('<a href="' +  auctionShowURL(data[category][i].id) + '">' +
+					auctions[category][data[category][i].id].itemName + '</a>');
 		//switches between bidValue and startingBid depending on whether the category is buying or selling	
 				if(category == 'buying'){
 					$(tdArray[1]).html(auctions[category][data[category][i].id].bidValue);
@@ -199,7 +200,9 @@ function updateTable(data, category, buttonName) {
 				$(tdArray[2]).html(auctions[category][data[category][i].id].currentBid);
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (category == 'buying' ? auctions[category][data[category][i].id].bidValue : auctions[category][data[category][i].id].startingBid) + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + '</td><td></td><td><a class="btn btn-primary" href="' + 
+				auctions[category][data[category][i].id].el = $('<tr><td style="text-align:left;">' + '<a href="' +  
+					auctionShowURL(data[category][i].id) + '">' + auctions[category][data[category][i].id].itemName + '</a></td><td>' 
+					+ (category == 'buying' ? auctions[category][data[category][i].id].bidValue : auctions[category][data[category][i].id].startingBid) + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + '</td><td></td><td><a class="btn btn-primary" href="' + 
 					(category == 'buying' ? auctionShowURL(data[category][i].id) : auctionEditURL(data[category][i].id)) + '" role="button">' + buttonName + '</a></td></tr>');
 				
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
