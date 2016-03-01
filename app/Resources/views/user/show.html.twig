@@ -167,10 +167,17 @@ function updateTable(data, category, buttonName) {
 		return url.replace('0', id);
 	} 
 
-	function feedbackShowURL(id) {
-		var url = '{{ path('feedback_newt', {'auctionID': 0 })}}';       //newt route over new for testing purposes for now
+	function feedbackGiveURL(id) {
+		var url = '{{ path('feedback_new', {'auctionID': 0 })}}';       //newt route over new for testing purposes for now
 		return url.replace('0', id);
 	}
+
+	function feedbackEditURL(id){
+		var url = '{{ path('feedback_edit', {'auctionID': 0 })}}';       
+		return url.replace('0', id);
+	}
+
+
 	for (var key in auctions[category]) {
 		if (auctions[category].hasOwnProperty(key)) {
 			auctions[category][key].pendingDelete = true;
@@ -246,7 +253,7 @@ function updateTable(data, category, buttonName) {
 			if (auctions[category][data[category][i].id]) {
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + auctions[category][data[category][i].id].sellerName + '</td><td>' + auctions[category][data[category][i].id].currentBid + '</td><td>' + auctions[category][data[category][i].id].endAt.date + '</td><td><a class="btn btn-primary" href="' + feedbackShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + auctions[category][data[category][i].id].sellerName + '</td><td>' + auctions[category][data[category][i].id].currentBid + '</td><td>' + auctions[category][data[category][i].id].endAt.date + '</td><td><a class="btn btn-primary" href="' + (auctions[category][data[category][i].id].didFeedback ? feedbackEditURL(data[category][i].id) : feedbackGiveURL(data[category][i].id)) + '" role="button">' + buttonName + '</a></td></tr>');
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
 			}
 		}
@@ -292,7 +299,7 @@ function updateTable(data, category, buttonName) {
 		var url = '{{ path('user_show', {'userID': 0 })}}';
 		return url.replace('0', id);
 	} 
-	function feedbackShowURL(id) {
+	function feedbackGiveURL(id) {
 		var url = '{{ path('feedback_newt', {'auctionID': 0 })}}';       //newt route over new for testing purposes for now
 		return url.replace('0', id);
 	}
