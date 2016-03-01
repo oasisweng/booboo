@@ -1359,12 +1359,11 @@
 /* Form */
 
 	form label {
-		font-weight: 200;
 		color: #888;
 		display: inline-block;
-		margin: 0 1em 0 0;
+		margin: 0 0.9em 0 0.5em;
 	}
-
+	
 	form input[type="text"],
 	form input[type="email"]
 	input[type="password"],
