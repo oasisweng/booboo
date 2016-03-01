@@ -315,6 +315,7 @@ class DatabaseConnection {
     if ($result){
       $winner = mysqli_fetch_assoc($result);
 
+
       if (isset($winner["winnerID"])) {
         return $winner["winnerID"];
       }
