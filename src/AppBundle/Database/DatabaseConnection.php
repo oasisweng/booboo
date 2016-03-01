@@ -830,67 +830,117 @@ public function addWatch($connection,$userID, $auctionID){
     //select all distinct categories user has bidded，ordered by number of categories
     //if results are not adequate, it will further select hottest auctions
     //in an attempt to attract user to bid them
-    define("MAX_TOTAL_RECOMMENDATIONS",10);
+    //
+    $MAX_TOTAL_RECOMMENDATIONS = 10;
 
     $auctions=[];
+    //only get these when user has logged in
     if ($userID!=0){
+      $query_select = "SELECT ";
+      $query_select .="auction.id, ";
+      $query_select .="itemimage.imageURL, ";
+      $query_select .="item.itemName ";
+      $query_select .= "FROM auction ";
+      $query_select .= "INNER JOIN ";
+      $query_select .= "item ON item.id = auction.itemID ";
+      $query_select .="INNER JOIN ";
+      $query_select .="itemimage on itemimage.itemID = auction.itemID ";
 
-      $query = "SELECT ";
-      $query .="auction.id, ";
-      $query .="itemimage.imageURL, ";
-      $query .="item.itemName ";
-      $query .= "FROM auction ";
-      $query .= "INNER JOIN ";
-      $query .= "item ON item.id = auction.itemID ";
-      $query .="INNER JOIN ";
-      $query .="itemimage on item.id = itemimage.itemID ";
-      $query .= "INNER JOIN ";
-      $query .= "( SELECT ";
-      $query .= "item.categoryID AS CategoryID, ";
-      $query .= "COUNT(item.id) AS Occurrence ";
-      $query .= "FROM item, ";
-      $query .= "( SELECT ";
-      $query .= "auction.itemID AS ItemID ";
-      $query .= "FROM ";
-      $query .= "auction, ";
-      $query .= "(SELECT DISTINCT ";
-      $query .= "bid.auctionID AS AuctionID ";
-      $query .= "FROM bid ";
-      $query .= "WHERE ";
-      $query .= "bid.buyerID = {$userID} ";
-      $query .= ") AS ab ";
-      $query .= "WHERE ";
-      $query .= "auction.id = ab.AuctionID ";
-      $query .= ") AS ai ";
-      $query .= "WHERE ";
-      $query .= "item.id = ai.ItemID ";
-      $query .= "GROUP BY ";
-      $query .= "item.categoryID ";
-      $query .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
-      $query .= "ORDER BY ";
-      $query .= "item_category.Occurrence DESC, ";
-      $query .= "auction.id DESC ";
-      $query .= "LIMIT 10; ";
-    } else {
-      return NULL;
-    }
+      //you might want to bid on the sorts of things
+      //other people, who have also bid on the sorts of things you have previously
+      //bid on, are currently bidding on
+      $query ="WHERE ";
+      $query .="auction.id IN( ";
+      $query .="SELECT bid.auctionID ";
+      $query .="FROM bid ";
+      $query .="WHERE ";
+      $query .="bid.buyerID IN( ";
+      $query .="SELECT bid.buyerID ";
+      $query .="FROM bid ";
+      $query .="WHERE ";
+      $query .="bid.buyerID <> {$userID} AND bid.auctionID IN( ";
+      $query .="SELECT bid.auctionID ";
+      $query .="FROM bid ";
+      $query .="WHERE ";
+      $query .="bid.buyerID = {$userID} ";
+      $query .="GROUP BY ";
+      $query .="bid.auctionID) ";
+      $query .="GROUP BY ";
+      $query .="bid.buyerID) ";
+      $query .="GROUP BY ";
+      $query .="bid.auctionID) ";
 
-    $result = mysqli_query( $connection, $query );
+      //you might want to bid on the sorts of things
+      //that are in the same category as the things you are currently bidding on
+      //ordered by how frequent you bid on a certain category of items
+      
+      $query2 = "INNER JOIN ";
+      $query2 .= "( SELECT ";
+      $query2 .= "item.categoryID AS CategoryID, ";
+      $query2 .= "COUNT(item.id) AS Occurrence ";
+      $query2 .= "FROM item, ";
+      $query2 .= "( SELECT ";
+      $query2 .= "auction.itemID AS ItemID ";
+      $query2 .= "FROM ";
+      $query2 .= "auction, ";
+      $query2 .= "(SELECT DISTINCT ";
+      $query2 .= "bid.auctionID AS AuctionID ";
+      $query2 .= "FROM bid ";
+      $query2 .= "WHERE ";
+      $query2 .= "bid.buyerID = {$userID} ";
+      $query2 .= ") AS ab ";
+      $query2 .= "WHERE ";
+      $query2 .= "auction.id = ab.AuctionID ";
+      $query2 .= ") AS ai ";
+      $query2 .= "WHERE ";
+      $query2 .= "item.id = ai.ItemID ";
+      $query2 .= "GROUP BY ";
+      $query2 .= "item.categoryID ";
+      $query2 .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
+      $query2 .= "ORDER BY ";
+      $query2 .= "item_category.Occurrence DESC, ";
+      $query2 .= "auction.id DESC ";
 
-    $auctions = [];
-    //get reco auctions
-    if ( $result ) {
-      while ($row = mysqli_fetch_assoc($result)){
-        $auctions[] = $row;
+      $query_limit = "LIMIT {$MAX_TOTAL_RECOMMENDATIONS}";
+      $result = mysqli_query( $connection, $query_select.$query.$query_limit );
+
+      //get first type reco
+      if ( $result ) {
+        while ($row = mysqli_fetch_assoc($result)){
+          $auctions[] = $row;
+        }
+      } else {
+        die( "Database query failed (get recommended auction 1). " . mysqli_error( $connection ) );
       }
-    } else {
-      die( "Database query failed (get recommended auction). " . mysqli_error( $connection ) );
+
+      // echo "q1:<pre>";
+      // var_dump($query_select.$query.$query_limit);
+      // echo "\n";
+      // var_dump($auctions);
+      // echo "</pre><br>";
+      
+      //if first type did not return enough reco, get second type reco
+      $shortage = $MAX_TOTAL_RECOMMENDATIONS-count($auctions);
+      $query2_limit = "LIMIT {$shortage}";
+      $result2 = mysqli_query( $connection, $query_select.$query2.$query2_limit );
+
+      //get second type reco
+      if ( $result2 ) {
+        while ($row = mysqli_fetch_assoc($result2)){
+          $auctions[] = $row;
+        }
+      } else {
+        die( "Database query failed (get recommended auction 2). " . mysqli_error( $connection ) );
+      }
+      // echo "q2:<pre>";
+      // var_dump($auctions);
+      // echo "</pre><br>";
     }
 
     //if reco auctions are not adequate, get random auctions
     $reco_count = count($auctions);
-    if ($reco_count<=constant("MAX_TOTAL_RECOMMENDATIONS")){
-        $more = constant("MAX_TOTAL_RECOMMENDATIONS")-$reco_count;
+    if ($reco_count<$MAX_TOTAL_RECOMMENDATIONS){
+        $more = $MAX_TOTAL_RECOMMENDATIONS-$reco_count;
         $random = $this->getRandomAuctions($connection,$more);
         if (count($auctions)== 0){
           $auctions = $random;
