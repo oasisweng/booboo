@@ -13,8 +13,8 @@
     <h2>Auction Detail</h2>
     {# show if this is user's own auction #}
     {% if auction.sellerID == app.session.get('userID') %}
-         <div class="flash flash-info">
-          <div class="alert alert-info fade in" role="alert">
+         <div class="flash flash-info" style="clear:both;">
+          <div class="alert alert-info fade in" role="alert" >
              This is your auction.
           </div>
         </div>

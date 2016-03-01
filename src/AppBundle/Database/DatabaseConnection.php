@@ -48,7 +48,9 @@ class DatabaseConnection {
     if ($column=="auction"){
       //winnerID
       $query .= "LEFT JOIN ";
-      $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID FROM bid GROUP BY bid.auctionID ORDER BY bid.bidValue DESC) as winner ";
+      $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID ";
+      $query .= "FROM bid WHERE bid.auctionID={$id} ";
+      $query .= "ORDER BY bid.bidValue DESC LIMIT 1) as winner ";
       $query .= "ON winner.auctionID={$id} ";
     }
     //handle item special case ImageURL
@@ -56,6 +58,8 @@ class DatabaseConnection {
       $query .= "LEFT JOIN ";
       $query .= "itemimage ON itemimage.itemID={$id} ";
     }
+
+    //var_dump($query.$where.$limit);
     $result = mysqli_query( $connection, $query.$where.$limit );
     if ( $result ) {
       $object = mysqli_fetch_assoc( $result );
@@ -258,7 +262,7 @@ class DatabaseConnection {
     // usleep(mt_rand(100000,1000000))
     // check if auction has finished
     $now = date( "Y-m-d H:i:s" );
-    if ( $auction->endAt<$now ) {
+    if ( $auction->endAt->format( 'Y-m-d H:i:s' )<$now ) {
       //if it should finish, check if it did finish
       if ( !$auction->ended ) {
         return true;
@@ -273,8 +277,9 @@ class DatabaseConnection {
   public function finishAuction( $connection, $auction ) {
     $id = mysqli_real_escape_string( $connection, $auction->id );
     //get two highest bid(sort by value DESC and time ASC)
-    $query = "SELECT buyerID,MAX(bidValue) as bidValue,MIN(createdAt) as createdAt FROM bid WHERE ";
-    $query .= "auctionID={$id} ";
+    //
+    $query = "SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID ";
+    $query .= "FROM bid WHERE bid.auctionID = {$id} ORDER BY bid.bidValue DESC LIMIT 1";
     $result = mysqli_query( $connection, $query );
     $bid = mysqli_fetch_assoc( $result );
     //make sure the highest price is higher than $auction's reserved price
@@ -286,11 +291,12 @@ class DatabaseConnection {
     if (!$bid){
       //no bid
       return array("status"=>"warning","message"=>"no bid");
-    } else if ($bid["bidValue"]<$auction->reservedPrice){
+    } else if ($bid["currentBid"]<$auction->reservedPrice){
        //auction didnt receive enough price, aborted
-       return array("status"=>"warning","message"=>"reserved price unmet","winnerID"=>$bid["buyerID"]);
+       return array("status"=>"warning","message"=>"reserved price unmet","winnerID"=>$bid["winnerID"]);
     } else {
-      return array("status"=>"success","message"=>"fail to meet reserved price","winnerID"=>$bid["buyerID"]);
+      $auction->winnerID = $bid["winnerID"];
+      return array("status"=>"success","winnerID"=>$bid["winnerID"]);
     }
     
   }
@@ -538,18 +544,18 @@ class DatabaseConnection {
   }
 
   public function getBoughtAuctions($connection,$userID){
-    $query = "SELECT auction.*, winner.winnerID, user.name as sellerName, item.itemName,item.description,";
-    $query .= "itemimage.imageURL,item.ownerID,item.categoryID ";
+    $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as sellerName, item.itemName ";
     $query .= "FROM auction ";
     $query .= "LEFT JOIN ";
-    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID FROM bid GROUP BY bid.auctionID ORDER BY bid.bidValue DESC) as winner ";
+    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
+    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
+    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
+    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "LEFT JOIN ";
     $query .= "user ON auction.sellerID = user.id ";
     $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
-    $query .="LEFT JOIN ";
-    $query .="itemimage on item.id = itemimage.itemID ";
     $query .= "WHERE ";
     $query .= "winner.winnerID = {$userID} ";
     $query .= "and auction.ended=1";
@@ -573,11 +579,18 @@ class DatabaseConnection {
 
   public function getSoldAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
-    $query = "SELECT auction.*, winner.winnerID FROM ";
-    $query .= "auction ";
+    $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as sellerName, item.itemName ";
+    $query .= "FROM auction ";
     $query .= "LEFT JOIN ";
-    $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid,bid.auctionID FROM bid GROUP BY bid.auctionID ORDER BY bid.bidValue DESC) as winner ";
+    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
+    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
+    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
+    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "user ON auction.sellerID = user.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
     $query .= "auction.sellerID = {$userID} ";
     $query .= "AND auction.ended=1";
@@ -603,6 +616,7 @@ class DatabaseConnection {
 
   public function getWatchingAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
+<<<<<<< HEAD
     $query = "SELECT auction.*, bid.bidValue, item.itemName FROM watching ";
     $query .="INNER JOIN auction ";
     $query .="ON watching.auctionID = auction.id ";
@@ -610,6 +624,20 @@ class DatabaseConnection {
     $query .="ON auction.id = bid.auctionID ";
     $query .= "INNER JOIN item ";
     $query .="ON auction.itemID = item.id ";
+=======
+    $query = "SELECT auction.*,winner.winnerID, winner.currentBid, item.itemName,item.description,";
+    $query .= "itemimage.imageURL,item.ownerID,item.categoryID FROM watching ";
+    $query .= "INNER JOIN auction ";
+    $query .= "ON watching.auctionID = auction.id ";
+    $query .= "INNER JOIN item ";
+    $query .= "ON auction.itemID = item.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
+    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
+    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
+    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
+    $query .= "ON winner.auctionID=auction.id ";
+>>>>>>>   1 Auction will properly end via auction_show
     $query .="LEFT JOIN ";
     $query .="itemimage on item.id = itemimage.itemID ";
     $query .="WHERE watching.userID = {$userID} and bid.bidValue =(SELECT MAX(bid.bidValue) FROM bid WHERE bid.auctionID = auction.id)";
@@ -963,7 +991,7 @@ public function addWatch($connection,$userID, $auctionID){
   public function bid($connection, $bid, $auction ) {
     //check if auction is on,
     $now = date( "Y-m-d H:i:s" );
-    if ( $auction->endAt>$now ) {
+    if ( $auction->endAt->format( 'Y-m-d H:i:s' )>$now ) {
       //if true, this bid has 3 cases: Highest new bid, Bidded by highest bidder but lower than highest bid, bidded by other but lower than highest bid
       $auctionID = $auction->id;
       $query = "SELECT * FROM bid WHERE ";
@@ -1164,7 +1192,10 @@ public function addWatch($connection,$userID, $auctionID){
   public function shouldFeedback($connection,$giverID,$receiverID,$auctionID){
     $query ="SELECT COUNT(*) AS ct  ";
     $query .="FROM auction, ";
-    $query .="(SELECT bid.buyerID AS winnerID, bid.bidValue FROM bid WHERE bid.auctionID={$auctionID} ORDER BY bid.bidValue DESC LIMIT 1) as winner ";
+    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
+    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
+    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
+    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
     $query .="WHERE ";
     $query .="auction.id={$auctionID} ";
     $query .="AND auction.ended=1 ";

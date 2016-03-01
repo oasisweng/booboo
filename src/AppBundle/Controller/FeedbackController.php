@@ -41,7 +41,6 @@ class FeedbackController extends Controller {
         }
 
 
-
         $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
         $item = new Item( $itemEntry );
         $auction->item = $item;
@@ -235,6 +234,8 @@ class FeedbackController extends Controller {
 
         //get receiverID
         $receiverID = $userID == $auction->winnerID ? $auction->sellerID : $auction->winnerID;
+
+
 
         //get giver and receiver
         $giverEntry = $this->get("db")->selectOne($connection, 'user', $userID);

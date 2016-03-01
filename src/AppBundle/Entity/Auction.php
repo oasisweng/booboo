@@ -127,7 +127,9 @@ class Auction {
             if ($this->ended == true && isset($a["didFeedback"])) {
                 $this->didFeedback = $a["didFeedback"];
             }
-            
+            if (isset($a["winnerID"])){
+                $this->winnerID=$a["winnerID"];
+            }
 
         } else {
 

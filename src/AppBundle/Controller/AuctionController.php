@@ -204,9 +204,13 @@ class AuctionController extends Controller {
                 $this->get( 'mailer' )->send( $message );
 
                 $winnerEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["winnerID"]);
+                $item->ownerID = $response["winnerID"];
+                $this->get('db')->updateItem($connection,$item);
+                //echo "item owner changed to ".$item->ownerID;
+
                 $wname = $winnerEntry["name"];
                 $wemail = $winnerEntry["email"];
-                //send email
+                //send email to winner
                 $message = \Swift_Message::newInstance()
                 ->setSubject( 'You bought'.$auction->item->itemName.'!' )
                 ->setFrom( 'boobooauction@gmail.com' )
@@ -248,6 +252,7 @@ class AuctionController extends Controller {
                     'text/html'
                 );
                 $this->get( 'mailer' )->send( $message );
+
                 if ($response['message']=="reserved price unmet"){
                     //send winner rpnm emails
                     $winnerEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["winnerID"]);
