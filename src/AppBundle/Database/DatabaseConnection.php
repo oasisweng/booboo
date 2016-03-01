@@ -1190,9 +1190,9 @@ public function addWatch($connection,$userID, $auctionID){
     $query .="auction.id={$auctionID} ";
     $query .="AND auction.ended=1 ";
     $query .="AND (auction.sellerID={$giverID} ";
-    $query .="AND winner.id={$receiverID}) ";
+    $query .="AND winner.winnerID={$receiverID}) ";
     $query .="OR (auction.sellerID={$receiverID} ";
-    $query .="AND winner.id=($giverID)) ";
+    $query .="AND winner.winnerID=($giverID)) ";
     $result = mysqli_query($connection,$query);
     if ($result){
       $count = mysqli_fetch_assoc($result);
@@ -1249,8 +1249,8 @@ public function addWatch($connection,$userID, $auctionID){
     $rating=$feedback->rating;
     $comment=$feedback->comment;
     //double check if one can leave feedback
-    $canFeedback = $this->canFeedback($connection,$giverID,$receiverID,$auctionID);
-    if ($canFeedback){
+    $shouldFeedback = $this->shouldFeedback($connection,$giverID,$receiverID,$auctionID);
+    if ($shouldFeedback){
       $query = "INSERT INTO feedback (giverID,receiverID,rating,comment,auctionID) ";
       $query .= "VALUES ({$giverID},{$receiverID},{$rating},'{$comment}',{$auctionID})";
       $result = mysqli_query( $connection, $query );

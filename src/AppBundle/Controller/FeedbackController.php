@@ -79,8 +79,8 @@ class FeedbackController extends Controller {
             return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
         } else {
             //check user can leave feedback, otherwise, redirect to user_profile
-            $canFeedback = $this->get( 'db' )->canFeedback( $connection, $userID, $receiverID, $auctionID );
-            if ( !$canFeedback ) {
+            $didFeedback = $this->get( 'db' )->didFeedback( $connection, $userID, $receiverID, $auctionID );
+            if ( $didFeedback ) {
                 $this->addFlash(
                     'warning',
                     'You have left feedback already!'
@@ -123,9 +123,9 @@ class FeedbackController extends Controller {
             return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
         }
 
-        $this->get('dump')->d($auction->item);
-        $this->get('dump')->d($giver);
-        $this->get('dump')->d($receiver);
+        // $this->get('dump')->d($auction->item);
+        // $this->get('dump')->d($giver);
+        // $this->get('dump')->d($receiver);
 
         return $this->render( 'feedback/new.html.twig', array( "form" => $form->createView(), "auction"=> $auction, 
                                                                 "giver"=>$giver, "receiver"=> $receiver ) );
@@ -193,8 +193,13 @@ class FeedbackController extends Controller {
         } else {
             //check user can leave feedback, if so, redirect to new profile page
             //otherwise, show feedback
-            $canFeedback = $this->get( 'db' )->canFeedback( $connection, $userID, $receiverID, $auctionID );
-            if ($canFeedback) {
+            $didFeedback = $this->get( 'db' )->didFeedback( $connection, $userID, $receiverID, $auctionID );
+            if (!$didFeedback) {
+                $this->addFlash(
+                    'warning',
+                    'You have not left feedback yet!'
+
+                );
                 return $this->redirectToRoute( 'feedback_new', array( "auctionID"=>$auctionID ), 301 );
             }
         }
@@ -203,9 +208,9 @@ class FeedbackController extends Controller {
         $feedbackEntry = $this->get('db')->selectFeedback($connection,$userID,$receiverID,$auctionID);
         $feedback = new Feedback($feedbackEntry);
 
-        $this->get('dump')->d($auction->item);
-        $this->get('dump')->d($giver);
-        $this->get('dump')->d($receiver);
+        // $this->get('dump')->d($auction->item);
+        // $this->get('dump')->d($giver);
+        // $this->get('dump')->d($receiver);
         $this->get('dump')->d($feedback);
 
         return $this->render( 'feedback/show.html.twig', array(  "auction"=> $auction, 
