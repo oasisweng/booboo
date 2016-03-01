@@ -1270,6 +1270,24 @@ public function addWatch($connection,$userID, $auctionID){
     }
   }
 
+  public function updateFeedback($connection,$feedback){
+    $id = $feedback->id;
+    $rating=$feedback->rating;
+    $comment=$feedback->comment;
+    $query = "UPDATE feedback SET ";
+    $query .= "rating={$rating},comment={$comment} ";
+    $query .= "WHERE id={$id}";
+
+    $result = mysqli_query( $connection, $query );
+    $affected = mysqli_affected_rows( $connection );
+    if ( $result && $affected >= 0 ) {
+      return true;
+    } else {
+      die( "Database query failed (Feedback Update). " . mysqli_error( $connection ) );
+      return false;
+    }
+  }
+
   /*
    * Get ratings from all feedbacks received for particular user and return the average
    * @return: average rating for this user and total number of feedbacks received.

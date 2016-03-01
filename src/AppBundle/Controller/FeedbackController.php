@@ -133,6 +133,99 @@ class FeedbackController extends Controller {
 
     /**
      *
+     * @Route("/feedback/{auctionID}/edit", name="feedback_edit", requirements={"auctionID": "\d+"} )
+     */
+    public function editAction($auctionID, Request $request){
+
+        //get userID from session, if not logged in, redirect to login
+        $session = $request->getSession();
+        $userID = $session->get( 'userID' );
+
+        if ( !isset( $userID ) ) {
+            //return to login page
+            $this->addFlash(
+                'warning',  
+                'You need to login first!'
+            );
+            return $this->redirectToRoute( 'user_login', array( "redirectRoute"=>$request->get( '_route' ) ), 301 );
+        } else {
+            $connection = $this->get( "db" )->connect();
+            //get auction
+            $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
+            $auction = new Auction( $auctionEntry );
+            $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
+            $item = new Item( $itemEntry );
+            $auction->item = $item;
+
+            //get receiverID
+            $receiverID = $userID == $auction->sellerID ? $auction->winnerID : $auction->sellerID;
+
+            //get giver and receiver
+            $giverEntry = $this->get("db")->selectOne($connection, 'user', $userID);
+            $receiverEntry = $this->get("db")->selectOne($connection, 'user', $receiverID);
+            $giver = new User($giverEntry);
+            $receiver = new User($receiverEntry);    
+
+            //check if giver is eligible
+            $testGiverID = $receiverID == $auction->sellerID ? $auction->winnerID : $auction->sellerID;
+            if ($testGiverID != $userID){
+                $this->addFlash(
+                    'warning',
+                    'This feedback does not seem to belong to you!'
+
+                );
+
+                return $this->redirectToRoute( 'homepage' );
+            }
+
+            //check user can leave feedback, if so, redirect to new profile page
+            //otherwise, show feedback
+            $didFeedback = $this->get( 'db' )->didFeedback( $connection, $userID, $receiverID, $auctionID );
+            if (!$didFeedback) {
+                $this->addFlash(
+                    'warning',
+                    'You have not left feedback yet!'
+
+                );
+                return $this->redirectToRoute( 'feedback_new', array( "auctionID"=>$auctionID ), 301 );
+            } else {
+
+                //get feedback
+                $feedbackEntry = $this->get('db')->selectFeedback($connection,$userID,$receiverID,$auctionID);
+                $feedback = new Feedback($feedbackEntry);
+
+                $form = $this->createForm( FeedbackType::class, $feedback );
+
+                // 2) handle the submit (will only happen on POST)
+                $form->handleRequest( $request );
+
+                if ( $form->isSubmitted() && $form->isValid() ) {
+                    // ... do any other work - like send them an email, etc
+                    // maybe set a "flash" success message for the user
+                    if ( $this->get('db')->updateFeedback( $connection, $feedback ) )  {
+                        $this->addFlash(
+                            'success',
+                            'Feedback is updated!'
+                        );
+                        return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
+                    } else {
+                        $this->addFlash(
+                            'warning',
+                            'Something went wrong in updating the feedback!'
+                        );
+                    }
+
+                }
+
+                return $this->render( 'feedback/edit.html.twig', array( "form" => $form->createView(), "auction"=> $auction, 
+                                                                "giver"=>$giver, "receiver"=> $receiver ) );
+            }
+        }
+
+    }
+
+    /**
+     *
      *
      * @Route("/feedback/{auctionID}", name="feedback_show", requirements={"auctionID": "\d+"})
      */
