@@ -343,7 +343,7 @@ class UserController extends Controller {
                 if ( $this->get( 'db' )->updateUser( $connection, $user ) ) {
                     $this->addFlash(
                         'success',
-                        'User {$userID} password reset!'
+                        'User '.$userID.' password reset!'
                     );
 
                     return $this->redirectToRoute( 'user_show', array( "userID"=>$userID ), 301 );
