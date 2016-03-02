@@ -5,8 +5,7 @@ parameters:
     database_name: comp3013_db
     database_user: bcaee1cbd4c59b
     database_password: 4a3a7ecd
-    mailer_transport: smtp
-    mailer_host: 127.0.0.1
-    mailer_user: null
-    mailer_password: null
+    mailer_transport: gmail
+    mailer_user: boobooauction
+    mailer_password: booboo2016
     secret: 8552984637c0dc83fd51b20ee4a795e4caf606f1
