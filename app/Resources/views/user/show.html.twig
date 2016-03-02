@@ -64,7 +64,7 @@
 				</div>
 				<div role="tabpanel" class="tab-pane" id="sold">
 					<table class="table table-striped">
-						<thead><tr><td>Item Name</td><td>Seller Name</td><td>Price</td><td>Date</td></td></thead>
+						<thead><tr><td>Item Name</td><td>Buyer Name</td><td>Price</td><td>Date</td></td></thead>
 						<tbody id="sold-table">
 						</tbody>
 					</table>
@@ -253,7 +253,8 @@ function updateTable(data, category, buttonName) {
 			if (auctions[category][data[category][i].id]) {
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + auctions[category][data[category][i].id].sellerName + '</td><td>' + auctions[category][data[category][i].id].currentBid + '</td><td>' + auctions[category][data[category][i].id].endAt.date + '</td><td><a class="btn btn-primary" href="' + (auctions[category][data[category][i].id].didFeedback ? feedbackEditURL(data[category][i].id) : feedbackGiveURL(data[category][i].id)) + '" role="button">' + buttonName + '</a></td></tr>');
+				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + 
+				((category == 'bought')? auctions[category][data[category][i].id].sellerName : auctions[category][data[category][i].id].winnerName) + '</td><td>' + auctions[category][data[category][i].id].currentBid + '</td><td>' + auctions[category][data[category][i].id].endAt.date + '</td><td><a class="btn btn-primary" href="' + (auctions[category][data[category][i].id].didFeedback ? feedbackEditURL(data[category][i].id) : feedbackGiveURL(data[category][i].id)) + '" role="button">' + buttonName + '</a></td></tr>');
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
 			}
 		}
