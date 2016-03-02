@@ -213,7 +213,7 @@ class AuctionController extends Controller {
                 try {
                     //send email to winner
                     $message = \Swift_Message::newInstance()
-                    ->setSubject( 'You bought'.$auction->item->itemName.'!' )
+                    ->setSubject( 'You bought '.$auction->item->itemName.'!' )
                     ->setFrom( 'boobooauction@gmail.com' )
                     ->setTo( $wemail )
                     ->setBody(

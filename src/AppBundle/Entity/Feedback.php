@@ -32,7 +32,6 @@ class Feedback {
 
     public function __construct( $feedback = NULL) {
         if (isset($feedback)){
-            $this->id = $feedback["id"];
             $this->auctionID = $feedback["auctionID"];
             $this->giverID = $feedback["giverID"];
             $this->giverName = empty($feedback["giverName"]) ? NULL : $feedback["giverName"] ;

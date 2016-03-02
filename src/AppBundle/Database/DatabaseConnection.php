@@ -345,6 +345,7 @@ class DatabaseConnection {
     $query .="item ON item.id = auction.itemID ";
     $query .="LEFT JOIN ";
     $query .="itemimage on item.id = itemimage.itemID ";
+    $query .="WHERE auction.ended=0 ";
     $query .="ORDER BY ";
     $query .="auction.viewCount DESC ";
     $query .="LIMIT 10 ";
@@ -808,7 +809,7 @@ public function addWatch($connection,$userID, $auctionID){
       $query .="LEFT JOIN ";
       $query .="itemimage on item.id = itemimage.itemID ";
       $query .= "WHERE ";
-      $query .= "auction.id IN({$rand_s}); ";
+      $query .= "auction.id IN({$rand_s}) AND auction.ended=0; ";
 
       $result = mysqli_query($connection,$query);
       if ($result){
@@ -868,7 +869,8 @@ public function addWatch($connection,$userID, $auctionID){
       $query .="GROUP BY ";
       $query .="bid.buyerID) ";
       $query .="GROUP BY ";
-      $query .="bid.auctionID) ";
+      $query .="bid.auctionID) AND ";
+      $query .="auction.ended=0 ";
 
       //you might want to bid on the sorts of things
       //that are in the same category as the things you are currently bidding on
@@ -897,6 +899,8 @@ public function addWatch($connection,$userID, $auctionID){
       $query2 .= "GROUP BY ";
       $query2 .= "item.categoryID ";
       $query2 .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
+      $query2 .= "WHERE ";
+      $query2 .= "auction.ended=0 ";
       $query2 .= "ORDER BY ";
       $query2 .= "item_category.Occurrence DESC, ";
       $query2 .= "auction.id DESC ";
@@ -1322,13 +1326,16 @@ public function addWatch($connection,$userID, $auctionID){
   }
 
   public function updateFeedback($connection,$feedback){
-    $id = $feedback->id;
+    $giverID=$feedback->giverID;
+    $receiverID=$feedback->receiverID;
+    $auctionID=$feedback->auctionID;
     $rating=$feedback->rating;
     $comment=$feedback->comment;
     $query = "UPDATE feedback SET ";
     $query .= "rating={$rating},comment='{$comment}' ";
-    $query .= "WHERE id={$id}";
+    $query .= "WHERE giverID={$giverID} AND receiverID={$receiverID} AND auctionID={$auctionID}";
 
+    var_dump($query);
     $result = mysqli_query( $connection, $query );
     $affected = mysqli_affected_rows( $connection );
     if ( $result && $affected >= 0 ) {
