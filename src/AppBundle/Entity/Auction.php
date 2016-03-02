@@ -95,6 +95,8 @@ class Auction {
 
     public $sellerName;
 
+    public $winnerName;
+
     public $didFeedback;
 
     public function __construct( $a = NULL ) {
@@ -103,6 +105,9 @@ class Auction {
             $this->sellerID = $a["sellerID"];
             if (isset($a["sellerName"])) {
                 $this->sellerName = $a["sellerName"];
+            }
+            if (isset($a["winnerName"])) {
+                $this->winnerName = $a["winnerName"];
             }
             $this->startAt = new DateTime($a["startAt"]);
             $this->endAt = new DateTime($a["endAt"]);

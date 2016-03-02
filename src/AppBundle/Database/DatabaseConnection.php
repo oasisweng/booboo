@@ -580,7 +580,7 @@ class DatabaseConnection {
 
   public function getSoldAuctions($connection,$userID){
     $userID = mysqli_real_escape_string($connection, $userID);
-    $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as sellerName, item.itemName ";
+    $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as winnerName, item.itemName ";
     $query .= "FROM auction ";
     $query .= "LEFT JOIN ";
     $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
@@ -589,7 +589,7 @@ class DatabaseConnection {
     $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "LEFT JOIN ";
-    $query .= "user ON auction.sellerID = user.id ";
+    $query .= "user ON winner.winnerID = user.id ";
     $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
