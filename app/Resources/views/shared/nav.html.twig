@@ -35,7 +35,10 @@
                 {% else %}
                 <li><a class="icon fa-sign-in" href="{{ path('user_login')}}"><span>Sign In/ Register</span></a></li>
                 {% endif %}
-                {# <li><a class="icon fa-question" href="#"><span>Contact Us/ FAQ</span></a></li> #}
+
+
+                <!-- method of linking via id to jump to contact us area possible? -->
+                 <li><a class="icon fa-question" href="{{ path('homepage')}}"><span>Contact Us/ FAQ</span></a></li>  
                 <a class="navbar-right">
                     <!-- to include search bar in top navi for other pages outside of HOME/INDEX -->
                     {% if app.request.attributes.get('_route') != "homepage" %}
