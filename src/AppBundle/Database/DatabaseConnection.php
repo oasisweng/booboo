@@ -1160,7 +1160,7 @@ public function addWatch($connection,$userID, $auctionID){
   }
 
   public function updateUser( $connection, $user ) {
-    $id = $user->id;
+    $id = $user->id; 
     $name = $user->name;
     $email = $user->email;
     $password = $user->password;
