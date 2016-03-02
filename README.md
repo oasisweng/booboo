@@ -98,13 +98,15 @@ Change user password | user_change_password | /user/{userID}/change_password | `
 Create an auction | auction_new   | /auction/new | `{{ path('auction_new', {'userID': 1}) }}`
 Show an auction | auction_show  | /auction/{auctionID} | `{{ path('auction_show', {'auctionID': 1}) }}`
 Edit an auction | auction_edit  | /auction/{auctionID}/edit | `{{ path('auction_edit', {'auctionID': 1}) }}`
+Watch an auction | auction_watch | //auction/watch/{auctionID}/{userID} | `{{ path('auction_watch', {'auctionID': 1, 'userID': 1}) }}`
 Show details of an item | item_show  | /item/{itemId} | `{{ path('item_show', {'itemId': 1}) }}`  
 Place a bid | bid_bid | /auction/{auctionID}/bid | `{{ path('bid_bid', {'auctionID': 1}) }}`
 Search for auction | auction_search | /search/{page} | *Use Form* |
 Leave an feedback | feedback_new | /feedback/{auctionID}/new | `{{ path('feedback_new', {'auctionID': 1}) }}`
 View an feedback | feedback_show | /feedback/{auctionID} | `{{ path('feedback_show', {'auctionID': 1}) }}`
 Update an feedback | feedback_edit | /feedback/{auctionID}/edit | `{{ path('feedback_edit', {'auctionID': 1}) }}`
-Get user info | user_api | /user/api/{userID} | `{{ path('feedback_new', {'auctionID': 1}) }}`
+Get user info (private)| user_api | /user/api/{userID} | `{{ path('user_api', {'auctionID': 1}) }}`
+Get user info (public)| show_api | /user/show/api/{userID} | `{{ path('show_api', {'auctionID': 1}) }}`
 Get specific columns for an auction | auction_columns_api | /auction/{auctionID}/columns/{columns} | `{{ path('auction_columns_api', {'auctionID': 1,'columns':'id/endAt/ended'}) }}`
 Finish auction on the background | auction_finish_api | /auction/{auctionID}/finish | `{{ path('auction_columns_api', {'auctionID': 1}) }}`
  
@@ -126,27 +128,6 @@ Copy
  
  
  <mark>Please delete the example code wrapped in `div.delete-us`</mark>
-
-
-2. Embed auction list in user's profile
-Views: `auction/auction_row.html.twig` `user/show.html.twig`
-
-Follow the instruction in `auction/auction_row.html.twig`
-
-Copy i.e.
-
-```Symfony
-
-{% for auction in buyingArray %}
-{{ include('auction/auction.html.twig', { 'auction': auction }) }}
-{% endfor %}
-
-
-```
-
-from `auction/auction_row.html.twig` to `user/show.html.twig`
-
- <mark>Please delete everything and write HTML code for rendering the row for each auction in `auction_row.html.twig`</mark>
 
 
 ###Feedback
