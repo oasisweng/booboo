@@ -1326,7 +1326,7 @@ public function addWatch($connection,$userID, $auctionID){
     $rating=$feedback->rating;
     $comment=$feedback->comment;
     $query = "UPDATE feedback SET ";
-    $query .= "rating={$rating},comment={$comment} ";
+    $query .= "rating={$rating},comment='{$comment}' ";
     $query .= "WHERE id={$id}";
 
     $result = mysqli_query( $connection, $query );

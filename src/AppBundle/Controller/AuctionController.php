@@ -190,8 +190,8 @@ class AuctionController extends Controller {
                 $email = $sellerEntry["email"];
                 //send email
                 $message = \Swift_Message::newInstance()
-                ->setSubject( 'You sold'.$auction->item->itemName.'!' )
-                ->setFrom( 'boobooauction@gmail.com' )
+                ->setSubject( 'You sold '.$auction->item->itemName.'!' )
+                ->setFrom( 'boobooauction@gmail.com')
                 ->setTo( $email )
                 ->setBody(
                     $this->renderView(
@@ -242,7 +242,7 @@ class AuctionController extends Controller {
                 }
 
                 $this->get( 'mailer' )->send( $message );
-                var_dump($winnerEntry);
+                //var_dump($winnerEntry);
 
             } else if ($response['status']=="warning"){
                 //CASE 2: seller did not sell the item because no one bidded
