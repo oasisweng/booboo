@@ -40,6 +40,8 @@ class User
 
     public $newPassword;
 
+    public $nameOrEmail;
+
     public function __construct( $u = NULL ) {
         if ( isset($u) ) {
             $this->id = $u["id"];

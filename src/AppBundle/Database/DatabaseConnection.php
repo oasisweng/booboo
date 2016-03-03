@@ -1194,8 +1194,8 @@ public function addWatch($connection,$userID, $auctionID){
 
   public function login( $user ) {
     $connection = $this->connect();
-    $email = mysqli_real_escape_string( $connection, $user->email );
-    $query = "SELECT * FROM user WHERE email='{$email}' LIMIT 1";
+    $nameOrEmail = mysqli_real_escape_string( $connection, $user->nameOrEmail );
+    $query = "SELECT * FROM user WHERE email='{$nameOrEmail}' OR name='{$nameOrEmail}' LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       $fetched_user = mysqli_fetch_assoc( $result );

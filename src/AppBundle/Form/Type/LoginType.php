@@ -13,7 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 class LoginType extends AbstractType
 {
     public function buildForm( FormBuilderInterface $builder, array $options ) {
-        $builder->add( 'email', EmailType::class )
+        $builder->add( 'nameOrEmail', TextType::class, array('label_attr' => array('class'=>'control-label col-xs-4')))
         ->add( 'password', PasswordType::class)
          ->add( 'login', SubmitType::class);
     }
