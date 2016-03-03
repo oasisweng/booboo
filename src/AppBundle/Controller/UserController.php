@@ -152,7 +152,7 @@ class UserController extends Controller {
     /**
      *
      *
-     * @Route("/user/{userID}", name="user_show", requirements={"userID": "\d+"})
+     * @Route("/user/{userID}/{preview}", name="user_show", requirements={"userID": "\d+"}, defaults={"preview" = false})
      *
      * @return  'buyingArray' An array of Auction objects
      * @return  'sellingArray' An array of Auction objects
@@ -164,20 +164,27 @@ class UserController extends Controller {
      * @return  'owner' is an boolean indicating whether current user owns this user profile
      * @return  'averageRating' is an integer indicating average rating of this user
      */
-    public function showAction( $userID, Request $request ) {
+    public function showAction( $userID, $preview, Request $request ) {
         //passing through entire session as parameter instead of just userID
         //entire session required to check whether user is 'LOGGED IN' or 'NOT LOGGED IN'
         $connection = $this->get( "db" )->connect();
         $userEntry = $this->get( "db" )->selectOne( $connection, 'user', $userID );
         $user = new User( $userEntry );
 
+
+
         if ( !$user ) {
             return $this->redirectToRoute( 'homepage' );
         }
 
         $session = $request->getSession();
-        //check if current user owns this profile
-        $owner = $session->get( 'userID' ) == $userID ;
+
+        if ($preview) {
+            $owner = false;
+        } else {
+            //check if current user owns this profile
+            $owner = $session->get( 'userID' ) == $userID ;
+        }
 
         //get average rating and total number of feedbacks received
         $rating = $this->get('db')->getAverageRating($connection,$userID);

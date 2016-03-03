@@ -39,6 +39,7 @@ class Feedback {
             $this->receiverName = empty($feedback["receiverName"]) ? NULL : $feedback["receiverName"] ;
             $this->rating = $feedback["rating"];
             $this->comment = $feedback["comment"];
+            $this->id = $this->auctionID . "-" . $this->giverID;
         }
     }
 }
