@@ -766,7 +766,7 @@ public function addWatch($connection,$userID, $auctionID){
     $query .="auction.endAt>NOW() ";
     $query .="ORDER BY ";
     $query .="auction.endAt ASC ";
-    $query .="LIMIT 10 ";
+    $query .="LIMIT {$limit} ";
 
     $result = mysqli_query($connection,$query);
     if ($result){
@@ -1013,27 +1013,27 @@ public function addWatch($connection,$userID, $auctionID){
     }
   }
 
-  public function updateBid( $connection, $bid ) {
-    $bidValue = $bid->bidValue;
-    $buyerID = $bid->buyerID;
-    $auctionID = $bid->auctionID;
-    $id=$bid->id;
+  // public function updateBid( $connection, $bid ) {
+  //   $bidValue = $bid->bidValue;
+  //   $buyerID = $bid->buyerID;
+  //   $auctionID = $bid->auctionID;
+  //   $id=$bid->id;
 
-    $query = "UPDATE bid SET ".
-    $query .= "bidValue = {$bidValue},";
-    $query .= "buyerID={$buyerID}, ";
-    $query .= "auctionID={$auctionID} ";
-    $query .= "WHERE id={$id} ";
+  //   $query = "UPDATE bid SET ".
+  //   $query .= "bidValue = {$bidValue},";
+  //   $query .= "buyerID={$buyerID}, ";
+  //   $query .= "auctionID={$auctionID} ";
+  //   $query .= "WHERE id={$id} ";
 
-    $result = mysqli_query( $connection, $query );
-    $affected = mysqli_affected_rows( $connection );
-    if ( $result && $affected >= 0 ) {
-      return true;
-    } else {
-      die( "Database query failed (Bid Update). " . mysqli_error( $connection ) );
-      return FALSE;
-    }
-  }
+  //   $result = mysqli_query( $connection, $query );
+  //   $affected = mysqli_affected_rows( $connection );
+  //   if ( $result && $affected >= 0 ) {
+  //     return true;
+  //   } else {
+  //     die( "Database query failed (Bid Update). " . mysqli_error( $connection ) );
+  //     return FALSE;
+  //   }
+  // }
 
   public function bid($connection, $bid, $auction ) {
     //check if auction is on,
