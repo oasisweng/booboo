@@ -203,8 +203,8 @@ class DatabaseConnection {
     $query =  "INSERT INTO auction ";
     $query .= "(sellerID,startAt,endAt, itemId, startingBid, minBidIncrease, reservedPrice,updatedAt) ";
     $query .= "VALUES ({$sellerID},'{$startAt}','{$endAt}',{$itemId},{$startingBid},";
-    $query .= ( isset( $minBidIncrease ) ? "{$minBidIncrease}" : "NULL" ) . ",";
-    $query .= ( isset( $reservedPrice ) ? "{$reservedPrice}" : "NULL" ) . ",";
+    $query .= "{$minBidIncrease},";
+    $query .= "{$reservedPrice},";
     $query .= "NOW())";
 
     $result = mysqli_query( $connection, $query );
