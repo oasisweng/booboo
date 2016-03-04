@@ -164,7 +164,7 @@ class UserController extends Controller {
      * @return  'owner' is an boolean indicating whether current user owns this user profile
      * @return  'averageRating' is an integer indicating average rating of this user
      */
-    public function showAction( $userID, $preview, Request $request ) {
+    public function showAction( $userID, $preview = false, Request $request ) {
         //passing through entire session as parameter instead of just userID
         //entire session required to check whether user is 'LOGGED IN' or 'NOT LOGGED IN'
         $connection = $this->get( "db" )->connect();
