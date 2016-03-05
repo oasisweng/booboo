@@ -11,10 +11,10 @@
 		{{ form_label(filter_form.categories, "Category") }}
         {{ form_errors(filter_form.categories) }}
         {{ form_widget(filter_form.categories, {'attr': {'class': 'row'}}) }}
-    	
+    	<br><br><br>
     	<div class = "row">
             {{ form_widget(filter_form.filter, {'attr': {'class':  'col-md-3 col-md-offset-4 btn btn-def'}}) }}
-        </div>
+      </div>
 	{{ form_end(filter_form) }}
 	</div>
 	{% if auctions|length > 0 %}
@@ -42,7 +42,7 @@
        </table>
        {% else %}
        			<br>
-				No matching items found for your serach. Please try again!
+				<p>No matching items found for your search. Please try again!</p>
        {% endif %}
 	</div>
 </div>

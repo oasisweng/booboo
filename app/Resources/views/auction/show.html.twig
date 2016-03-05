@@ -301,6 +301,33 @@ function updateWatchingButton() {
 updateWatchingButton();
 </script>
 
+<script>
+
+    // function waitforUpdate(){
+    //     $.ajax({
+    //         type : "GET"
+    //         url : "src/AppBundle/Controller/AuctionController.php",
+    //         async : true,
+    //         cache : false,
+
+    //         success : function(data){
+    //             alret("Bue is happy");
+    //             //$(document).reload();
+    //         },
+    //         error : function(XMLHttpRequest, textStatus, errorThrown){
+    //             alret("error: "+textStatus + "("+errorThrown+")");
+    //             setTimeout('waitforUpdate()', 15000);
+    //         }
+    //     });
+    // }
+
+    // $(document).ready(function() {
+    //     waitforUpdate();
+    // });
+    setInterval(function(){
+        window.location.reload();
+    }, 15000);
+</script>
 
 <script>
 $('#similarAuction').carousel({
