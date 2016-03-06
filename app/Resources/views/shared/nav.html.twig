@@ -38,7 +38,7 @@
 
 
                 <!-- method of linking via id to jump to contact us area possible? -->
-                 <li><a class="icon fa-question" href="{{ path('homepage')}}"><span>Contact Us/ FAQ</span></a></li>  
+                 <li><a class="icon fa-question" href="{{ path('homepage')}}#contact"><span>Contact Us/ FAQ</span></a></li>  
                 <a class="navbar-right">
                     <!-- to include search bar in top navi for other pages outside of HOME/INDEX -->
                     {% if app.request.attributes.get('_route') != "homepage" %}

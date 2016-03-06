@@ -47,10 +47,16 @@ class DatabaseConnection {
     //handle auction special case WinnerID
     if ($column=="auction"){
       //winnerID
-      $query .= "LEFT JOIN ";
-      $query .= "(SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID ";
-      $query .= "FROM bid WHERE bid.auctionID={$id} ";
-      $query .= "ORDER BY bid.bidValue DESC LIMIT 1) as winner ";
+      $query .= "LEFT JOIN ( ";
+      $query .= "SELECT bid.auctionID,b1.currentBid,bid.buyerID as winnerID ";
+      $query .= "FROM bid ";
+      $query .= "INNER JOIN ( ";
+      $query .= "SELECT MAX(bid.bidValue) AS currentBid ";
+      $query .= "FROM bid ";
+      $query .= "WHERE bid.auctionID = {$safe_id} ";
+      $query .= ") AS b1 ON bid.bidValue = b1.currentBid ";
+      $query .= "WHERE bid.auctionID = {$safe_id} ";
+      $query .= ") AS winner  ";
       $query .= "ON winner.auctionID={$id} ";
     }
     //handle item special case ImageURL
@@ -65,6 +71,7 @@ class DatabaseConnection {
       $object = mysqli_fetch_assoc( $result );
       return $object;
     } else {
+      die( "Database query failed. " . mysqli_error( $connection ) . "<br/>" );
       return false;
     }
   }
@@ -548,11 +555,18 @@ class DatabaseConnection {
   public function getBoughtAuctions($connection,$userID){
     $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as sellerName, item.itemName ";
     $query .= "FROM auction ";
-    $query .= "LEFT JOIN ";
-    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
-    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
-    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
-    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT b1.auctionID,b1.highestBid as currentBid,b2.buyerID as winnerID ";
+    $query .= "FROM ( ";
+    $query .= "SELECT bid.auctionID,MAX(bid.bidValue) AS highestBid ";
+    $query .= "FROM bid ";
+    $query .= "GROUP BY bid.auctionID ";
+    $query .= ") AS b1 ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT bid.auctionID, bid.bidValue, bid.buyerID ";
+    $query .= "FROM bid ";
+    $query .= ") AS b2 ON b2.auctionID = b1.auctionID AND b2.bidValue = b1.highestBid ";
+    $query .= ") AS winner  ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "LEFT JOIN ";
     $query .= "user ON auction.sellerID = user.id ";
@@ -583,11 +597,18 @@ class DatabaseConnection {
     $userID = mysqli_real_escape_string($connection, $userID);
     $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as winnerName, item.itemName ";
     $query .= "FROM auction ";
-    $query .= "LEFT JOIN ";
-    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
-    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
-    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
-    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT b1.auctionID,b1.highestBid as currentBid,b2.buyerID as winnerID ";
+    $query .= "FROM ( ";
+    $query .= "SELECT bid.auctionID,MAX(bid.bidValue) AS highestBid ";
+    $query .= "FROM bid ";
+    $query .= "GROUP BY bid.auctionID ";
+    $query .= ") AS b1 ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT bid.auctionID, bid.bidValue, bid.buyerID ";
+    $query .= "FROM bid ";
+    $query .= ") AS b2 ON b2.auctionID = b1.auctionID AND b2.bidValue = b1.highestBid ";
+    $query .= ") AS winner  ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .= "LEFT JOIN ";
     $query .= "user ON winner.winnerID = user.id ";
@@ -624,11 +645,18 @@ class DatabaseConnection {
     $query .= "ON watching.auctionID = auction.id ";
     $query .= "INNER JOIN item ";
     $query .= "ON auction.itemID = item.id ";
-    $query .= "LEFT JOIN ";
-    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
-    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
-    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
-    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT b1.auctionID,b1.highestBid as currentBid,b2.buyerID as winnerID ";
+    $query .= "FROM ( ";
+    $query .= "SELECT bid.auctionID,MAX(bid.bidValue) AS highestBid ";
+    $query .= "FROM bid ";
+    $query .= "GROUP BY bid.auctionID ";
+    $query .= ") AS b1 ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT bid.auctionID, bid.bidValue, bid.buyerID ";
+    $query .= "FROM bid ";
+    $query .= ") AS b2 ON b2.auctionID = b1.auctionID AND b2.bidValue = b1.highestBid ";
+    $query .= ") AS winner  ";
     $query .= "ON winner.auctionID=auction.id ";
     $query .="LEFT JOIN ";
     $query .="itemimage on item.id = itemimage.itemID ";
@@ -1213,20 +1241,45 @@ public function addWatch($connection,$userID, $auctionID){
   // feedback
   
   public function getFeedbacks($connection,$userID){
-    $query = "SELECT feedback.*, u1.name AS receiverName, u2.name AS giverName FROM feedback ";
-    $query .= "INNER JOIN user AS u1 ON u1.id = feedback.receiverID ";
-    $query .= "INNER JOIN user AS u2 ON u2.id = feedback.giverID ";
-    $query .= "WHERE feedback.receiverID = {$userID}";
-
+    //get sold
+    $query_sold = "SELECT feedback.* FROM feedback ";
+    $query_sold .= "INNER JOIN auction ON auction.id = feedback.auctionID ";
+    $query_sold .= "WHERE auction.sellerID = {$userID} ";
 
     $feedbacks = [];
-    $result = mysqli_query($connection,$query);
+    $result = mysqli_query($connection,$query_sold);
     if ($result){
       while ($row = mysqli_fetch_assoc($result)){
         $feedbacks[] = $row;
       }
     }else {
-      die( "Database query failed (get feedbacks). " . mysqli_error( $connection ) );
+      die( "Database query failed (get feedbacks 1). " . mysqli_error( $connection ) );
+    }
+
+    //get bought 
+    $query_bought =" SELECT feedback.* FROM feedback ";
+    $query_bought .=" LEFT JOIN ( ";
+    $query_bought .=" SELECT b1.auctionID,b1.highestBid as currentBid,b2.buyerID as winnerID ";
+    $query_bought .=" FROM ( ";
+    $query_bought .=" SELECT bid.auctionID,MAX(bid.bidValue) AS highestBid ";
+    $query_bought .=" FROM bid ";
+    $query_bought .=" GROUP BY bid.auctionID ";
+    $query_bought .=" ) AS b1 ";
+    $query_bought .=" LEFT JOIN ( ";
+    $query_bought .=" SELECT bid.auctionID, bid.bidValue, bid.buyerID ";
+    $query_bought .=" FROM bid ";
+    $query_bought .=" ) AS b2 ";
+    $query_bought .=" ON b2.auctionID = b1.auctionID AND b2.bidValue = b1.highestBid ";
+    $query_bought .=" ) AS winner ";
+    $query_bought .=" ON winner.auctionID = feedback.auctionID WHERE winner.winnerID=12 ";
+
+    $result2 = mysqli_query($connection,$query_bought);
+    if ($result2){
+      while ($row2 = mysqli_fetch_assoc($result2)){
+        $feedbacks[] = $row2;
+      }
+    }else {
+      die( "Database query failed (get feedbacks 2). " . mysqli_error( $connection ));
     }
 
     return $feedbacks;
@@ -1236,24 +1289,23 @@ public function addWatch($connection,$userID, $auctionID){
    * This function check if a giver can give a receiver feedback for an particular auction
    * It is based on if user's eligibility and if user has already given feedback
    */
-  public function shouldFeedback($connection,$giverID,$receiverID,$auctionID){
+  public function shouldFeedback($connection,$giverID,$auctionID){
     $query ="SELECT COUNT(*) AS ct  ";
     $query .="FROM auction, ";
-    $query .= "(SELECT b2.auctionID, b2.winnerID, b1.currentBid FROM ";
-    $query .= "( SELECT MAX(bid.bidValue) AS currentBid, bid.auctionID AS aID FROM bid GROUP BY bid.auctionID ) AS b1 ";
-    $query .= "INNER JOIN ( SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue FROM bid ) AS b2 ";
-    $query .= "ON b2.auctionID = b1.aID AND b2.bidValue = b1.currentBid) as winner ";
+    $query .= "(SELECT b2.auctionID,b2.winnerID,b1.currentBid ";
+    $query .= "FROM (SELECT MAX(bid.bidValue) AS currentBid ";
+    $query .= "FROM bid ";
+    $query .= "WHERE bid.auctionID = {$auctionID}) AS b1 ";
+    $query .= "INNER JOIN (SELECT bid.auctionID, bid.buyerID AS winnerID, bid.bidValue ";
+    $query .= "FROM bid ) AS b2 ON b2.auctionID = {$auctionID} AND b2.bidValue = b1.currentBid) AS winner ";
     $query .="WHERE ";
     $query .="auction.id={$auctionID} ";
     $query .="AND auction.ended=1 ";
-    $query .="AND (auction.sellerID={$giverID} ";
-    $query .="AND winner.winnerID={$receiverID}) ";
-    $query .="OR (auction.sellerID={$receiverID} ";
-    $query .="AND winner.winnerID=($giverID)) ";
+    $query .="AND auction.sellerID={$giverID} OR winner.winnerID=($giverID) ";
     $result = mysqli_query($connection,$query);
     if ($result){
       $count = mysqli_fetch_assoc($result);
-      return ($count["ct"]>1 && ! $this->didFeedback($connection,$giverID,$receiverID,$auctionID));
+      return ($count["ct"]>1 && ! $this->didFeedback($connection,$giverID,$auctionID));
     } else {
       die( "Database query failed (shouldFeedback). " . mysqli_error( $connection ) );
       return false;
@@ -1261,12 +1313,11 @@ public function addWatch($connection,$userID, $auctionID){
 
   } 
 
-  public function didFeedback($connection,$giverID,$receiverID,$auctionID){
+  public function didFeedback($connection,$giverID,$auctionID){
     $query ="SELECT COUNT(*) as ct ";
     $query .="FROM feedback ";
     $query .="WHERE ";
     $query .="feedback.giverID = {$giverID} ";
-    $query .="AND feedback.receiverID = {$receiverID} ";
     $query .="AND feedback.auctionID = {$auctionID}";
     $result = mysqli_query($connection,$query);
     if ($result){
@@ -1282,8 +1333,8 @@ public function addWatch($connection,$userID, $auctionID){
     }
   }
 
-  public function selectFeedback($connection,$giverID,$receiverID,$auctionID){
-    $query = "SELECT * FROM feedback WHERE giverID={$giverID} AND receiverID={$receiverID} AND auctionID={$auctionID} LIMIT 1";
+  public function selectFeedback($connection,$giverID,$auctionID){
+    $query = "SELECT * FROM feedback WHERE giverID={$giverID} AND auctionID={$auctionID} LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
       $object = mysqli_fetch_assoc( $result );
@@ -1301,15 +1352,14 @@ public function addWatch($connection,$userID, $auctionID){
    */
   public function feedback($connection,$feedback){
     $giverID=$feedback->giverID;
-    $receiverID=$feedback->receiverID;
     $auctionID=$feedback->auctionID;
     $rating=$feedback->rating;
     $comment=$feedback->comment;
     //double check if one can leave feedback
-    $shouldFeedback = $this->shouldFeedback($connection,$giverID,$receiverID,$auctionID);
+    $shouldFeedback = $this->shouldFeedback($connection,$giverID,$auctionID);
     if ($shouldFeedback){
-      $query = "INSERT INTO feedback (giverID,receiverID,rating,comment,auctionID) ";
-      $query .= "VALUES ({$giverID},{$receiverID},{$rating},'{$comment}',{$auctionID})";
+      $query = "INSERT INTO feedback (giverID,rating,comment,auctionID) ";
+      $query .= "VALUES ({$giverID},{$rating},'{$comment}',{$auctionID})";
       $result = mysqli_query( $connection, $query );
       if ( $result ) {
         $id =  mysqli_insert_id( $connection );
@@ -1327,15 +1377,13 @@ public function addWatch($connection,$userID, $auctionID){
 
   public function updateFeedback($connection,$feedback){
     $giverID=$feedback->giverID;
-    $receiverID=$feedback->receiverID;
     $auctionID=$feedback->auctionID;
     $rating=$feedback->rating;
     $comment=$feedback->comment;
     $query = "UPDATE feedback SET ";
     $query .= "rating={$rating},comment='{$comment}' ";
-    $query .= "WHERE giverID={$giverID} AND receiverID={$receiverID} AND auctionID={$auctionID}";
+    $query .= "WHERE giverID={$giverID} AND auctionID={$auctionID}";
 
-    var_dump($query);
     $result = mysqli_query( $connection, $query );
     $affected = mysqli_affected_rows( $connection );
     if ( $result && $affected >= 0 ) {
@@ -1351,22 +1399,53 @@ public function addWatch($connection,$userID, $auctionID){
    * @return: average rating for this user and total number of feedbacks received.
    */
   public function getAverageRating($connection,$userID){
-    $query = "SELECT AVG(rating) AS AvgRating, COUNT(*) AS NumOfFeedbacks ";
-    $query .= "FROM feedback ";
-    $query .= "WHERE receiverID={$userID} ";
+    //get sold
+    $query_sold = "SELECT feedback.rating FROM feedback ";
+    $query_sold .= "INNER JOIN auction ON auction.id = feedback.auctionID ";
+    $query_sold .= "WHERE auction.sellerID = {$userID} ";
 
-    $result = mysqli_query( $connection, $query );
-    if ( $result ) {
-      $row = mysqli_fetch_assoc( $result );
-      if ( $row['NumOfFeedbacks'] == 0 ) {
-        return 0;
-      } else {
-        return $row['AvgRating'];
+    $ratings = [];
+    $result = mysqli_query($connection,$query_sold);
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $ratings[] = $row["rating"];
       }
-    } else {
-      die( "Database query failed (getAverageRating). " . mysqli_error( $connection ) );
-      return false;
+    }else {
+      die( "Database query failed (get feedbacks 1). " . mysqli_error( $connection ) );
     }
+
+    //get bought 
+    $query_bought =" SELECT feedback.rating FROM feedback ";
+    $query_bought .=" LEFT JOIN ( ";
+    $query_bought .=" SELECT b1.auctionID,b1.highestBid as currentBid,b2.buyerID as winnerID ";
+    $query_bought .=" FROM ( ";
+    $query_bought .=" SELECT bid.auctionID,MAX(bid.bidValue) AS highestBid ";
+    $query_bought .=" FROM bid ";
+    $query_bought .=" GROUP BY bid.auctionID ";
+    $query_bought .=" ) AS b1 ";
+    $query_bought .=" LEFT JOIN ( ";
+    $query_bought .=" SELECT bid.auctionID, bid.bidValue, bid.buyerID ";
+    $query_bought .=" FROM bid ";
+    $query_bought .=" ) AS b2 ";
+    $query_bought .=" ON b2.auctionID = b1.auctionID AND b2.bidValue = b1.highestBid ";
+    $query_bought .=" ) AS winner ";
+    $query_bought .=" ON winner.auctionID = feedback.auctionID WHERE winner.winnerID=12 ";
+    $result2 = mysqli_query($connection,$query_bought);
+    if ($result2){
+      while ($row2 = mysqli_fetch_assoc($result2)){
+        $ratings[] = $row["rating"];
+      }
+    }else {
+      die( "Database query failed (get feedbacks 2). " . mysqli_error( $connection ) );
+    }
+
+    $avg = 0;
+    if (count($ratings)>0){
+     $avg = array_sum($ratings) / count($ratings); 
+    }
+
+    return $avg;
+    
   }
 
   // category
