@@ -9,12 +9,22 @@
 	{{ form_errors(filter_form) }}
 
 		{{ form_label(filter_form.categories, "Category") }}
-        {{ form_errors(filter_form.categories) }}
-        {{ form_widget(filter_form.categories, {'attr': {'class': 'row'}}) }}
-    	<br><br><br>
-    	<div class = "row">
+    {{ form_errors(filter_form.categories) }}
+    {{ form_widget(filter_form.categories, {'attr': {'class': 'row'}}) }}
+
+    {{ form_label(filter_form.price_ascending) }}
+    {{ form_errors(filter_form.price_ascending) }}
+    {{ form_widget(filter_form.price_ascending, {'attr': {'class': 'row'}}) }}
+
+
+    {{ form_label(filter_form.created_ascending) }}
+    {{ form_errors(filter_form.created_ascending) }}
+    {{ form_widget(filter_form.created_ascending, {'attr': {'class': 'row'}}) }}
+
+      <div class = "row" style="padding-top:20px;">
             {{ form_widget(filter_form.filter, {'attr': {'class':  'col-md-3 col-md-offset-4 btn btn-def'}}) }}
       </div>
+    
 	{{ form_end(filter_form) }}
 	</div>
 	{% if auctions|length > 0 %}

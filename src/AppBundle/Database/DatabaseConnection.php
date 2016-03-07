@@ -373,14 +373,27 @@ class DatabaseConnection {
    * search for auctions based on keywords
    * @return: {"auctions"=>search result array, "totalPages"=>total number of pages}
    */
-  public function searchAuctions($connection,$keywords,$page,$perPage,$filter_categories=NULL){
+  public function searchAuctions($connection,$keywords,$page,$perPage,$filter){
     if ($page==0){
       return NULL;
     } 
+
+    $price_ascending=$filter->price_ascending;
+    $created_ascending=$filter->created_ascending;
+    $filter_categories=$filter->categories;
+
     //init auctions
     $auctions = [];
     //get offset
     $offset = ($page-1)*$perPage;
+
+    $query_order = "ORDER BY currentBid.currentBid ";
+    $query_order .= $price_ascending ? "ASC":"DESC";
+    $query_order .= ", auction.createdAt ";
+    $query_order .= $created_ascending ? "ASC ":"DESC ";
+    $query_limit = "LIMIT {$offset},{$perPage} ";
+
+
     //if there is keywords, do keyword search
     $where = "WHERE auction.endAt>NOW() ";
 
@@ -399,22 +412,32 @@ class DatabaseConnection {
         $keyword = $keywords[$i];
         $where .= "OR item.itemName LIKE '%{$keyword}%' ";
       }
+
+
       //get all auction
       $query ="SELECT ";
-      $query .="auction.id, ";
-      $query .="itemimage.imageURL, ";
-      $query .="item.itemName, ";
-      $query .="user.name, ";
-      $query .="auction.sellerID ";
+      $query .= "auction.id, ";
+      $query .= "itemimage.imageURL, ";
+      $query .= "item.itemName, ";
+      $query .= "user.name, ";
+      $query .= "auction.sellerID, ";
+      $query .= "IfNull(currentBid.currentBid, auction.startingBid) ";
       $query .= "FROM auction ";
       $query .= "INNER JOIN ";
       $query .= "item ON auction.itemID = item.id ";
       $query .="LEFT JOIN ";
       $query .="itemimage on item.id = itemimage.itemID ";
+      $query .= "LEFT JOIN ";
+      $query .= "(SELECT MAX(bid.bidValue) AS currentBid,bid.auctionID FROM bid GROUP BY bid.auctionID) AS currentBid ";
+      $query .= "ON currentBid.auctionID = auction.id ";
       $query .="INNER JOIN ";
       $query .="user ON user.id = auction.sellerID ";
-      $query .= $where;
-      $query .= "LIMIT {$offset},{$perPage} ";
+      $query .= $where; 
+      $query .= $query_order;
+      $query .= $query_limit;
+  
+      
+
       $result = mysqli_query($connection,$query);
       if ($result){
         while ($row = mysqli_fetch_assoc($result)){
@@ -442,14 +465,14 @@ class DatabaseConnection {
       
     } else {
       //if there is no keywords, get new auctions
-      $query_all = "SELECT ";
-      $query_all .="auction.id, ";
-      $query_all .="itemimage.imageURL, ";
-      $query_all .="item.itemName, ";
-      $query_all .="user.name, ";
-      $query_all .="auction.sellerID FROM auction ";
+      $query_new = "SELECT ";
+      $query_new .="auction.id, ";
+      $query_new .="itemimage.imageURL, ";
+      $query_new .="item.itemName, ";
+      $query_new .="user.name, ";
+      $query_new .="IfNull(currentBid.currentBid, auction.startingBid), ";
+      $query_new .="auction.sellerID FROM auction ";
       $query_count = "SELECT COUNT(*) AS count FROM auction ";
-      $query_limit ="LIMIT {$offset},{$perPage} ";
 
       $query ="INNER JOIN ";
       $query .="item ON item.id = auction.itemID ";
@@ -457,17 +480,21 @@ class DatabaseConnection {
       $query .="itemimage on item.id = itemimage.itemID ";
       $query .="INNER JOIN ";
       $query .="user ON user.id = auction.sellerID ";
+      $query .= "LEFT JOIN ";
+      $query .= "(SELECT MAX(bid.bidValue) AS currentBid,bid.auctionID FROM bid GROUP BY bid.auctionID) AS currentBid ";
+      $query .= "ON currentBid.auctionID = auction.id ";
       $query .=$where;
-      $query .="ORDER BY ";
-      $query .="auction.createdAt DESC ";
+      $query .=$query_order;
+      $query .=$query_limit;
 
-      $result = mysqli_query($connection,$query_all.$query.$query_limit);
+
+      $result = mysqli_query($connection,$query_new.$query);
       if ($result){
         while ($row = mysqli_fetch_assoc($result)){
           $auctions[] = $row;
         }
       }else {
-        die( "Database query failed (search auction). " . mysqli_error( $connection ) );
+        die( "Database query failed (search auction 2). " . mysqli_error( $connection ) );
       }
 
       //get total pages for new auctions
@@ -477,7 +504,7 @@ class DatabaseConnection {
         $count = mysqli_fetch_assoc($result);
         $totalPages = ceil($count["count"]/$perPage);
       }else {
-        die( "Database query failed (search auction). " . mysqli_error( $connection ) );
+        die( "Database query failed (search auction 2 total). " . mysqli_error( $connection ) );
       } 
       
     }
@@ -808,7 +835,7 @@ public function addWatch($connection,$userID, $auctionID){
     return $auctions;
   }
 
-  public function getRandomAuctions($connection,$limit){
+  public function getRandomAuctions($connection,$limit,$userID){
     $auctions = [];
     $query = "SELECT COUNT(*) as ct FROM auction";
     $result = mysqli_query($connection, $query);
@@ -837,7 +864,7 @@ public function addWatch($connection,$userID, $auctionID){
       $query .="LEFT JOIN ";
       $query .="itemimage on item.id = itemimage.itemID ";
       $query .= "WHERE ";
-      $query .= "auction.id IN({$rand_s}) AND auction.ended=0; ";
+      $query .= "auction.id IN({$rand_s}) AND auction.ended=0 AND auction.sellerID<>$userID; ";
 
       $result = mysqli_query($connection,$query);
       if ($result){
@@ -929,6 +956,7 @@ public function addWatch($connection,$userID, $auctionID){
       $query2 .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
       $query2 .= "WHERE ";
       $query2 .= "auction.ended=0 ";
+      $query2 .= "AND auction.sellerID<>{$userID} ";
       $query2 .= "ORDER BY ";
       $query2 .= "item_category.Occurrence DESC, ";
       $query2 .= "auction.id DESC ";
@@ -936,6 +964,7 @@ public function addWatch($connection,$userID, $auctionID){
       $query_limit = "LIMIT {$MAX_TOTAL_RECOMMENDATIONS}";
       $result = mysqli_query( $connection, $query_select.$query.$query_limit );
 
+      //$this->container->get('dump')->d($query_select.$query.$query_limit);
       //get first type reco
       if ( $result ) {
         while ($row = mysqli_fetch_assoc($result)){
@@ -973,7 +1002,7 @@ public function addWatch($connection,$userID, $auctionID){
     $reco_count = count($auctions);
     if ($reco_count<$MAX_TOTAL_RECOMMENDATIONS){
         $more = $MAX_TOTAL_RECOMMENDATIONS-$reco_count;
-        $random = $this->getRandomAuctions($connection,$more);
+        $random = $this->getRandomAuctions($connection,$more,$userID);
         if (count($auctions)== 0){
           $auctions = $random;
         } else {

@@ -53,6 +53,7 @@ class AuctionController extends Controller {
         // 1) build the form
         $filter = new Filter();
         $filter->categories = NULL;
+
         $filter_form = $this->createForm( FilterType::class, $filter );
 
         // 2) handle the submit (will only happen on POST)
@@ -62,13 +63,13 @@ class AuctionController extends Controller {
             // maybe set a "flash" success message for the user
             $this->addFlash(
                 'success',
-                'Filtered!'
+                'Result is filtered!'
             );
             
         }
 
         //pass in filter
-        $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25, $filter->categories );
+        $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25,  $filter );
         // $this->get('dump')->d($searchResults);
         if ( $request->isXmlHttpRequest() ) {
             //return json
