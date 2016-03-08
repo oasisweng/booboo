@@ -13,21 +13,15 @@
         <nav id="nav">
             <ul>
                 <li><a class="icon fa-home" href="{{ path('homepage')}}"><span>Home</span></a></li>
-                {# <li><a class="icon fa-tag" href="#"><span>Categories</span></a>
+                <li><a class="icon fa-tag" href="#"><span>Categories</span></a>
                     <ul>
-                        <li><a href="#">Lorem ipsum dolor</a></li>
-                        <li><a href="#">Magna phasellus</a></li>
-                        <li><a href="#">Etiam dolore nisl</a></li>
-                        <li>
-                            <a href="#">Phasellus consequat</a>
-                            <ul>
-                                <li><a href="#">Magna phasellus</a></li>
-                                <li><a href="#">Etiam dolore nisl</a></li>
-                                <li><a href="#">Phasellus consequat</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">Veroeros feugiat</a></li>
-                    </ul>#}
+                        {#<li><a href="{{ path('auction_category',{'categoryName':'E-books'})}}">E-books</a></li>
+                        <li><a href="{{ path('auction_category',{'categoryName':'E-Pets'})}}">E-Pets</a></li>
+                        <li><a href="{{ path('auction_category',{'categoryName':'Game Items'})}}">Game Items</a></li>
+                        <li><a href="{{ path('auction_category',{'categoryName':'Prepaid Time Cards'})}}">Prepaid Time Cards</a></li>
+                        <li><a href="{{ path('auction_category',{'categoryName':'Trade Cards'})}}">Trade Cards</a></li>
+                        <li><a href="{{ path('auction_category',{'categoryName':'Tutorials'})}}">Tutorials</a></li>#}
+                    </ul>
                 </li>
                 {% if app.session.get('userID') is not null %}
                 <li><a class="icon fa-user" href="{{ path('user_show', {'userID': app.session.get('userID')})}}"><span>My Profile/Feed </span></a></li>
