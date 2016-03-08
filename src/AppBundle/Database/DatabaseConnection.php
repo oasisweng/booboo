@@ -283,7 +283,7 @@ class DatabaseConnection {
 
   public function getAuctionsWithCategoryName($connection,$categoryName){
 
-    $query = "SELECT auction.id,item.itemName,user.name AS sellerName,itemimage.imageURL FROM auction ";
+    $query = "SELECT auction.id,item.itemName,auction.sellerID,user.name,itemimage.imageURL FROM auction ";
     $query .= "INNER JOIN item ON item.id = auction.itemID  ";
     $query .= "INNER JOIN category ON category.id = item.categoryID ";
     $query .= "INNER JOIN itemimage ON itemimage.itemID = item.id ";

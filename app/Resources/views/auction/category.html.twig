@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container">
+  <div class="col-md-8 col-md-offset-2">
+  <h2>{{categoryName}}</h2>
+  {% if auctions|length > 0 %}
+    <table class="table table-striped search-table">
+        <thead>
+          <tr>
+            <td class="col-md-3"><label>Item </label></td>
+            <td class="col-md-3"><label>Image </label></td>
+            <td class="col-md-3"><label>Seller </label></td>
+          </tr>
+        </thead>
+        <tbody>
+           {% for auction in auctions %}
+           <tr>
+               <td><a href="{{ path('auction_show', {'auctionID': auction.id})}}">{{ auction.itemName }}</a></td>
+               {% if auction.imageURL is not null %}
+               <td><img src="{{asset('assets/photos/'~auction.imageURL) }}" alt="image" class="tbn"></td>
+               {% else %}
+               <td><center><img src="http://placehold.it/100/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive"></center></td>
+             {% endif %}
+               <td><a href="{{ path('user_show', {'userID': auction.sellerID})}}">{{auction.name}}</a></td>
+           </tr>
+           {% endfor %}    
+        </tbody>
+       </table>
+       {% else %}
+            <br>
+        <p>We don't have any {{categoryName}}, please choose another category!</p>
+       {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+  <style>
+  table.search-table tr td{
+    vertical-align: middle !important;
+  }
+  img.tbn{
+    max-width: 150px;
+    height: 150px;
+    display: -moz-inline-box; /* Firefox 2 */
+    display: inline-block;
+  }
+  </style>
+{% endblock %}

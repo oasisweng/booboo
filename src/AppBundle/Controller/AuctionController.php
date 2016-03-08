@@ -537,6 +537,9 @@ class AuctionController extends Controller {
 
         $auctions = $this->get('db')->getAuctionsWithCategoryName($connection,$categoryName);
 
+        // $this->get('dump')->d($categoryName);
+        // $this->get('dump')->d($auctions);
+
         return $this->render( 'auction/category.html.twig', array(
             'auctions' => $auctions,
             'categoryName'=> $categoryName) );
