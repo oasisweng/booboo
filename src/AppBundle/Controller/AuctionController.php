@@ -486,6 +486,62 @@ class AuctionController extends Controller {
         }
     }
 
+    /**
+     *
+     *
+     * @Route("/auctions/updateSeller", name="auction_update_seller")
+     */
+    public function updateSellerAction(Request $request){
+
+        //connect to db
+        $connection = $this->get('db')->connect();
+
+        $auctions = $this->get('db')->countNewBids($connection);
+
+        //for each auction, send an email
+        foreach ($auctions as $auction){
+            $name = $auction["name"];
+            $email = $auction["email"];
+            //send email
+            $message = \Swift_Message::newInstance()
+            ->setSubject( 'You have '.$auction["ct"].' new bids on '.$auction["itemName"].'!' )
+            ->setFrom( 'boobooauction@gmail.com')
+            ->setTo( $email )
+            ->setBody(
+                $this->renderView(
+                    'Emails/updatebid.html.twig',
+                    array( 'name' => $name,
+                        'auctionID'=>$auction["auctionID"],
+                        'itemName'=>$auction["itemName"],
+                        'bidCount'=>$auction["ct"],
+                        'updatedTo'=>$auction["updatedTo"] )
+                ),
+                'text/html'
+            );
+            $this->get( 'mailer' )->send( $message );
+        }
+
+
+        return $this->render( 'auction/updateSeller.html.twig', array() );
+
+    }
+
+    /**
+     *
+     *
+     * @Route("/category/{categoryName}", name="auction_category")
+     */
+    public function categoryAction($categoryName,Request $request){
+        //connect to db
+        $connection = $this->get('db')->connect();
+
+        $auctions = $this->get('db')->getAuctionsWithCategoryName($connection,$categoryName);
+
+        return $this->render( 'auction/category.html.twig', array(
+            'auctions' => $auctions,
+            'categoryName'=> $categoryName) );
+    }
+
 
     /**
      *

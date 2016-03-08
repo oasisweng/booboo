@@ -281,6 +281,76 @@ class DatabaseConnection {
     }
   }
 
+  public function getAuctionsWithCategoryName($connection,$categoryName){
+
+    $query = "SELECT auction.id,item.itemName,user.name AS sellerName,itemimage.imageURL FROM auction ";
+    $query .= "INNER JOIN item ON item.id = auction.itemID  ";
+    $query .= "INNER JOIN category ON category.id = item.categoryID ";
+    $query .= "INNER JOIN itemimage ON itemimage.itemID = item.id ";
+    $query .= "INNER JOIN user ON auction.sellerID = user.id ";
+    $query .= "WHERE ";
+    $query .= "category.categoryName = '{$categoryName}' ";
+    $query .= "AND auction.ended = 0  ";
+    $query .= "ORDER BY ";
+    $query .= "auction.createdAt DESC ";
+
+    $auctions = [];
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+      }
+    }else {
+      die( "Database query failed (getAuctionsWithCategoryName). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+  }
+
+// @return an array of each auction that has new bids and their item and user information
+  public function countNewBids($connection){
+    //count new bids for each non-ending auctions
+    $query = "SELECT bid.auctionID,item.itemName,user.name,user.email,auction.updatedTo,COUNT(*) as ct FROM bid  ";
+    $query .= "LEFT JOIN auction ON bid.auctionID = auction.id ";
+    $query .= "LEFT JOIN item ON item.id = auction.itemID ";
+    $query .= "LEFT JOIN user ON user.id = auction.sellerID ";
+    $query .= "WHERE bid.createdAt>auction.updatedTo ";
+    $query .= "GROUP BY bid.auctionID ";
+
+    var_dump($query);
+
+    $auctions = [];
+    $auctionIDs = [];
+    $result = mysqli_query($connection,$query);
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $auctions[] = $row;
+        $auctionIDs[] = $row['auctionID'];
+      }
+
+      // For demonstration, we allow no update on updatedTo column
+      // if (count($auctionIDs)>0){
+      //   $auctionIDs_s = implode(",",$auctionIDs);
+      //   //update auction updatedTo
+      //   $query2 = "UPDATE auction ";
+      //   $query2 .= "SET auction.updatedTo = NOW() ";
+      //   $query2 .= "WHERE auction.id in {$auctionIDs_s} ";
+      //   $result2 = mysqli_query($connection,$query2);
+      //   $affected = mysqli_affected_rows( $connection );
+      //   if ( $result2 && $affected >= 0 ) {
+      //     return $auctions;
+      //   } else {
+      //     die( "Database query failed (count new bids 2 ). " . mysqli_error( $connection ) );
+      //     return false;
+      //   }
+      // } 
+    }else {
+      die( "Database query failed (count new bids 1). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+  }
+
   public function finishAuction( $connection, $auction ) {
     $id = mysqli_real_escape_string( $connection, $auction->id );
     //get two highest bid(sort by value DESC and time ASC)
