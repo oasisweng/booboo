@@ -32,18 +32,18 @@ class FilterType extends AbstractType
             'data'=> false
         ))
         ->add('created_ascending', ChoiceType::class, array(
-            'label'    => 'Created Time',
+            'label'    => 'Ending Time',
             'label_attr' => array('style'=>'text-align:left;'),
             'required' => false,
             'choices'  => array(
-                'Late to Early' => false,
-                'Early to Late' => true
+                'Sooner First' => true,
+                'Later First' => false
                 
             ),
             'choices_as_values' => true,
             'multiple' => false,
             'expanded' => true,
-            'data'=> false
+            'data'=> true
         ))
         ->add('filter', SubmitType::class);
 

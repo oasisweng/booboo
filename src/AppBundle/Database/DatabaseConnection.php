@@ -459,7 +459,7 @@ class DatabaseConnection {
 
     $query_order = "ORDER BY currentBid.currentBid ";
     $query_order .= $price_ascending ? "ASC":"DESC";
-    $query_order .= ", auction.createdAt ";
+    $query_order .= ", auction.endAt ";
     $query_order .= $created_ascending ? "ASC ":"DESC ";
     $query_limit = "LIMIT {$offset},{$perPage} ";
 
@@ -491,7 +491,8 @@ class DatabaseConnection {
       $query .= "item.itemName, ";
       $query .= "user.name, ";
       $query .= "auction.sellerID, ";
-      $query .= "IfNull(currentBid.currentBid, auction.startingBid) ";
+      $query .= "IfNull(currentBid.currentBid, auction.startingBid) AS currentBid ";
+      $query .= "auction.endAt ";
       $query .= "FROM auction ";
       $query .= "INNER JOIN ";
       $query .= "item ON auction.itemID = item.id ";
@@ -540,7 +541,8 @@ class DatabaseConnection {
       $query_new .="itemimage.imageURL, ";
       $query_new .="item.itemName, ";
       $query_new .="user.name, ";
-      $query_new .="IfNull(currentBid.currentBid, auction.startingBid), ";
+      $query_new .="IfNull(currentBid.currentBid, auction.startingBid) AS currentBid, ";
+      $query_new .="auction.endAt, ";
       $query_new .="auction.sellerID FROM auction ";
       $query_count = "SELECT COUNT(*) AS count FROM auction ";
 

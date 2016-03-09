@@ -70,6 +70,8 @@ class AuctionController extends Controller {
 
         //pass in filter
         $searchResults = $this->get( 'db' )->searchAuctions( $connection, $keywords_a, $page, 25,  $filter );
+
+        // $this->get('dump')->d($searchResults);
         // $this->get('dump')->d($searchResults);
         if ( $request->isXmlHttpRequest() ) {
             //return json

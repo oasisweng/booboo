@@ -2,7 +2,7 @@
 
 {% block body %}
 <div class="container">
-	<div class="col-md-8 col-md-offset-2">
+	<div class="col-md-10 col-md-offset-1">
 	<h2>Search Result</h2>
 	<div class = "row">
 	{{ form_start(filter_form) }}
@@ -31,9 +31,11 @@
     <table class="table table-striped search-table">
         <thead>
           <tr>
-        		<td class="col-md-3"><label>Item </label></td>
-        		<td class="col-md-3"><label>Image </label></td>
-        		<td class="col-md-3"><label>Seller </label></td>
+        		<td class="col-md-4"><label>Item </label></td>
+        		<td class="col-md-1"><label>Image </label></td>
+        		<td class="col-md-2"><label>Seller </label></td>
+            <td class="col-md-1"><label>Price </label></td>
+            <td class="col-md-2"><label>End At </label></td>
         	</tr>
         </thead>
         <tbody>
@@ -46,6 +48,8 @@
                <td><center><img src="http://placehold.it/100/bbbbbb/fff&amp;text={{ auction.id }}" class="img-responsive"></center></td>
              {% endif %}
                <td><a href="{{ path('user_show', {'userID': auction.sellerID})}}">{{auction.name}}</a></td>
+               <td>{{auction.currentBid}}</td>
+               <td>{{auction.endAt | date('Y-m-d H:i')}}</td>
            </tr>
            {% endfor %}    
         </tbody>
