@@ -303,7 +303,7 @@ function updateTable(data, category, buttonName) {
 		return url.replace('0', id);
 	} 
 	function feedbackGiveURL(id) {
-		var url = '{{ path('feedback_newt', {'auctionID': 0 })}}';       //newt route over new for testing purposes for now
+		var url = '{{ path('feedback_new', {'auctionID': 0 })}}';       //newt route over new for testing purposes for now
 		return url.replace('0', id);
 	}
 	for (var key in auctions[category]) {
