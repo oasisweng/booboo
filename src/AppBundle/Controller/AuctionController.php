@@ -262,7 +262,7 @@ class AuctionController extends Controller {
                 }
                 //send email
                 $message = \Swift_Message::newInstance()
-                ->setSubject( 'You sold'.$auction->item->itemName.'!' )
+                ->setSubject( 'You'.$auction->item->itemName.' was not sold!' )
                 ->setFrom( 'boobooauction@gmail.com' )
                 ->setTo( $email )
                 ->setBody(
