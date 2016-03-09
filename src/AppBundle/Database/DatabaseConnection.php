@@ -510,7 +510,7 @@ class DatabaseConnection {
       $query .= "item.itemName, ";
       $query .= "user.name, ";
       $query .= "auction.sellerID, ";
-      $query .= "IfNull(currentBid.currentBid, auction.startingBid) AS currentBid ";
+      $query .= "IfNull(currentBid.currentBid, auction.startingBid) AS currentBid, ";
       $query .= "auction.endAt ";
       $query .= "FROM auction ";
       $query .= "INNER JOIN ";
@@ -525,7 +525,6 @@ class DatabaseConnection {
       $query .= $where; 
       $query .= $query_order;
       $query .= $query_limit;
-  
       
 
       $result = mysqli_query($connection,$query);
