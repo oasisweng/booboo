@@ -12,14 +12,15 @@
     {{ form_errors(filter_form.categories) }}
     {{ form_widget(filter_form.categories, {'attr': {'class': 'row'}}) }}
 
-    {{ form_label(filter_form.price_ascending) }}
-    {{ form_errors(filter_form.price_ascending) }}
-    {{ form_widget(filter_form.price_ascending, {'attr': {'class': 'row'}}) }}
-
-
-    {{ form_label(filter_form.created_ascending) }}
-    {{ form_errors(filter_form.created_ascending) }}
-    {{ form_widget(filter_form.created_ascending, {'attr': {'class': 'row'}}) }}
+    
+      {{ form_label(filter_form.order) }}
+    {{ form_errors(filter_form.order) }}
+    <div class="col-md-4" style="clear:both;">
+    <div class="form-group order">
+      {{ form_widget(filter_form.order, {'attr': {'class': 'select'}}) }}
+    </div>
+    </div>
+    
     <br><br>
       <div class = "row" style="padding-top:20px;">
             {{ form_widget(filter_form.filter, {'attr': {'class':  'col-md-3 col-md-offset-4 btn btn-def'}}) }}
@@ -66,6 +67,20 @@
   <style>
   table.search-table tr td{
     vertical-align: middle !important;
+  }
+
+  select{
+        -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+  }
+
+  .order{
+    margin-left: 12px;margin-top: 12px;
+  }
+
+  .order > .select{
+    margin-left:26px;
   }
   img.tbn{
     max-width: 150px;

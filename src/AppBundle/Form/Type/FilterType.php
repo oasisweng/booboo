@@ -17,33 +17,20 @@ class FilterType extends AbstractType
                 'multiple' => true,
                 'expanded' => true
             ))
-        ->add('price_ascending',ChoiceType::class, array(
-            'label'    => 'Price',
+        ->add('order',ChoiceType::class, array(
+            'label'    => 'Search Order',
             'label_attr' => array('style'=>'text-align:left;'),
             'required' => false,
             'choices'  => array(
-                'High to Low' => false,
-                'Low to High' => true
+                'Price Low to High' => 1,
+                'Price High to Low' => 2,
+                'Ending Sooner First' => 3,
+                'Ending Later First' => 4
                 
             ),
             'choices_as_values' => true,
             'multiple' => false,
-            'expanded' => true,
-            'data'=> false
-        ))
-        ->add('created_ascending', ChoiceType::class, array(
-            'label'    => 'Ending Time',
-            'label_attr' => array('style'=>'text-align:left;'),
-            'required' => false,
-            'choices'  => array(
-                'Sooner First' => true,
-                'Later First' => false
-                
-            ),
-            'choices_as_values' => true,
-            'multiple' => false,
-            'expanded' => true,
-            'data'=> true
+            'data'=> 1
         ))
         ->add('filter', SubmitType::class);
 

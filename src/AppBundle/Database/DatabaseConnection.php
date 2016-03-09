@@ -448,8 +448,7 @@ class DatabaseConnection {
       return NULL;
     } 
 
-    $price_ascending=$filter->price_ascending;
-    $created_ascending=$filter->created_ascending;
+    $order=$filter->order;
     $filter_categories=$filter->categories;
 
     //init auctions
@@ -457,12 +456,32 @@ class DatabaseConnection {
     //get offset
     $offset = ($page-1)*$perPage;
 
-    $query_order = "ORDER BY currentBid.currentBid ";
-    $query_order .= $price_ascending ? "ASC":"DESC";
-    $query_order .= ", auction.endAt ";
-    $query_order .= $created_ascending ? "ASC ":"DESC ";
+
     $query_limit = "LIMIT {$offset},{$perPage} ";
 
+    //order
+    //'Price Low to High' => 1,
+    // 'Price High to Low' => 2,
+    // 'Ending Sooner First' => 3,
+    // 'Ending Later First' => 4
+
+    $query_order = "ORDER BY currentBid ASC ";
+    switch ($order) {
+      case 1:
+          $query_order = "ORDER BY currentBid ASC ";
+          break;
+      case 2:
+          $query_order = "ORDER BY currentBid DESC ";
+          break;
+      case 3:
+          $query_order = "ORDER BY auction.endAt ASC ";
+          break;
+      case 4:
+          $query_order = "ORDER BY auction.endAt DESC ";
+      break;
+    }
+    
+    // var_dump($query_order);
 
     //if there is keywords, do keyword search
     $where = "WHERE auction.endAt>NOW() ";

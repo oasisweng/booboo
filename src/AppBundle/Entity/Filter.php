@@ -11,17 +11,13 @@ class Filter {
      */
     public $categories;
 
-    public $price_ascending;
-
-    public $created_ascending;
+    public $order;
 
 
     public function __construct() {
       $categories = NULL;
 
-      $price_ascending = false;
-
-      $created_ascending = false;
+      $order = 1;
     }
 }
 ?>

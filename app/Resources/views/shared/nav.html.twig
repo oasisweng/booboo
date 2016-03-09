@@ -35,7 +35,7 @@
                  <li><a class="icon fa-question" href="{{ path('homepage')}}#contact"><span>Contact Us/ FAQ</span></a></li>  
                 <a class="navbar-right">
                     <!-- to include search bar in top navi for other pages outside of HOME/INDEX -->
-                    {% if app.request.attributes.get('_route') != "homepage" %}
+                    {% if app.request.attributes.get('_route') != "homepage" and app.request.attributes.get('_route') != "auction_search" %}
                         <form class="navbar-form" action="{{path('auction_search')}}" method="get" target="_self">
                         <div class="form-group">
                             <input type="text" id="indexonly" name="keywords" placeholder="Enter search" class="keywords form-control">
