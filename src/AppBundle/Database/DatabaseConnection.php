@@ -698,8 +698,7 @@ class DatabaseConnection {
     $auctions = [];
     if ($result){
       while ($row = mysqli_fetch_assoc($result)){
-        $receiverID = $userID == $row["sellerID"] ? $row["winnerID"] : $row["sellerID"];
-        $row["didFeedback"] = $this->didFeedback($connection,$userID,$receiverID,$row["id"]);
+        $row["didFeedback"] = $this->didFeedback($connection,$userID,$row["id"]);
         $auctions[] = $row;
 
       }
@@ -740,8 +739,7 @@ class DatabaseConnection {
     $auctions = [];
     if ($result){
       while ($row = mysqli_fetch_assoc($result)){
-        $receiverID = $userID == $row["sellerID"] ? $row["winnerID"] : $row["sellerID"];
-        $row["didFeedback"] = $this->didFeedback($connection,$userID,$receiverID,$row["id"]);
+        $row["didFeedback"] = $this->didFeedback($connection,$userID,$row["id"]);
         $auctions[] = $row;
       }
     } else {
