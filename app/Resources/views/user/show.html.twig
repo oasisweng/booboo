@@ -316,12 +316,12 @@ function updateTable(data, category, buttonName, colspan, message) {
 }
 function updateTables() {
 	$.get('{{ path('user_api', {'userID': user.id })}}', function(data) {
-		updateTable(data, 'buying', 'Go', 5, 'Hello world 1');
-		updateTable(data, 'selling', 'Edit', 5, 'Hello world 2');
-		updateTable(data, 'bought', 'Feedback', 5, 'Hello world 3');
-		updateTable(data, 'sold', 'Feedback', 5, 'Hello world 4');
-		updateTable(data, 'unsold', 'Go', 2, 'Hello world 5');
-		updateTable(data, 'watching', 'Go', 3, 'Hello world 6');
+		updateTable(data, 'buying', 'Go', 5, 'You are not currently buying any items.');
+		updateTable(data, 'selling', 'Edit', 5, 'You are not currently selling any items.');
+		updateTable(data, 'bought', 'Feedback', 5, 'You have not bought any items.');
+		updateTable(data, 'sold', 'Feedback', 5, 'You have not sold any items.');
+		updateTable(data, 'unsold', 'Go', 2, 'You do not have any unsold items.');
+		updateTable(data, 'watching', 'Go', 3, 'You are not watching any auctions.');
 	});
 }
 updateTables();
