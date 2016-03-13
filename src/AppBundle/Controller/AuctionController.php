@@ -17,7 +17,7 @@ use AppBundle\Entity\Bid;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Filter;
 use AppBundle\Form\Type\BidType;
-use AppBundle\Form\Type\FilterType;
+use AppBundle\Form\Type\FilterType; 
 
 
 class AuctionController extends Controller {
@@ -182,141 +182,6 @@ class AuctionController extends Controller {
         $sellerEntry = $this->get( "db" )->selectOne( $connection, 'user', $auction->sellerID );
         $seller = new User($sellerEntry);
         
-        //if should finish auction through this way
-        if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
-            $response = $this->get( 'db' )->finishAuction( $connection, $auction );
-            //CASE 1: seller sold the item, one user won
-            if ($response['status']=='success'){
-                //send seller and winner congrad emails
-                $sellerEntry = $this->get( 'db' )->selectOne( $connection, "user", $auction->sellerID);
-                $name = $sellerEntry["name"];
-                $email = $sellerEntry["email"];
-                try{
-                //send email
-                $message = \Swift_Message::newInstance()
-                ->setSubject( 'You sold '.$auction->item->itemName.'!' )
-                ->setFrom( 'boobooauction@gmail.com')
-                ->setTo( $email )
-                ->setBody(
-                    $this->renderView(
-                        'Emails/sold.html.twig',
-                        array( 'name' => $name,
-                            'auctionID'=>$auctionID,
-                            'itemName'=>$auction->item->itemName )
-                    ),
-                    'text/html'
-                );
-                $this->get( 'mailer' )->send( $message );
-                }
-                catch (Swift_TransportException $STe) {
-                    // logging error
-                    $string = date("Y-m-d H:i:s")  . ' - ' . $STe->getMessage() . PHP_EOL;
-                    echo $string;
-                    // send error note to user
-                    echo "the mail service has encountered a problem. Please retry later or contact the site admin.";
-                }
-                catch (Exception $e) {
-                    // logging error
-                    $string = date("Y-m-d H:i:s")  . ' - GENERAL ERROR - ' . $e->getMessage() . PHP_EOL;
-                    echo $string;
-                    // redirect to error page
-                    $app->abort(500, "Oops, something went seriously wrong. Please retry later !");
-                }
-
-                $winnerEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["winnerID"]);
-                $item->ownerID = $response["winnerID"];
-                $this->get('db')->updateItem($connection,$item);
-
-                $wname = $winnerEntry["name"];
-                $wemail = $winnerEntry["email"];
-                try {
-                    //send email to winner
-                    $message = \Swift_Message::newInstance()
-                    ->setSubject( 'You bought '.$auction->item->itemName.'!' )
-                    ->setFrom( 'boobooauction@gmail.com' )
-                    ->setTo( $wemail )
-                    ->setBody(
-                        $this->renderView(
-                            'Emails/won.html.twig',
-                            array( 'name' => $wname,
-                                'auctionID'=>$auctionID,
-                                'itemName'=>$auction->item->itemName )
-                        ),
-                        'text/html'
-                    );
-                }
-                catch (Swift_TransportException $STe) {
-                    // logging error
-                    $string = date("Y-m-d H:i:s")  . ' - ' . $STe->getMessage() . PHP_EOL;
-                    echo $string;
-                    // send error note to user
-                    echo "the mail service has encountered a problem. Please retry later or contact the site admin.";
-                }
-                catch (Exception $e) {
-                    // logging error
-                    $string = date("Y-m-d H:i:s")  . ' - GENERAL ERROR - ' . $e->getMessage() . PHP_EOL;
-                    echo $string;
-                    // redirect to error page
-                    $app->abort(500, "Oops, something went seriously wrong. Please retry later !");
-                }
-
-                $this->get( 'mailer' )->send( $message );
-                //var_dump($winnerEntry);
-
-            } else if ($response['status']=="warning"){
-                //CASE 2: seller did not sell the item because no one bidded
-                //CASE 3: the highest bid didnt meet the reserved price
-                //send seller unsold email
-                $sellerEntry = $this->get( 'db' )->selectOne( $connection, "user", $auction->sellerID);
-                $name = $sellerEntry["name"];
-                $email = $sellerEntry["email"];
-                $reason = "";
-                if ($response['message']=="reserved price unmet"){
-                    $reason = "The highest bid did not meet the reserved price you have set";
-                } else if ($response['message']=="no bid"){
-                    $reason = "No one bidded your auction";
-                }
-                //send email
-                $message = \Swift_Message::newInstance()
-                ->setSubject( 'You'.$auction->item->itemName.' was not sold!' )
-                ->setFrom( 'boobooauction@gmail.com' )
-                ->setTo( $email )
-                ->setBody(
-                    $this->renderView(
-                        'Emails/unsold.html.twig',
-                        array( 'name' => $name,
-                            'auctionID'=>$auctionID,
-                            'itemName'=>$auction->item->itemName,
-                            'reason'=>$reason )
-                    ),
-                    'text/html'
-                );
-                $this->get( 'mailer' )->send( $message );
-                if ($response['message']=="reserved price unmet"){
-                    //CASE 3:
-                    //send winner rpnm emails
-                    $winnerEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["winnerID"]);
-                    $wname = $winnerEntry["name"];
-                    $wemail = $winnerEntry["email"];
-                    //send email
-                    $message = \Swift_Message::newInstance()
-                    ->setSubject( 'You did not meet reserved price for '.$auction->item->itemName.'!' )
-                    ->setFrom( 'boobooauction@gmail.com' )
-                    ->setTo( $wemail )
-                    ->setBody(
-                        $this->renderView(
-                            'Emails/reservedPriceNotMeet.html.twig',
-                            array( 'name' => $wname,
-                                'auctionID'=>$auctionID,
-                                'itemName'=>$auction->item->itemName )
-                        ),
-                        'text/html'
-                    );
-                    $this->get( 'mailer' )->send( $message );
-                }
-            } 
-            $auction->ended = true;
-        }
 
         //get userID, or null if not logged in
         $session = $request->getSession();   
@@ -406,16 +271,14 @@ class AuctionController extends Controller {
                 $bids[] = new Bid($bidEntry);    
             }
         }
+        //backslash required for DateTime in this case to be taken as PHP DateTime OVER Symphony-based DateTime 
+        //that is apparently different thus this originally kept evaluating to 'false'.
+        $ended = ($auction->endAt <= new \DateTime());
 
-        $ended = $auction->ended;
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
         //echo $auctionID . " ". $userID . " "; var_dump($bidded);
         $winning = $bidded && $this->get( 'db' )->getWinnerForAuction($connection,$auctionID)==$userID;
         $won = $ended && $winning;
-
-        // var_dump($ended);
-        // var_dump($bidded);
-        // var_dump($winning);
 
         //check if auction is alr being watched by user
         $watching = $this->get('db')->isWatchingAuction($connection, $userID, $auctionID);
@@ -582,15 +445,25 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/auction/{auctionID}/finish", name="auction_finish_api", requirements={"auctionID": "\d+"})
+     * @Route("/auction/finish", name="auction_finish_api")
      */
-    public function finishAuction($auctionID){
+    public function finishAuction() {
+        // create a daemon thread that performs a curl call to this URL, make this run every minute
+        // select all auctions that have finished (i.e. endAt <= NOW()) and have not been notified (i.e. ended set to false)
+        // notify every one of them and update their ended boolean to true
         $connection = $this->get('db')->connect();
-        $auctionEntry = $this->get('db')->selectOne($connection,'auction',$auctionID);
-        $auction = new Auction($auctionEntry);
+        $auctions = $this->get('db')->getPendingFinishedAuctions($connection);
+        foreach ($auctions as $auctionID) {
+            $auctionEntry = $this->get( "db" )->selectOne( $connection, 'auction', $auctionID );
+            $auction = new Auction( $auctionEntry );
+            $itemEntry = $this->get( "db" )->selectOne( $connection, 'item', $auction->itemID );
+            $item = new Item( $itemEntry );
+            $auction->item = $item;
+            $category = $this->get( "db" )->selectOne( $connection, 'category', $auction->item->categoryID );
+            $item->categoryName = $category["categoryName"];
+            $sellerEntry = $this->get( "db" )->selectOne( $connection, 'user', $auction->sellerID );
+            $seller = new User($sellerEntry);
 
-         //if should finish auction through this way
-        if ( $this->get( 'db' )->shouldFinishAuction( $auction ) ) {
             $response = $this->get( 'db' )->finishAuction( $connection, $auction );
             //CASE 1: seller sold the item, one user won
             if ($response['status']=='success'){
@@ -629,11 +502,9 @@ class AuctionController extends Controller {
                     // redirect to error page
                     $app->abort(500, "Oops, something went seriously wrong. Please retry later !");
                 }
-
                 $winnerEntry = $this->get( 'db' )->selectOne( $connection, "user", $response["winnerID"]);
                 $item->ownerID = $response["winnerID"];
                 $this->get('db')->updateItem($connection,$item);
-
                 $wname = $winnerEntry["name"];
                 $wemail = $winnerEntry["email"];
                 try {
@@ -666,10 +537,8 @@ class AuctionController extends Controller {
                     // redirect to error page
                     $app->abort(500, "Oops, something went seriously wrong. Please retry later !");
                 }
-
                 $this->get( 'mailer' )->send( $message );
                 //var_dump($winnerEntry);
-
             } else if ($response['status']=="warning"){
                 //CASE 2: seller did not sell the item because no one bidded
                 //CASE 3: the highest bid didnt meet the reserved price
@@ -723,12 +592,9 @@ class AuctionController extends Controller {
                 }
             } 
             $auction->ended = true;
-            $this->get('db')->updateAuction($connection,$auction);
         }
 
         return new JsonResponse( ['status'=>'success'] );
-
-
 
     }
 

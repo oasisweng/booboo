@@ -263,9 +263,20 @@
 
 {% block javascripts %} 
 <script type="text/javascript" src="{{asset('assets/vendor/bootstrap/dist/js/jquery.countdown.min.js')}}"></script>
-<script type="text/javascript" src="{{asset('assets/js/auction_show.js')}}"></script>
 <script>
-
+{% if ended %}
+{% else %}
+var endTime = new Date('{{ auction.endAt | date('Y-m-d H:i:s') }}');
+$('#timeleft').countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
+    var $this = $(this);
+    if (event.elapsed) {
+        $this.html(event.strftime('Auction has ended.'));
+        location.reload();
+    } else {
+        $this.html(event.strftime('</span>Time Left : %D days : %H hours : %M mins : %S seconds</span>'));
+    }
+});
+{% endif %}
 
 {% if watching %}
     var watchingFlag = true;

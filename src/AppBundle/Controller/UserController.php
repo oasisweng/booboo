@@ -290,6 +290,15 @@ class UserController extends Controller {
                     //check if user should leave feedback    
                 }
             }
+            //get unsold
+            $unsoldEntries = $this->get('db')->getUnsoldAuctions($connection,$userID);
+            $unsold = [];
+            foreach ($unsoldEntries as $unsoldEntry){
+                if ($unsoldEntry){
+                    $unsold[] = new Auction($unsoldEntry);
+                    //check if user should leave feedback    
+                }
+            }
             //get watching
             $watchingEntries = $this->get('db')->getWatchingAuctions($connection,$userID);
             $watching = [];
@@ -304,6 +313,7 @@ class UserController extends Controller {
                     'selling'=>$selling,
                     'bought'=>$bought,
                     'sold'=>$sold,
+                    'unsold'=>$unsold,
                     'watching'=>$watching,
                  ));
 

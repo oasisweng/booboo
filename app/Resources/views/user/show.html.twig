@@ -37,6 +37,7 @@
 				<li role="presentation"><a href="#selling" aria-controls="selling" role="tab" data-toggle="tab">Selling</a></li>
 				<li role="presentation"><a href="#bought" aria-controls="bought" role="tab" data-toggle="tab">Bought</a></li>
 				<li role="presentation"><a href="#sold" aria-controls="sold" role="tab" data-toggle="tab">Sold</a></li>
+				<li role="presentation"><a href="#unsold" aria-controls="unsold" role="tab" data-toggle="tab">Unsold</a></li>
 				<li role="presentation"><a href="#watching" aria-controls="watching" role="tab" data-toggle="tab">Watching</a></li>
 			</ul>
 
@@ -51,7 +52,7 @@
 				</div>
 				<div role="tabpanel" class="tab-pane" id="selling">
 					<table class="table table-striped">
-						<thead><tr><td>Item Name</td><td>Starting Bid</td><td>Current Bid</td><td>Time Left</td><td>Details</td></td></thead>
+						<thead><tr><td>Item Name</td><td>Starting Bid</td><td>Current Bid</td><td>Time Left</td><td>Details</td></tr></thead>
 						<tbody id="selling-table">
 						</tbody>
 					</table>
@@ -65,14 +66,21 @@
 				</div>
 				<div role="tabpanel" class="tab-pane" id="sold">
 					<table class="table table-striped">
-						<thead><tr><td>Item Name</td><td>Buyer Name</td><td>Price</td><td>Date</td></td></thead>
+						<thead><tr><td>Item Name</td><td>Buyer Name</td><td>Price</td><td>Date</td></tr></thead>
 						<tbody id="sold-table">
+						</tbody>
+					</table>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="unsold">
+					<table class="table table-striped">
+						<thead><tr><td>Item Name</td><td>Date</td></tr></thead>
+						<tbody id="unsold-table">
 						</tbody>
 					</table>
 				</div>
 				<div role="tabpanel" class="tab-pane" id="watching">
 					<table class="table table-striped">
-						<thead><tr><td>Item Name</td><td>Current Bid</td><td>Time Left</td><td>Details</td></tr></thead>
+						<thead><tr><td>Item Name</td><td>Current Bid</td><td>Time Left</td></tr></thead>
 						<tbody id="watching-table">
 						</tbody>
 					</table>
@@ -121,7 +129,7 @@
 			<div class="tab-content">
 				<div role="tabpanel" class="tab-pane active" id="selling">
 					<table class="table table-striped">
-						<thead><tr><td>Item Name</td><td>Current Bid</td><td>Time Left</td><td>Details</td></td></thead>
+						<thead><tr><td>Item Name</td><td>Current Bid</td><td>Time Left</td><td>Details</td></tr></thead>
 						<tbody id="selling-table">
 						</tbody>
 					</table>
@@ -154,10 +162,19 @@ var auctions = {
 	selling: {},
 	bought: {},
 	sold: {},
+	unsold: {},
 	watching: {}
 };
+var emptyMessages = {
+	buying: null,
+	selling: null,
+	bought: null,
+	sold: null,
+	unsold: null,
+	watching: null
+};
 var countDownRows = [];
-function updateTable(data, category, buttonName) {
+function updateTable(data, category, buttonName, colspan, message) {
 	function auctionShowURL(id) {
 		var url = '{{ path('auction_show', {'auctionID': 0 })}}';
 		return url.replace('0', id);
@@ -232,12 +249,14 @@ function updateTable(data, category, buttonName) {
 				auctions[category][data[category][i].id].itemName = data[category][i].itemName;
 				auctions[category][data[category][i].id].endAt = data[category][i].endAt;
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
-				$(tdArray[0]).html(auctions[category][data[category][i].id].itemName);
-				$(tdArray[1]).html(auctions[category][data[category][i].id].currentBid);
+				$(tdArray[0]).html('<a href="' +  auctionShowURL(data[category][i].id) + '">' +
+					auctions[category][data[category][i].id].itemName + '</a>');
+				$(tdArray[1]).html(auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid');
 			} else {
 				auctions[category][data[category][i].id] = data[category][i];
-				auctions[category][data[category][i].id].el = $('<tr><td>' + auctions[category][data[category][i].id].itemName + '</td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + 
-					'</td><td></td><td><a class="btn btn-primary" href="' + auctionShowURL(data[category][i].id) + '" role="button">' + buttonName + '</a></td></tr>');
+				auctions[category][data[category][i].id].el = $('<tr><td><a href="' +  auctionShowURL(data[category][i].id) + '">' +
+					auctions[category][data[category][i].id].itemName + '</a></td><td>' + (auctions[category][data[category][i].id].currentBid ? auctions[category][data[category][i].id].currentBid : 'No bid') + 
+					'</td><td></td></tr>');
 				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
 				var endTime = new Date(auctions[category][data[category][i].id].endAt.date);
 				var tdArray = $(auctions[category][data[category][i].id].el).children('td');
@@ -249,6 +268,14 @@ function updateTable(data, category, buttonName) {
 						$this.html(event.strftime('%D days : %H hours : %M mins : %S seconds'));
 					} 
 				}); 
+			}
+		} else if (category == 'unsold') {
+			if (auctions[category][data[category][i].id]) {
+			} else {
+				auctions[category][data[category][i].id] = data[category][i];
+				auctions[category][data[category][i].id].el = $('<tr><td><a href="' +  auctionShowURL(data[category][i].id) + '">' +
+					auctions[category][data[category][i].id].itemName + '</a></td><td>' + auctions[category][data[category][i].id].endAt.date + '</td></tr>');
+				$('#' + category + '-table').append(auctions[category][data[category][i].id].el);
 			}
 		} else {
 			if (auctions[category][data[category][i].id]) {
@@ -273,14 +300,28 @@ function updateTable(data, category, buttonName) {
 	for (var i = 0; i < toDelete.length; ++i) {
 		auctions[category][toDelete[i]] = undefined;
 	}
+	if (data[category].length == 0) {
+		console.log('length = 0 for category ' + category);
+		if (emptyMessages[category] == null) {
+			console.log('adding ' + category);
+			emptyMessages[category] = $('<tr><td colspan="' + colspan + '">' + message + '</td></tr>');
+			$('#' + category + '-table').append(emptyMessages[category]);
+		}
+	} else {
+		if (emptyMessages[category]) {
+			$(emptyMessages[category]).remove();
+			emptyMessages[category] = null;
+		}
+	}
 }
 function updateTables() {
 	$.get('{{ path('user_api', {'userID': user.id })}}', function(data) {
-		updateTable(data, 'buying', 'Go');
-		updateTable(data, 'selling', 'Edit');
-		updateTable(data, 'bought', 'Feedback');
-		updateTable(data, 'sold', 'Feedback');
-		updateTable(data, 'watching', 'Go');
+		updateTable(data, 'buying', 'Go', 5, 'Hello world 1');
+		updateTable(data, 'selling', 'Edit', 5, 'Hello world 2');
+		updateTable(data, 'bought', 'Feedback', 5, 'Hello world 3');
+		updateTable(data, 'sold', 'Feedback', 5, 'Hello world 4');
+		updateTable(data, 'unsold', 'Go', 2, 'Hello world 5');
+		updateTable(data, 'watching', 'Go', 3, 'Hello world 6');
 	});
 }
 updateTables();

@@ -57,12 +57,12 @@ class DatabaseConnection {
       $query .= ") AS b1 ON bid.bidValue = b1.currentBid ";
       $query .= "WHERE bid.auctionID = {$safe_id} ";
       $query .= ") AS winner  ";
-      $query .= "ON winner.auctionID={$id} ";
+      $query .= "ON winner.auctionID={$safe_id} ";
     }
     //handle item special case ImageURL
     if ($column=="item"){
       $query .= "LEFT JOIN ";
-      $query .= "itemimage ON itemimage.itemID={$id} ";
+      $query .= "itemimage ON itemimage.itemID={$safe_id} ";
     }
 
     //var_dump($query.$where.$limit);
@@ -265,22 +265,6 @@ class DatabaseConnection {
     }
   }
 
-  public function shouldFinishAuction( $auction ) {
-    // usleep(mt_rand(100000,1000000))
-    // check if auction has finished
-    $now = date( "Y-m-d H:i:s" );
-    if ( $auction->endAt->format( 'Y-m-d H:i:s' )<$now ) {
-      //if it should finish, check if it did finish
-      if ( !$auction->ended ) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-
   public function getAuctionsWithCategoryName($connection,$categoryName){
 
     $query = "SELECT auction.id,item.itemName,auction.sellerID,user.name,itemimage.imageURL FROM auction ";
@@ -290,7 +274,7 @@ class DatabaseConnection {
     $query .= "INNER JOIN user ON auction.sellerID = user.id ";
     $query .= "WHERE ";
     $query .= "category.categoryName = '{$categoryName}' ";
-    $query .= "AND auction.ended = 0  ";
+    $query .= "and auction.endAt > NOW() ";
     $query .= "ORDER BY ";
     $query .= "auction.createdAt DESC ";
 
@@ -348,6 +332,18 @@ class DatabaseConnection {
       die( "Database query failed (count new bids 1). " . mysqli_error( $connection ) );
     }
 
+    return $auctions;
+  }
+
+public function getPendingFinishedAuctions( $connection ) {
+    $query = "SELECT id FROM auction where endAt <= NOW() and ended = 0";
+    $result = mysqli_query( $connection, $query );
+    $auctions = array();
+    if ($result) {
+      while ($object = mysqli_fetch_assoc( $result )) {
+        $auctions[] = $object['id'];
+      }
+    }
     return $auctions;
   }
 
@@ -422,7 +418,7 @@ class DatabaseConnection {
     $query .="item ON item.id = auction.itemID ";
     $query .="LEFT JOIN ";
     $query .="itemimage on item.id = itemimage.itemID ";
-    $query .="WHERE auction.ended=0 ";
+    $query .="WHERE auction.endAt > NOW() ";
     $query .="ORDER BY ";
     $query .="auction.viewCount DESC ";
     $query .="LIMIT 10 ";
@@ -690,8 +686,7 @@ class DatabaseConnection {
     $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
-    $query .= "winner.winnerID = {$userID} ";
-    $query .= "and auction.ended=1";
+    $query .= "winner.winnerID = {$userID} and auction.endAt <= NOW()";
 
     $result = mysqli_query($connection,$query);
 
@@ -731,8 +726,7 @@ class DatabaseConnection {
     $query .= "LEFT JOIN ";
     $query .= "item ON auction.itemID = item.id ";
     $query .= "WHERE ";
-    $query .= "auction.sellerID = {$userID} ";
-    $query .= "AND auction.ended=1";
+    $query .= "auction.sellerID = {$userID} AND user.name IS NOT NULL AND auction.endAt <= NOW()";
 
     $result = mysqli_query($connection,$query);
 
@@ -744,6 +738,45 @@ class DatabaseConnection {
       }
     } else {
       die( "Database query failed (getSoldAuctions). " . mysqli_error( $connection ) );
+    }
+
+    return $auctions;
+  }
+
+    public function getUnsoldAuctions($connection,$userID){
+    $userID = mysqli_real_escape_string($connection, $userID);
+    $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as winnerName, item.itemName ";
+    $query .= "FROM auction ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT b1.auctionID,b1.highestBid as currentBid,b2.buyerID as winnerID ";
+    $query .= "FROM ( ";
+    $query .= "SELECT bid.auctionID,MAX(bid.bidValue) AS highestBid ";
+    $query .= "FROM bid ";
+    $query .= "GROUP BY bid.auctionID ";
+    $query .= ") AS b1 ";
+    $query .= "LEFT JOIN ( ";
+    $query .= "SELECT bid.auctionID, bid.bidValue, bid.buyerID ";
+    $query .= "FROM bid ";
+    $query .= ") AS b2 ON b2.auctionID = b1.auctionID AND b2.bidValue = b1.highestBid ";
+    $query .= ") AS winner  ";
+    $query .= "ON winner.auctionID=auction.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "user ON winner.winnerID = user.id ";
+    $query .= "LEFT JOIN ";
+    $query .= "item ON auction.itemID = item.id ";
+    $query .= "WHERE ";
+    $query .= "auction.sellerID = {$userID} AND user.name IS NULL and auction.endAt <= NOW()";
+
+    $result = mysqli_query($connection,$query);
+
+    $auctions = [];
+    if ($result){
+      while ($row = mysqli_fetch_assoc($result)){
+        $row["didFeedback"] = $this->didFeedback($connection,$userID,$row["id"]);
+        $auctions[] = $row;
+      }
+    } else {
+      die( "Database query failed (getUnsoldAuctions). " . mysqli_error( $connection ) );
     }
 
     return $auctions;
@@ -952,7 +985,7 @@ public function addWatch($connection,$userID, $auctionID){
       $query .="LEFT JOIN ";
       $query .="itemimage on item.id = itemimage.itemID ";
       $query .= "WHERE ";
-      $query .= "auction.id IN({$rand_s}) AND auction.ended=0 AND auction.sellerID<>$userID; ";
+      $query .= "auction.id IN({$rand_s}) and auction.endAt > NOW() AND auction.sellerID<>$userID; ";
 
       $result = mysqli_query($connection,$query);
       if ($result){
@@ -1013,7 +1046,7 @@ public function addWatch($connection,$userID, $auctionID){
       $query .="bid.buyerID) ";
       $query .="GROUP BY ";
       $query .="bid.auctionID) AND ";
-      $query .="auction.ended=0 ";
+      $query .="auction.endAt > NOW() ";
 
       //you might want to bid on the sorts of things
       //that are in the same category as the things you are currently bidding on
@@ -1043,7 +1076,7 @@ public function addWatch($connection,$userID, $auctionID){
       $query2 .= "item.categoryID ";
       $query2 .= ") AS item_category ON item.categoryID = item_category.CategoryID ";
       $query2 .= "WHERE ";
-      $query2 .= "auction.ended=0 ";
+      $query2 .= "auction.endAt > NOW() ";
       $query2 .= "AND auction.sellerID<>{$userID} ";
       $query2 .= "ORDER BY ";
       $query2 .= "item_category.Occurrence DESC, ";
@@ -1437,7 +1470,7 @@ public function addWatch($connection,$userID, $auctionID){
     $query .= "FROM bid ) AS b2 ON b2.auctionID = {$auctionID} AND b2.bidValue = b1.currentBid) AS winner ";
     $query .="WHERE ";
     $query .="auction.id={$auctionID} ";
-    $query .="AND auction.ended=1 ";
+    $query .="AND auction.endAt <= NOW() ";
     $query .="AND auction.sellerID={$giverID} OR winner.winnerID=($giverID) ";
     $result = mysqli_query($connection,$query);
     if ($result){
