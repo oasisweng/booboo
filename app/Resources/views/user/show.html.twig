@@ -333,8 +333,13 @@ var auctions = {
 	selling: {},
 	feedback: {}
 };
+var emptyMessages = {
+	selling: null,
+	feedback: null 
+};
 var countDownRows = [];
-function updateTable(data, category, buttonName) {
+
+function updateTable(data, category, buttonName, colspan, message) {
 	function auctionShowURL(id) {
 		var url = '{{ path('auction_show', {'auctionID': 0 })}}';
 		return url.replace('0', id);
@@ -408,11 +413,25 @@ function updateTable(data, category, buttonName) {
 	for (var i = 0; i < toDelete.length; ++i) {
 		auctions[category][toDelete[i]] = undefined;
 	}
+	if (data[category].length == 0) {
+	console.log('length = 0 for category ' + category);
+		if (emptyMessages[category] == null) {
+			console.log('adding ' + category);
+			emptyMessages[category] = $('<tr><td colspan="' + colspan + '">' + message + '</td></tr>');
+			$('#' + category + '-table').append(emptyMessages[category]);
+		}
+	} else {
+		if (emptyMessages[category]) {
+			$(emptyMessages[category]).remove();
+			emptyMessages[category] = null;
+		}
+	}
 }
+
 function updateTables() {
 	$.get('{{ path('show_api', {'userID': user.id })}}', function(data) {
-		updateTable(data, 'selling', 'Go');
-		updateTable(data, 'feedback', 'Go');
+		updateTable(data, 'selling', 'Go',4, 'This user is not selling any items.');
+		updateTable(data, 'feedback', 'Go',4, 'This user has not received any feedback.');
 	});
 }
 updateTables();
