@@ -445,7 +445,7 @@ class AuctionController extends Controller {
     /**
      *
      *
-     * @Route("/auction/finish", name="auction_finish_api")
+     * @Route("/auctions/finish", name="auction_finish")
      */
     public function finishAuction() {
         // create a daemon thread that performs a curl call to this URL, make this run every minute
