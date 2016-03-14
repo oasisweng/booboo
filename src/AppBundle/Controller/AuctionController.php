@@ -594,7 +594,7 @@ class AuctionController extends Controller {
         //     $auction->ended = true;
         // }
 
-        return new JsonResponse( ['status'=>'success'] );
+        return new JsonResponse( ['status'=>$auction] );
 
     }
 
