@@ -432,7 +432,7 @@ class AuctionController extends Controller {
      *
      * @Route("/auction/{auctionID}/columns/{columns}", name="auction_columns_api", requirements={"auctionID": "\d+", "columns": ".+"})
      */
-    public function getAuctionColumns($auctionID, $columns){
+    public function getAuctionColumns($auctionID, $columns,Request $request){
         $columns_a = explode("/",$columns);
     
         $connection = $this->get('db')->connect();
@@ -447,7 +447,7 @@ class AuctionController extends Controller {
      *
      * @Route("/finish", name="auction_finish")
      */
-    public function finishAuction() {
+    public function finishAuction(Request $request) {
         // create a daemon thread that performs a curl call to this URL, make this run every minute
         // select all auctions that have finished (i.e. endAt <= NOW()) and have not been notified (i.e. ended set to false)
         // notify every one of them and update their ended boolean to true
@@ -594,7 +594,7 @@ class AuctionController extends Controller {
             $auction->ended = true;
         }
 
-        return $this->render( 'auction/category.html.twig');//new JsonResponse( ["status"=>"success"] );
+        return new JsonResponse( ["status"=>"success"] );
 
     }
 
