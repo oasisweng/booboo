@@ -40,8 +40,9 @@ class DatabaseConnection {
   }
 
   public function selectOne( $connection, $column, $id ) {
-    $safe_id = mysqli_real_escape_string( $connection, $id );
-    $query = "SELECT * FROM {$column} ";
+    $safe_id = $this->e( $connection, $id );
+    $safe_column = $this->e($connection,$column);
+    $query = "SELECT * FROM {$safe_column} ";
     $where = "WHERE {$column}.id = {$safe_id} ";
     $limit = "LIMIT 1";
     //handle auction special case WinnerID
@@ -77,7 +78,7 @@ class DatabaseConnection {
   }
 
   public function deleteOne( $connection, $column, $id ) {
-    $safe_id = mysqli_real_escape_string( $connection, $id );
+    $safe_id = $this->e( $connection, $id );
     $query = "DELETE FROM item WHERE id ={$safe_id} LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( !$result ) {
@@ -91,16 +92,14 @@ class DatabaseConnection {
   // Item
 
   public function addItem( $connection, $item ) {
-    $itemName = $item->itemName;
-    $ownerID = $item->ownerID;
-    $description = isset($item->description) ? $item->description:"";
-    $image = $item->image;
-    $categoryID = $item->categoryID;
-    $escaped_name = $this->e( $connection, $itemName );
-    $escaped_description = $this->e( $connection, $description );
+    $itemName = $this->e($item->itemName);
+    $ownerID = $this->e($item->ownerID);
+    $description = isset($item->description) ? $this->e($item->description):"";
+    $image = $this->e($item->image);
+    $categoryID = $this->e($item->categoryID);
 
     $query = "INSERT INTO item (itemName,description,ownerID,categoryID) " .
-      "VALUES ('{$escaped_name}','{$escaped_description}',{$ownerID},{$categoryID})";
+      "VALUES ('{$itemName}','{$description}',{$ownerID},{$categoryID})";
     
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
@@ -110,7 +109,7 @@ class DatabaseConnection {
         $dir = $this->container->getParameter( 'kernel.root_dir' ).'/../web/assets/photos/';
         $fileName = $this->generateRandomString().".".$image->guessExtension();
         $image->move( $dir, $fileName );
-        $imageURL = $fileName;
+        $imageURL = $this->e($fileName);
 
         $query2 = "INSERT INTO itemimage (itemID,imageURL) ";
         $query2 .= "VALUES ({$id},'{$imageURL}')";
@@ -130,17 +129,15 @@ class DatabaseConnection {
   }
 
   public function updateItem( $connection, $item ) {
-    $id = $item->id;
-    $itemName = $item->itemName;
-    $description = $description = isset($item->description) ? $item->description:"";
+    $id = $this->e($item->id);
+    $itemName = $this->e($item->itemName);
+    $description = $description = isset($item->description) ? $this->e($item->description):"";
     $image = $item->image;
-    $categoryID = $item->categoryID;
-    $imageURL = $item->imageURL;
-    $escaped_name = $this->e( $connection, $itemName );
-    $escaped_description = $this->e( $connection, $description );
+    $categoryID = $this->e($item->categoryID);
+    $imageURL = $this->e($item->imageURL);
     $query = "UPDATE item SET ";
-    $query .="itemName='{$escaped_name}', ";
-    $query .="description='{$escaped_description}', ";
+    $query .="itemName='{$itemName}', ";
+    $query .="description='{$description}', ";
     $query .="categoryID={$categoryID} ";
     $query .="WHERE id={$id}";
     $result = mysqli_query( $connection, $query );
@@ -348,7 +345,7 @@ public function getPendingFinishedAuctions( $connection ) {
   }
 
   public function finishAuction( $connection, $auction ) {
-    $id = mysqli_real_escape_string( $connection, $auction->id );
+    $id = $this->e( $connection, $auction->id );
     //get two highest bid(sort by value DESC and time ASC)
     //
     $query = "SELECT bid.buyerID AS winnerID, bid.bidValue AS currentBid, bid.auctionID ";
@@ -705,7 +702,7 @@ public function getPendingFinishedAuctions( $connection ) {
   }
 
   public function getSoldAuctions($connection,$userID){
-    $userID = mysqli_real_escape_string($connection, $userID);
+    $userID = $this->e($connection, $userID);
     $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as winnerName, item.itemName ";
     $query .= "FROM auction ";
     $query .= "LEFT JOIN ( ";
@@ -744,7 +741,7 @@ public function getPendingFinishedAuctions( $connection ) {
   }
 
     public function getUnsoldAuctions($connection,$userID){
-    $userID = mysqli_real_escape_string($connection, $userID);
+    $userID = $this->e($connection, $userID);
     $query = "SELECT auction.*, winner.winnerID,winner.currentBid, user.name as winnerName, item.itemName ";
     $query .= "FROM auction ";
     $query .= "LEFT JOIN ( ";
@@ -786,7 +783,7 @@ public function getPendingFinishedAuctions( $connection ) {
 /* get auctions said user is watching atm */
 
   public function getWatchingAuctions($connection,$userID){
-    $userID = mysqli_real_escape_string($connection, $userID);
+    $userID = $this->e($connection, $userID);
     $query = "SELECT auction.*,winner.winnerID, winner.currentBid, item.itemName,item.description,";
     $query .= "itemimage.imageURL,item.ownerID,item.categoryID FROM watching ";
     $query .= "INNER JOIN auction ";
@@ -825,7 +822,7 @@ public function getPendingFinishedAuctions( $connection ) {
   }
 /*
 public function addWatch($connection,$userID, $auctionID){
-    $userID = mysqli_real_escape_string($connection, $userID, $auctionID);
+    $userID = $this->e($connection, $userID, $auctionID);
     $query = "INSERT INTO watching ";
     $query .="VALUES({$userID}, {$auctionID}) ";   
 
@@ -845,8 +842,8 @@ public function addWatch($connection,$userID, $auctionID){
 */
 
   public function isWatchingAuction($connection, $userID, $auctionID) {
-    $userID = mysqli_real_escape_string($connection, $userID);
-    $auctionID = mysqli_real_escape_string($connection, $auctionID);
+    $userID = $this->e($connection, $userID);
+    $auctionID = $this->e($connection, $auctionID);
     $query = "select * from watching where userID = '{$userID}' and auctionID = '{$auctionID}'";
     $result = mysqli_query($connection,$query);
     if (mysqli_fetch_assoc($result)) {
@@ -857,8 +854,8 @@ public function addWatch($connection,$userID, $auctionID){
   }
 
  public function setWatchingAuction($connection, $userID, $auctionID) {
-    $userID = mysqli_real_escape_string($connection, $userID);
-    $auctionID = mysqli_real_escape_string($connection, $auctionID);
+    $userID = $this->e($connection, $userID);
+    $auctionID = $this->e($connection, $auctionID);
     $query = "select * from watching where userID = '{$userID}' and auctionID = '{$auctionID}'";
     $result = mysqli_query($connection,$query);
     if ($row = mysqli_fetch_assoc($result)) {
@@ -1338,11 +1335,11 @@ public function addWatch($connection,$userID, $auctionID){
   }
 
   public function updateUser( $connection, $user ) {
-    $id = $user->id; 
-    $name = $user->name;
-    $email = $user->email;
-    $password = $user->password;
-    $newPassword = $user->newPassword;
+    $id = $this->e($connection,$user->id); 
+    $name = $this->e($connection,$user->name);
+    $email = $this->e($connection,$user->email);
+    $password = $this->e($connection,$user->password);
+    $newPassword = $this->e($connection,$user->newPassword);
     // reset password
     if ( !is_null( $email ) && $this->login( $user ) ) {
       if ( !is_null( $newPassword ) ) {
@@ -1350,10 +1347,6 @@ public function addWatch($connection,$userID, $auctionID){
         $query = "UPDATE user SET ";
         $query .= "password='{$newPassword}' ";
         $query .= "WHERE id = {$id}";
-      } else {
-        $query = "UPDATE user SET ";
-        $query .= "name='{$name}' ";  
-        $query .= "WHERE id={$id}";
       }
 
       $result = mysqli_query( $connection, $query );
@@ -1372,7 +1365,7 @@ public function addWatch($connection,$userID, $auctionID){
 
   public function login( $user ) {
     $connection = $this->connect();
-    $nameOrEmail = mysqli_real_escape_string( $connection, $user->nameOrEmail );
+    $nameOrEmail = $this->e( $connection, $user->nameOrEmail );
     $query = "SELECT * FROM user WHERE email='{$nameOrEmail}' OR name='{$nameOrEmail}' LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
@@ -1391,6 +1384,7 @@ public function addWatch($connection,$userID, $auctionID){
   // feedback
   
   public function getFeedbacks($connection,$userID){
+    $userID = $this->e($connection,$userID);
 
     //get sold and giverName
     $query_sold = "SELECT feedback.*,user.name AS giverName FROM feedback ";
@@ -1460,6 +1454,9 @@ public function addWatch($connection,$userID, $auctionID){
    * It is based on if user's eligibility and if user has already given feedback
    */
   public function shouldFeedback($connection,$giverID,$auctionID){
+    $giverID = $this->e($connection,$giverID);
+    $auctionID = $this->e($connection, $auctionID);
+
     $query ="SELECT COUNT(*) AS ct  ";
     $query .="FROM auction, ";
     $query .= "(SELECT b2.auctionID,b2.winnerID,b1.currentBid ";
@@ -1504,6 +1501,9 @@ public function addWatch($connection,$userID, $auctionID){
   }
 
   public function selectFeedback($connection,$giverID,$auctionID){
+    $giverID = $this->e($connection,$giverID);
+    $auctionID = $this->e($connection, $auctionID);
+
     $query = "SELECT * FROM feedback WHERE giverID={$giverID} AND auctionID={$auctionID} LIMIT 1";
     $result = mysqli_query( $connection, $query );
     if ( $result ) {
@@ -1521,10 +1521,10 @@ public function addWatch($connection,$userID, $auctionID){
    *          "id": the generated id of a new feedback]
    */
   public function feedback($connection,$feedback){
-    $giverID=$feedback->giverID;
-    $auctionID=$feedback->auctionID;
-    $rating=$feedback->rating;
-    $comment=$feedback->comment;
+    $giverID= $this->e($connection,$feedback->giverID);
+    $auctionID= $this->e($connection,$feedback->auctionID);
+    $rating= $this->e($connection,$feedback->rating);
+    $comment= $this->e($connection,$feedback->comment);
     //double check if one can leave feedback
     $shouldFeedback = $this->shouldFeedback($connection,$giverID,$auctionID);
     if ($shouldFeedback){
@@ -1546,10 +1546,10 @@ public function addWatch($connection,$userID, $auctionID){
   }
 
   public function updateFeedback($connection,$feedback){
-    $giverID=$feedback->giverID;
-    $auctionID=$feedback->auctionID;
-    $rating=$feedback->rating;
-    $comment=$feedback->comment;
+    $giverID=$this->e($connection,$feedback->giverID);
+    $auctionID=$this->e($connection,$feedback->auctionID);
+    $rating=$this->e($connection,$feedback->rating);
+    $comment=$this->e($connection,$feedback->comment);
     $query = "UPDATE feedback SET ";
     $query .= "rating={$rating},comment='{$comment}' ";
     $query .= "WHERE giverID={$giverID} AND auctionID={$auctionID}";
@@ -1569,6 +1569,8 @@ public function addWatch($connection,$userID, $auctionID){
    * @return: average rating for this user and total number of feedbacks received.
    */
   public function getAverageRating($connection,$userID){
+    $userID = $this->e($connection,$userID);
+    
     $ratings = [];
     //get sold and giverName
     $query_sold = "SELECT feedback.rating FROM feedback ";
