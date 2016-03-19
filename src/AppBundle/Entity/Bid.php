@@ -42,7 +42,7 @@ class Bid {
             $this->buyerID = $bid["buyerID"];
             $this->buyerName = $bid["buyerName"];
             $this->auctionID = $bid["auctionID"];
-            $this->createdAt = new DateTime( $bid["createdAt"] );
+            $this->createdAt = date("c", strtotime($bid["createdAt"]));
         }
     }
 }

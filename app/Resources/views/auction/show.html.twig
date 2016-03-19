@@ -266,7 +266,7 @@
 <script>
 {% if ended %}
 {% else %}
-var endTime = new Date('{{ auction.endAt | date('Y-m-d H:i:s') }}');
+var endTime = new Date('{{ auction.endAt}}');
 $('#timeleft').countdown(endTime, {elapse: true}).on('update.countdown', function(event) {
     var $this = $(this);
     if (event.elapsed) {

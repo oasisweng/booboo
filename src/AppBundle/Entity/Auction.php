@@ -109,15 +109,15 @@ class Auction {
             if (isset($a["winnerName"])) {
                 $this->winnerName = $a["winnerName"];
             }
-            $this->startAt = new DateTime($a["startAt"]);
-            $this->endAt = new DateTime($a["endAt"]);
+            $this->startAt = date("c", strtotime($a["startAt"]));
+            $this->endAt = date("c", strtotime($a["endAt"]));
             $this->itemID = $a["itemID"];
             if (isset($a["itemName"])) {
                 $this->itemName = $a["itemName"];
             }
             $this->viewCount = $a["viewCount"];
-            $this->createdAt = new DateTime($a["createdAt"]);
-            $this->updatedAt = new DateTime($a["updatedAt"]);
+            $this->createdAt = date("c", strtotime($a["createdAt"]));
+            $this->updatedAt = date("c", strtotime($a["updatedAt"]));
             $this->startingBid = $a["startingBid"];
             $this->minBidIncrease = $a["minBidIncrease"];
             $this->reservedPrice = $a["reservedPrice"];
@@ -141,10 +141,10 @@ class Auction {
             $this->startingBid = 1.0;
             $this->minBidIncrease = 0.5;
             $this->viewCount =  0;
-            $this->startAt = new DateTime(date( "Y-m-d H:i:s" ));
-            $this->endAt = new DateTime(date( "Y-m-d H:i:s" )); 
-            $this->createdAt = date( "Y-m-d H:i:s" );
-            $this->updatedAt = date( "Y-m-d H:i:s" );
+            $this->startAt = date( "c" );
+            $this->endAt = date( "c" ); 
+            $this->createdAt = date( "c" );
+            $this->updatedAt = date( "c" );
             $this->ended = false;
             $this->shouldFeedback = false;
         }

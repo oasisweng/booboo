@@ -1212,8 +1212,8 @@ public function addWatch($connection,$userID, $auctionID){
 
   public function bid($connection, $bid, $auction ) {
     //check if auction is on,
-    $now = date( "Y-m-d H:i:s" );
-    if ( $auction->endAt->format( 'Y-m-d H:i:s' )>$now ) {
+    $now = date( "Y-m-dTH:i:s" );
+    if ( $auction->endAt>$now ) {
       //if true, this bid has 3 cases: Highest new bid, Bidded by highest bidder but lower than highest bid, bidded by other but lower than highest bid
       $auctionID = $auction->id;
       $query = "SELECT * FROM bid WHERE ";

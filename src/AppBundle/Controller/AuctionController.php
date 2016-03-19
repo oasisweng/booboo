@@ -273,7 +273,7 @@ class AuctionController extends Controller {
         }
         //backslash required for DateTime in this case to be taken as PHP DateTime OVER Symphony-based DateTime 
         //that is apparently different thus this originally kept evaluating to 'false'.
-        $ended = ($auction->endAt <= new \DateTime());
+        $ended = ($auction->endAt <= date("c"));
         // var_dump($ended);
         $bidded = isset( $userID ) && $this->get( 'db' )->bidded( $connection, $auctionID, $userID );
         //echo $auctionID . " ". $userID . " "; var_dump($bidded);
